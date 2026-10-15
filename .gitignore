@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local secrets
+.env
+.env.local
+supabase/functions/node_modules
+supabase/.temp
+supabase/.branches

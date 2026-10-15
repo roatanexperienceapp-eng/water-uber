@@ -1,0 +1,34 @@
+{
+  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": { "APP_VARIANT": "guest" }
+    },
+    "development-captain": {
+      "extends": "development",
+      "env": { "APP_VARIANT": "captain" }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": { "APP_VARIANT": "guest" }
+    },
+    "preview-captain": {
+      "extends": "preview",
+      "env": { "APP_VARIANT": "captain" }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": { "APP_VARIANT": "guest" }
+    },
+    "production-captain": {
+      "extends": "production",
+      "env": { "APP_VARIANT": "captain" }
+    }
+  },
+  "submit": {
+    "production": {},
+    "production-captain": {}
+  }
+}

@@ -1,0 +1,56 @@
+// Run: deno test supabase/functions/_shared/
+import { deepStrictEqual as assertEquals, ok as assert, throws as assertThrows } from 'node:assert';
+import { quoteFare, needsFamilyBoat, rideMinutes } from './pricing.ts';
+import { DOCKS, routeFor } from './geo.ts';
+
+const q = (from: string, to: string, riders: number, mode: 'shared' | 'private' = 'shared', timing: 'now' | 'scheduled' = 'now') =>
+  quoteFare({ from, to, riders, mode, timing });
+
+Deno.test('flat zone: shared is $5 per rider', () => {
+  assertEquals(q('we', 'inf', 1).total, 5);
+  assertEquals(q('we', 'inf', 4).total, 20);
+  assertEquals(q('inf', 'we', 2).rule, 'flat');
+});
+
+Deno.test('flat zone: private has a $20 minimum, then $5 per rider', () => {
+  assertEquals(q('we', 'inf', 2, 'private').total, 20);
+  assertEquals(q('we', 'inf', 6, 'private').total, 30);
+});
+
+Deno.test('scheduled pickups are private and add a $5 reservation fee', () => {
+  const s = q('we', 'inf', 2, 'shared', 'scheduled');
+  assertEquals(s.total, 25);
+  assertEquals(s.reservationFee, 5);
+});
+
+Deno.test('outside the zone: $5 per rider per mile, rounded to whole dollars', () => {
+  const r = q('we', 'sandyD', 2);
+  assertEquals(r.rule, 'distance');
+  assertEquals(r.total, Math.round(5 * 2 * r.miles));
+  assert(r.breakdown.endsWith(`= $${r.total}`));
+});
+
+Deno.test('riders are clamped to 1–12', () => {
+  assertEquals(q('we', 'inf', 0).total, 5);
+  assertEquals(q('we', 'inf', 99).total, 60);
+});
+
+Deno.test('same dock is rejected', () => {
+  assertThrows(() => q('we', 'we', 2));
+});
+
+Deno.test('West End to Infinity Bay is about 1.5 miles and 11 minutes', () => {
+  const r = routeFor('we', 'inf');
+  assert(r.miles > 1.2 && r.miles < 1.8, `got ${r.miles}`);
+  assertEquals(rideMinutes(r.miles), q('we', 'inf', 1).rideMinutes);
+});
+
+Deno.test('every dock can reach every other dock by sea', () => {
+  for (const a of DOCKS) for (const b of DOCKS) if (a.id !== b.id) assert(routeFor(a.id, b.id).miles > 0, `${a.id}->${b.id}`);
+});
+
+Deno.test('family boat for more than 6 riders or kids', () => {
+  assertEquals(needsFamilyBoat(6, false), false);
+  assertEquals(needsFamilyBoat(7, false), true);
+  assertEquals(needsFamilyBoat(2, true), true);
+});

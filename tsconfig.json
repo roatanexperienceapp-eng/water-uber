@@ -1,6 +1,25 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
-  }
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "app.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "supabase/functions/**/index.ts",
+    "supabase/functions/_shared/*.test.ts",
+    "supabase/tests"
+  ]
 }
