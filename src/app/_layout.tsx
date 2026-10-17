@@ -26,6 +26,7 @@ export default function RootLayout() {
         <Stack.Screen name="split/[token]" />
         <Stack.Screen name="ticket/[id]" />
         <Stack.Screen name="inbox-compose" />
+        <Stack.Screen name="give" />
         <Stack.Screen name="captain/index" />
       </Stack>
     </SafeAreaProvider>

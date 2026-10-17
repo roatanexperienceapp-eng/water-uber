@@ -39,6 +39,7 @@ npm run test:server     # pricing checks (needs Deno)
 | `supabase/functions/_shared/cruise.ts` | Cruise rules: port-time fit, transfer times, crowd meter, split deadlines |
 | `supabase/functions/_shared/payments.ts` | Payment provider boundary (Stripe adapter, signature checks, cents maths) |
 | `docs/PAYMENTS.md` | How money works + go-live checklist |
+| `docs/GIVING.md` | Donations to Every Child Roatán, the 10% pledge, monthly transfer routine |
 | `docs/INBOX.md` | Inbox: how to send offers/support/updates, the Priority rule, automatic messages |
 | `docs/CRUISE.md` | Cruise features + what the team maintains (ship schedule, meeting points) |
 | `supabase/migrations/` | Database tables and security rules |

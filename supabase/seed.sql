@@ -2,7 +2,7 @@
 -- Regenerate with: node scripts/generate-seed.mjs   (do not hand-edit listings here; edit the catalogue).
 
 -- Your own business. Fill in the real WhatsApp before launch.
-insert into public.operators (id, name, whatsapp, is_partner) values ('00000000-0000-0000-0000-000000000001', 'Owner tours & rentals', null, true) on conflict do nothing;
+insert into public.operators (id, name, whatsapp, is_partner, commission_pct) values ('00000000-0000-0000-0000-000000000001', 'Owner tours & rentals', null, true, 100) on conflict (id) do update set commission_pct = 100;
 
 insert into public.docks (id, name, lon, lat, in_flat_zone) values
   ('hmb', 'Half Moon Bay', -86.59533, 16.30999, true),

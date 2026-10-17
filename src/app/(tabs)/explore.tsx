@@ -102,8 +102,17 @@ export default function ExploreScreen() {
               </Pressable>
             ))}
           </View>
-          <Pressable accessibilityRole="button" style={styles.give}>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('giveCardH')} onPress={() => router.push('/give')} style={[styles.give, { backgroundColor: c.tile }]}>
             <Image source={require('../../../assets/images/giveback.jpg')} style={styles.giveImg} resizeMode="cover" />
+            <View style={styles.giveBar}>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={[type.bodyStrong, { color: c.ink }]}>{t('giveCardH')}</Text>
+                <Text style={[type.small, { color: c.muted }]}>{t('giveCardS')}</Text>
+              </View>
+              <View style={[styles.giveBtn, { backgroundColor: c.flame }]}>
+                <Text style={[type.label, { color: '#fff', fontSize: 14 }]}>{t('giveDonateShort')}</Text>
+              </View>
+            </View>
           </Pressable>
         </View>
       )}
@@ -145,4 +154,6 @@ const styles = StyleSheet.create({
   tileLabel: { fontSize: 16, fontWeight: '600', textAlign: 'center', letterSpacing: -0.2 },
   give: { borderRadius: radius.lg, overflow: 'hidden' },
   giveImg: { width: '100%', aspectRatio: 1000 / 656 },
+  giveBar: { flexDirection: 'row', alignItems: 'center', gap: space(3), padding: space(4) },
+  giveBtn: { borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
 });

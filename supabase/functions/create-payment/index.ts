@@ -10,6 +10,7 @@ interface Body {
   rideId?: string;
   bookingId?: string;
   passId?: string;
+  donationId?: string;
   splitToken?: string;
   shares?: 'one' | 'rest';
   /** App path to land on after the checkout page (web), e.g. "/confirmation?kind=ride&id=…". */
@@ -34,8 +35,8 @@ export default {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
     if (req.method !== 'POST') return fail(405, 'method_not_allowed', 'Use POST');
     const b = await readBody<Body>(req);
-    if (!b || [b.rideId, b.bookingId, b.passId, b.splitToken].filter(Boolean).length !== 1) {
-      return fail(400, 'bad_body', 'Send exactly one of rideId, bookingId, passId or splitToken');
+    if (!b || [b.rideId, b.bookingId, b.passId, b.donationId, b.splitToken].filter(Boolean).length !== 1) {
+      return fail(400, 'bad_body', 'Send exactly one of rideId, bookingId, passId, donationId or splitToken');
     }
     const uid = ctx.userClaims!.id;
     const db = ctx.supabaseAdmin;
@@ -79,6 +80,13 @@ export default {
         if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This pass is not awaiting payment');
         amount = Number(data.price_usd);
         description = 'Water taxi ride pass';
+      } else if (b.donationId) {
+        const { data } = await db.from('donations').select('donor_id, status, amount_usd').eq('id', b.donationId).single();
+        if (!data || data.donor_id !== uid) return fail(404, 'not_found', 'Donation not found');
+        if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This donation is already paid');
+        amount = Number(data.amount_usd);
+        const { data: g } = await db.from('giving_settings').select('charity_name').eq('id', 1).single();
+        description = `Donation to ${g?.charity_name ?? 'Roatán kids'}`;
       } else {
         const { data } = await db.from('bookings').select('guest_id, status, total_usd, listings(name)').eq('id', b.bookingId!).single();
         if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Booking not found');
@@ -96,8 +104,10 @@ export default {
         description = String((data as any).listings?.name ?? 'Booking');
       }
       if (toCents(amount) < 50) return fail(409, 'amount_too_small', 'Nothing to pay'); // processors reject < $0.50
+      // Donations may only be paid on the website (Apple: no in-app charity payments unless approved nonprofit).
+      if (b.donationId && b.appReturnUrl) return fail(409, 'donate_on_web', 'Donations are completed on the website');
 
-      const target = b.rideId ? { ride_id: b.rideId } : b.passId ? { pass_id: b.passId } : { booking_id: b.bookingId };
+      const target = b.rideId ? { ride_id: b.rideId } : b.passId ? { pass_id: b.passId } : b.donationId ? { donation_id: b.donationId } : { booking_id: b.bookingId };
       const [col, val] = Object.entries(target)[0];
       const { data: open } = await db
         .from('payments')

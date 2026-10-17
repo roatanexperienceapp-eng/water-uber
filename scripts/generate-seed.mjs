@@ -20,7 +20,7 @@ const out = [
   '-- Regenerate with: node scripts/generate-seed.mjs   (do not hand-edit listings here; edit the catalogue).',
   '',
   '-- Your own business. Fill in the real WhatsApp before launch.',
-  `insert into public.operators (id, name, whatsapp, is_partner) values (${OWNER}, 'Owner tours & rentals', null, true) on conflict do nothing;`,
+  `insert into public.operators (id, name, whatsapp, is_partner, commission_pct) values (${OWNER}, 'Owner tours & rentals', null, true, 100) on conflict (id) do update set commission_pct = 100;`,
   '',
   'insert into public.docks (id, name, lon, lat, in_flat_zone) values',
   docks.map((d) => `  (${q(d.id)}, ${q(d.name)}, ${d.lon}, ${d.lat}, ${b(zone.includes(d.id))})`).join(',\n') +
