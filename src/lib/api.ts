@@ -4,6 +4,7 @@ import { demoActivePass, demoUsePassRide } from '@/lib/stay';
 import * as Linking from 'expo-linking';
 import { Platform } from 'react-native';
 import { DEMO_MODE } from '@/config';
+import { ensureSession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 import { demoBoats } from '@/lib/demoFleet';
 import { readJSON, writeJSON } from '@/lib/localStore';
@@ -66,18 +67,7 @@ function toBooking(r: Row, listingName = ''): Booking {
   };
 }
 
-/**
- * Guests can book without creating an account (cruise visitors on the no-download web page): we give
- * them an anonymous session. They can add an email later and keep their bookings.
- * Requires "Allow anonymous sign-ins" in Supabase Auth (docs/PAYMENTS.md).
- */
-export async function ensureSession(): Promise<void> {
-  if (!supabase) return;
-  const { data } = await supabase.auth.getSession();
-  if (data.session) return;
-  const { error } = await supabase.auth.signInAnonymously();
-  if (error) throw error;
-}
+export { ensureSession } from '@/lib/session';
 
 async function invoke<T>(name: string, body: Record<string, unknown>): Promise<T> {
   await ensureSession();
@@ -264,6 +254,14 @@ export async function createBooking(req: BookingRequest): Promise<Booking & { sp
   return { ...toBooking(booking, listing.name), split: split ?? undefined };
 }
 
+/** Demo mode stands in for the database trigger that posts "Your ticket is ready". */
+function demoTicketReady(b?: Booking) {
+  if (!b) return;
+  void import('@/lib/inbox').then(({ demoInboxAdd }) =>
+    demoInboxAdd({ category: 'update', title: 'Your ticket is ready', body: `${b.listingName} on ${b.date} at ${b.time}. Your ticket works offline: open it from Trips.`, ctaLabel: 'Open ticket', ctaPath: `/ticket/${b.id}`, audience: 'all' }),
+  );
+}
+
 // ---------- Group split ----------
 
 const SPLITS_KEY = 'demo.splits';
@@ -355,7 +353,10 @@ export async function startPayment(target: PayTarget, returnPath = '/trips'): Pr
       if (count < 1) throw new Error('no_shares_left');
       const paid = sp.paid + count;
       writeJSON(SPLITS_KEY, splits.map((x) => (x.token === sp.token ? { ...x, paid, status: paid >= x.shares ? 'complete' : 'open' } : x)));
-      if (paid >= sp.shares) writeJSON(BOOKINGS_KEY, readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => (b.id === sp.bookingId ? { ...b, status: 'paid' as const } : b)));
+      if (paid >= sp.shares) {
+        writeJSON(BOOKINGS_KEY, readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => (b.id === sp.bookingId ? { ...b, status: 'paid' as const } : b)));
+        demoTicketReady(readJSON<Booking[]>(BOOKINGS_KEY, []).find((b) => b.id === sp.bookingId));
+      }
       return { paymentId: `DEMO-${sp.token}-${paid}`, amountUsd: (Math.floor(sp.totalCents / sp.shares) * count) / 100 };
     }
     if ('rideId' in target) {
@@ -369,6 +370,7 @@ export async function startPayment(target: PayTarget, returnPath = '/trips'): Pr
     }
     const list = readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => (b.id === target.bookingId ? { ...b, status: 'paid' as const } : b));
     writeJSON(BOOKINGS_KEY, list);
+    demoTicketReady(list.find((b) => b.id === target.bookingId));
     // Taxi rides booked with the activity are paid in the same checkout.
     writeJSON(RIDES_KEY, readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.bookingId === target.bookingId && r.status === 'awaiting_payment' ? { ...r, status: 'paid' as const } : r)));
     return { paymentId: `DEMO-${target.bookingId}`, amountUsd: list.find((b) => b.id === target.bookingId)?.totalUsd ?? 0 };

@@ -25,6 +25,7 @@ export default function RootLayout() {
         <Stack.Screen name="paid" options={{ gestureEnabled: false }} />
         <Stack.Screen name="split/[token]" />
         <Stack.Screen name="ticket/[id]" />
+        <Stack.Screen name="inbox-compose" />
         <Stack.Screen name="captain/index" />
       </Stack>
     </SafeAreaProvider>

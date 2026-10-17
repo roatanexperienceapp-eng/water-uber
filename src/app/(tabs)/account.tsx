@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -10,6 +10,7 @@ import { LanguageButton } from '@/components/LanguageButton';
 import { Button, Card, Note } from '@/components/ui';
 import { DEMO_MODE } from '@/config';
 import { currentUserEmail, sendLoginCode, signOut, verifyLoginCode } from '@/lib/api';
+import { canSendInbox } from '@/lib/inbox';
 import { deletePlace, savedPlaces, type SavedPlace } from '@/lib/stay';
 import { hourLabel, PLACE_ICONS } from '@/lib/stayUi';
 import { radius, space, type, useTheme } from '@/theme';
@@ -23,10 +24,12 @@ export default function Account() {
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [staff, setStaff] = useState(false);
 
   const load = useCallback(() => {
     savedPlaces().then(setPlaces).catch(() => {});
     currentUserEmail().then(setMe).catch(() => {});
+    canSendInbox().then(setStaff).catch(() => {});
   }, []);
   useFocusEffect(load);
 
@@ -76,6 +79,10 @@ export default function Account() {
               }}
             />
           </Card>
+        )}
+
+        {staff && (
+          <Button variant="ink" label={t('composeH')} trailing="✉" onPress={() => router.push('/inbox-compose')} />
         )}
 
         <Text style={[type.h2, { color: c.ink }]}>{t('savedPlacesH')}</Text>

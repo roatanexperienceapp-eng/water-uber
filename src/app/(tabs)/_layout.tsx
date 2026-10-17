@@ -3,6 +3,7 @@ import { Redirect, Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { APP_VARIANT } from '@/config';
+import { useUnreadCount } from '@/lib/inbox';
 import { useTheme } from '@/theme';
 
 function renderIcon(name: keyof typeof Ionicons.glyphMap, { color, size }: { color: ColorValue; size: number }) {
@@ -10,8 +11,9 @@ function renderIcon(name: keyof typeof Ionicons.glyphMap, { color, size }: { col
 }
 
 export default function TabsLayout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const c = useTheme();
+  const unread = useUnreadCount(i18n.language);
   if (APP_VARIANT === 'captain') return <Redirect href="/captain" />;
   // Returns an element (not a component), so each tab icon renders without a new component type.
   const icon = (name: keyof typeof Ionicons.glyphMap) => (p: { color: ColorValue; size: number }) => renderIcon(name, p);
@@ -28,6 +30,15 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: t('tab_ride'), tabBarIcon: icon('boat') }} />
       <Tabs.Screen name="explore" options={{ title: t('tab_explore'), tabBarIcon: icon('compass') }} />
       <Tabs.Screen name="trips" options={{ title: t('tab_trips'), tabBarIcon: icon('receipt') }} />
+      <Tabs.Screen
+        name="inbox"
+        options={{
+          title: t('inboxH'),
+          tabBarIcon: icon('mail'),
+          tabBarBadge: unread > 0 ? (unread > 9 ? '9+' : unread) : undefined,
+          tabBarBadgeStyle: { backgroundColor: c.flame, color: '#fff', fontSize: 11 },
+        }}
+      />
       <Tabs.Screen name="account" options={{ title: t('tab_account'), tabBarIcon: icon('person-circle') }} />
     </Tabs>
   );
