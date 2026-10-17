@@ -46,7 +46,7 @@ five server functions. The app never sets a price or a status itself.
    npx supabase link --project-ref YOUR_PROJECT_REF
    npx supabase db push                  # creates all tables and rules
    npx supabase db push --include-seed   # loads docks, portals and listings
-   npx supabase functions deploy         # deploys all nine functions
+   npx supabase functions deploy         # deploys all ten functions
    npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    ```
 4. **Authentication → Providers → Email**: keep it on; the app signs people in with a 6-digit email code.
@@ -140,7 +140,7 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 
 ```bash
 npm i -D @electric-sql/pglite   # once
-npm run test:db                 # 147 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving)
+npm run test:db                 # 166 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account)
 npm run test:server             # 24 pricing, feature, payment and cruise-rule checks (needs Deno: https://deno.com)
 npm run typecheck
 ```

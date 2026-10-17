@@ -27,6 +27,14 @@ export default function RootLayout() {
         <Stack.Screen name="ticket/[id]" />
         <Stack.Screen name="inbox-compose" />
         <Stack.Screen name="give" />
+        <Stack.Screen name="me/profile" />
+        <Stack.Screen name="me/settings" />
+        <Stack.Screen name="me/places" />
+        <Stack.Screen name="me/help" />
+        <Stack.Screen name="me/wallet" />
+        <Stack.Screen name="me/safety" />
+        <Stack.Screen name="me/partner" />
+        <Stack.Screen name="me/legal" />
         <Stack.Screen name="captain/index" />
       </Stack>
     </SafeAreaProvider>

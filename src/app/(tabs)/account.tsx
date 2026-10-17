@@ -1,126 +1,158 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Constants from 'expo-constants';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DOCKS } from '../../../supabase/functions/_shared/geo.ts';
-import { FEATURE_SETTINGS } from '../../../supabase/functions/_shared/features.ts';
+import Svg, { Circle } from 'react-native-svg';
+import { MenuRow, Tile } from '@/components/AccountKit';
 import { LanguageButton } from '@/components/LanguageButton';
-import { Button, Card, Note } from '@/components/ui';
 import { DEMO_MODE } from '@/config';
-import { currentUserEmail, sendLoginCode, signOut, verifyLoginCode } from '@/lib/api';
-import { canSendInbox } from '@/lib/inbox';
-import { deletePlace, savedPlaces, type SavedPlace } from '@/lib/stay';
-import { hourLabel, PLACE_ICONS } from '@/lib/stayUi';
+import { getProfile, hasFlag, type Profile } from '@/lib/account';
+import { canSendInbox, useUnreadCount } from '@/lib/inbox';
+import { useMyShip } from '@/lib/cruise';
+import { savedPlaces } from '@/lib/stay';
 import { radius, space, type, useTheme } from '@/theme';
+
+/** Safety checkup: five things that make a guest's trips safer. Progress shows as a ring. */
+function checkup(p: Profile | null, places: number) {
+  return [
+    { key: 'ckEmail', done: !!p?.email, go: '/me/profile' },
+    { key: 'ckEmergency', done: !!p?.emergencyPhone, go: '/me/profile' },
+    { key: 'ckPlace', done: places > 0, go: '/me/places' },
+    { key: 'ckSafety', done: hasFlag('readSafety'), go: '/me/safety' },
+    { key: 'ckAlerts', done: !!p?.notifyTrips, go: '/me/settings' },
+  ] as const;
+}
+
+function Ring({ done, total }: { done: number; total: number }) {
+  const c = useTheme();
+  const r = 30;
+  const len = 2 * Math.PI * r;
+  return (
+    <View style={{ width: 76, height: 76, alignItems: 'center', justifyContent: 'center' }}>
+      <Svg width={76} height={76} style={StyleSheet.absoluteFill}>
+        <Circle cx={38} cy={38} r={r} stroke={c.tile2} strokeWidth={7} fill="none" />
+        <Circle cx={38} cy={38} r={r} stroke={c.flame} strokeWidth={7} fill="none" strokeLinecap="round" strokeDasharray={`${(len * done) / total} ${len}`} transform="rotate(-90 38 38)" />
+      </Svg>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: c.flame }}>
+        {done}
+        <Text style={{ fontSize: 15, fontWeight: '600' }}>/{total}</Text>
+      </Text>
+    </View>
+  );
+}
 
 export default function Account() {
   const { t, i18n } = useTranslation();
   const c = useTheme();
-  const [places, setPlaces] = useState<SavedPlace[]>([]);
-  const [me, setMe] = useState<string | null>(null);
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [sent, setSent] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [places, setPlaces] = useState(0);
   const [staff, setStaff] = useState(false);
+  const unread = useUnreadCount(i18n.language);
+  const ship = useMyShip();
 
-  const load = useCallback(() => {
-    savedPlaces().then(setPlaces).catch(() => {});
-    currentUserEmail().then(setMe).catch(() => {});
-    canSendInbox().then(setStaff).catch(() => {});
-  }, []);
-  useFocusEffect(load);
+  useFocusEffect(
+    useCallback(() => {
+      getProfile().then(setProfile).catch(() => {});
+      savedPlaces().then((p) => setPlaces(p.length)).catch(() => {});
+      canSendInbox().then(setStaff).catch(() => {});
+    }, []),
+  );
 
-  const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
-  const input = [styles.input, { backgroundColor: c.tile, color: c.ink }];
+  const items = checkup(profile, places);
+  const done = items.filter((i) => i.done).length;
+  const next = items.find((i) => !i.done);
+  const name = profile?.fullName || (profile?.email ? profile.email.split('@')[0] : t('guestName'));
+  const version = Constants.expoConfig?.version ?? '1.0.0';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ padding: space(4), gap: space(4), paddingBottom: space(12) }}>
-        <View style={styles.head}>
-          <Text style={[type.h1, { color: c.ink }]}>{t('accountH')}</Text>
+      <ScrollView contentContainerStyle={{ padding: space(4), paddingBottom: space(12) }}>
+        <View style={styles.langRow}>
           <LanguageButton />
         </View>
 
-        {DEMO_MODE ? (
-          <Card>
-            <Note>{t('demoMode')}</Note>
-          </Card>
-        ) : me ? (
-          <Card>
-            <Note>{t('signedInAs')}</Note>
-            <Text style={[type.bodyStrong, { color: c.ink }]}>{me}</Text>
-            <Button small variant="tile" label={t('signOut')} onPress={() => signOut().then(load)} />
-          </Card>
-        ) : (
-          <Card>
-            <Text style={[type.bodyStrong, { color: c.ink }]}>{t('signIn')}</Text>
-            <Note>{t('signInSub')}</Note>
-            <TextInput style={input} value={email} onChangeText={setEmail} placeholder={t('email')} placeholderTextColor={c.muted} autoCapitalize="none" keyboardType="email-address" />
-            {sent && <TextInput style={input} value={code} onChangeText={setCode} placeholder={t('code')} placeholderTextColor={c.muted} keyboardType="number-pad" maxLength={6} />}
-            <Button
-              label={sent ? t('verify') : t('sendCode')}
-              loading={busy}
-              onPress={async () => {
-                setBusy(true);
-                try {
-                  if (sent) {
-                    await verifyLoginCode(email.trim(), code.trim());
-                    load();
-                  } else {
-                    await sendLoginCode(email.trim());
-                    setSent(true);
-                  }
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            />
-          </Card>
-        )}
-
-        {staff && (
-          <Button variant="ink" label={t('composeH')} trailing="✉" onPress={() => router.push('/inbox-compose')} />
-        )}
-
-        <Text style={[type.h2, { color: c.ink }]}>{t('savedPlacesH')}</Text>
-        {places.length === 0 ? (
-          <Note>{t('noPlaces')}</Note>
-        ) : (
-          places.map((p) => (
-            <View key={p.id} style={[styles.row, { borderBottomColor: c.line }]}>
-              <Ionicons name={PLACE_ICONS[p.icon]} size={20} color={c.flame} />
-              <View style={{ flex: 1 }}>
-                <Text style={[type.bodyStrong, { color: c.ink }]}>{p.label}</Text>
-                <Note>{dockName(p.dockId)}</Note>
+        {/* Header: name, status chip, avatar */}
+        <Pressable accessibilityRole="button" onPress={() => router.push('/me/profile')} style={styles.head}>
+          <View style={{ flex: 1, gap: space(2) }}>
+            <Text style={[styles.name, { color: c.ink }]} numberOfLines={2}>
+              {name}
+            </Text>
+            <View style={styles.chips}>
+              <View style={[styles.chip, { backgroundColor: c.tile }]}>
+                <Text style={[type.label, { color: c.ink, fontSize: 14 }]}>{profile?.email ? t('emailVerified') : t('notSignedIn')}</Text>
               </View>
-              <Pressable accessibilityRole="button" onPress={() => deletePlace(p.id).then(load)} style={[styles.small, { backgroundColor: c.tile }]}>
-                <Text style={[type.label, { color: c.ink }]}>{t('delete')}</Text>
-              </Pressable>
+              {ship && (
+                <View style={[styles.chip, { backgroundColor: c.tile }]}>
+                  <Text style={[type.label, { color: c.ink, fontSize: 14 }]}>🚢 {t('cruiseGuest')}</Text>
+                </View>
+              )}
             </View>
-          ))
-        )}
+          </View>
+          <View style={[styles.avatar, { backgroundColor: c.muted }]}>
+            {profile?.fullName ? (
+              <Text style={{ color: '#fff', fontSize: 30, fontWeight: '800' }}>{profile.fullName.trim()[0]?.toUpperCase()}</Text>
+            ) : (
+              <Ionicons name="person-outline" size={34} color="#fff" />
+            )}
+          </View>
+        </Pressable>
 
-        <Text style={[type.h2, { color: c.ink }]}>{t('nightSafety')}</Text>
-        <Card>
-          <Note>{t('nightMsg')}</Note>
-          <Note>{t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}</Note>
-        </Card>
+        {/* Four tiles */}
+        <View style={styles.grid}>
+          <View style={styles.gridRow}>
+            <Tile icon="help-buoy-outline" label={t('helpH')} onPress={() => router.push('/me/help')} />
+            <Tile icon="wallet-outline" label={t('walletH')} onPress={() => router.push('/me/wallet')} />
+          </View>
+          <View style={styles.gridRow}>
+            <Tile icon="shield-outline" label={t('safetyH')} onPress={() => router.push('/me/safety')} />
+            <Tile icon="mail-outline" label={t('inboxH')} badge={unread} onPress={() => router.push('/inbox')} />
+          </View>
+        </View>
 
-        <Text style={[type.h2, { color: c.ink }]}>{t('guaranteeH')}</Text>
-        <Card>
-          <Note>{t('guaranteeMsg').replace('{c}', String(FEATURE_SETTINGS.guarantee.missedPickupCreditUsd))}</Note>
-        </Card>
+        {/* Safety checkup */}
+        <Pressable accessibilityRole="button" onPress={() => next && router.push(next.go)} style={[styles.checkup, { backgroundColor: c.tile }]}>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={[styles.cardTitle, { color: c.ink }]}>{t('checkupH')}</Text>
+            <Text style={[type.body, { color: c.muted }]}>{next ? t(next.key) : t('checkupDone')}</Text>
+          </View>
+          <Ring done={done} total={items.length} />
+        </Pressable>
+
+        {/* Menu */}
+        <View style={{ marginTop: space(2) }}>
+          <MenuRow icon="person-circle-outline" title={t('manageAccount')} sub={t('manageAccountSub')} onPress={() => router.push('/me/profile')} />
+          <MenuRow icon="settings-outline" title={t('settingsH')} onPress={() => router.push('/me/settings')} />
+          <MenuRow icon="bookmark-outline" title={t('savedPlacesH')} sub={t('savedPlacesSub')} onPress={() => router.push('/me/places')} />
+          <MenuRow icon="ticket-outline" title={t('passTitle')} sub={t('passesSub')} onPress={() => router.push('/pass')} />
+          <MenuRow icon="pricetag-outline" title={t('inboxOffers')} sub={t('offersSub')} onPress={() => router.push('/inbox')} />
+          <MenuRow icon="boat-outline" title={t('driveH')} sub={t('driveSub')} onPress={() => router.push({ pathname: '/me/partner', params: { kind: 'captain' } })} />
+          <MenuRow icon="storefront-outline" title={t('listBizH')} sub={t('listBizSub')} badge={t('newBadge')} onPress={() => router.push({ pathname: '/me/partner', params: { kind: 'business' } })} />
+          <MenuRow icon="heart-outline" title={t('giveCardH')} sub={t('giveMenuSub')} onPress={() => router.push('/give')} />
+          {staff && <MenuRow icon="megaphone-outline" title={t('composeH')} sub={t('staffOnly')} onPress={() => router.push('/inbox-compose')} />}
+          <MenuRow icon="information-circle-outline" title={t('legalH')} onPress={() => router.push('/me/legal')} />
+        </View>
+
+        <Text style={[type.small, { color: c.muted, marginTop: space(4) }]}>
+          v{version}
+          {DEMO_MODE ? ` · ${t('demoShort')}` : ''}
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  input: { borderRadius: radius.md, paddingHorizontal: space(4), paddingVertical: space(3), fontSize: 16 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space(3), paddingVertical: space(3), borderBottomWidth: 1 },
-  small: { borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 7 },
+  langRow: { alignItems: 'flex-end' },
+  head: { flexDirection: 'row', alignItems: 'center', gap: space(3), marginTop: space(2), marginBottom: space(5) },
+  name: { fontSize: 34, fontWeight: '800', letterSpacing: -1 },
+  chips: { flexDirection: 'row', gap: space(2), flexWrap: 'wrap' },
+  chip: { borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 6 },
+  avatar: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center' },
+  grid: { gap: space(3) },
+  gridRow: { flexDirection: 'row', gap: space(3) },
+  checkup: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.lg, padding: space(5), marginTop: space(4) },
+  cardTitle: { fontSize: 20, fontWeight: '600' },
 });

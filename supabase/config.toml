@@ -446,3 +446,6 @@ verify_jwt = false
 
 [functions.process-refunds]
 verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = true
