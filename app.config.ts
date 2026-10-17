@@ -4,13 +4,16 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
  * One codebase, two apps:
  *   APP_VARIANT=guest   (default) → the tourist app
  *   APP_VARIANT=captain           → the captain app (background GPS)
- * OPEN DECISIONS before the first store build (docs/DECISIONS.md): final brand name and bundle ids.
+ * OPEN DECISIONS before the first store build (README.md "Open decisions"): final brand name and bundle ids.
  * Bundle ids can never change after the first App Store / Play Store release.
  */
 const VARIANT = (process.env.APP_VARIANT ?? 'guest') as 'guest' | 'captain';
 const BRAND = process.env.BRAND_NAME ?? 'Water Uber';
 const BUNDLE_BASE = process.env.BUNDLE_ID_BASE ?? 'com.roatanexperience.watertaxi';
 const IS_CAPTAIN = VARIANT === 'captain';
+// No-download website. Booking links (/l/…, /split/…, /ship/…) open the app when it's installed.
+// Requires the two verification files on that site — see docs/CRUISE.md "Universal links".
+const WEB_HOST = new URL(process.env.EXPO_PUBLIC_WEB_URL ?? 'https://wateruber.app').host;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -25,6 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: IS_CAPTAIN ? `${BUNDLE_BASE}.captain` : BUNDLE_BASE,
     supportsTablet: false,
     infoPlist: { ITSAppUsesNonExemptEncryption: false },
+    ...(IS_CAPTAIN ? {} : { associatedDomains: [`applinks:${WEB_HOST}`] }),
   },
   android: {
     package: IS_CAPTAIN ? `${BUNDLE_BASE}.captain` : BUNDLE_BASE,
@@ -35,6 +39,18 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
+    ...(IS_CAPTAIN
+      ? {}
+      : {
+          intentFilters: [
+            {
+              action: 'VIEW',
+              autoVerify: true,
+              data: ['/l/', '/split/', '/ship/'].map((pathPrefix) => ({ scheme: 'https', host: WEB_HOST, pathPrefix })),
+              category: ['BROWSABLE', 'DEFAULT'],
+            },
+          ],
+        }),
   },
   web: { favicon: './assets/favicon.png', bundler: 'metro' },
   plugins: [

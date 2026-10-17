@@ -3,6 +3,7 @@
 // Request listings: status requested; the concierge team confirms price/availability, then sets quoted.
 import { withSupabase } from 'npm:@supabase/server@1';
 import { fail, json, readBody } from '../_shared/http.ts';
+import { CRUISE_SETTINGS, fitsPortTime, roatanDate, roatanInstant, splitDeadline, type PortId } from '../_shared/cruise.ts';
 
 interface Body {
   listingId: string;
@@ -10,6 +11,10 @@ interface Body {
   time: string; // e.g. "09:00"
   quantity: number;
   note?: string;
+  /** The guest's cruise ship today. The server refuses times that would make them miss it. */
+  shipCallId?: string;
+  /** Split the price into this many equal shares paid separately (2–12). Instant bookings only. */
+  splitShares?: number;
 }
 
 export default {
@@ -18,14 +23,14 @@ export default {
     const b = await readBody<Body>(req);
     if (!b?.listingId) return fail(400, 'bad_body', 'listingId is required');
     if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date ?? '')) return fail(400, 'bad_date', 'date must be YYYY-MM-DD');
-    const today = new Date().toISOString().slice(0, 10);
+    const today = roatanDate(new Date()); // island date, not UTC (UTC rolls over at 6 pm in Roatán)
     if (b.date < today) return fail(400, 'past_date', 'Pick a date from today on');
     if (!/^\d{1,2}:\d{2}$/.test(b.time ?? '')) return fail(400, 'bad_time', 'time must be HH:MM');
     if (!Number.isInteger(b.quantity) || b.quantity < 1 || b.quantity > 60) return fail(400, 'bad_quantity', 'quantity must be 1–60');
 
     const { data: listing, error: lerr } = await ctx.supabaseAdmin
       .from('listings')
-      .select('id, booking, price_usd, unit, active, operator_id, operators(is_partner)')
+      .select('id, portal_key, area, duration_minutes, booking, price_usd, unit, active, operator_id, operators(is_partner)')
       .eq('id', b.listingId)
       .single();
     if (lerr || !listing || !listing.active) return fail(404, 'listing_not_found', 'This listing is not available');
@@ -35,6 +40,35 @@ export default {
     const partner = !!(listing as any).operators?.is_partner;
     const instant = listing.booking === 'instant' && partner && listing.price_usd != null;
     const total = instant ? (listing.unit === 'boat' ? Number(listing.price_usd) : Number(listing.price_usd) * b.quantity) : null;
+
+    const start = roatanInstant(b.date, b.time);
+    if (start.getTime() < Date.now()) return fail(400, 'past_time', 'That time has passed');
+
+    // Cruise guests: never sell a time that gets them back after the ship's deadline.
+    let shipCallId: string | null = null;
+    if (b.shipCallId) {
+      const { data: call } = await ctx.supabaseAdmin.from('ship_calls').select('*').eq('id', b.shipCallId).maybeSingle();
+      if (!call) return fail(400, 'bad_ship', 'Unknown ship call');
+      if (call.call_date !== b.date) return fail(409, 'misses_ship', 'Your ship is only in port on ' + call.call_date);
+      const fit = fitsPortTime(
+        { id: call.id, date: call.call_date, ship: call.ship_name, port: call.port as PortId, arriveAt: new Date(call.arrive_at), allAboardAt: new Date(call.all_aboard_at) },
+        { area: listing.area, portal: listing.portal_key, start, durationMinutes: listing.duration_minutes },
+      );
+      if (!fit.fits && fit.reason !== 'unknown_area') {
+        return fail(409, 'misses_ship', `This time gets you back after ${CRUISE_SETTINGS.backAtPortMinutesBefore} min before all-aboard`);
+      }
+      shipCallId = call.id;
+    }
+
+    let deadline: Date | null = null;
+    if (b.splitShares != null) {
+      if (!Number.isInteger(b.splitShares) || b.splitShares < 2 || b.splitShares > CRUISE_SETTINGS.splitMaxShares) {
+        return fail(400, 'bad_split', `Split into 2–${CRUISE_SETTINGS.splitMaxShares} shares`);
+      }
+      if (!instant) return fail(409, 'not_splittable', 'Only fixed-price bookings can be split');
+      deadline = splitDeadline(new Date(), start);
+      if (!deadline) return fail(409, 'too_late_to_split', 'Too close to the start time to split. Pay in full instead.');
+    }
 
     const { data, error } = await ctx.supabaseAdmin
       .from('bookings')
@@ -47,10 +81,23 @@ export default {
         total_usd: total,
         status: instant ? 'awaiting_payment' : 'requested',
         guest_note: b.note?.slice(0, 500) ?? null,
+        ship_call_id: shipCallId,
       })
       .select()
       .single();
     if (error) return fail(500, 'insert_failed', error.message);
-    return json({ booking: data });
+
+    let split = null;
+    if (deadline) {
+      const { data: s, error: serr } = await ctx.supabaseAdmin.rpc('create_split', {
+        p_booking_id: data.id,
+        p_organizer: ctx.userClaims!.id,
+        p_shares: b.splitShares,
+        p_deadline: deadline.toISOString(),
+      });
+      if (serr) return fail(500, 'split_failed', serr.message);
+      split = { token: s.token, shares: s.shares, deadlineAt: s.deadline_at };
+    }
+    return json({ booking: data, split });
   }),
 };

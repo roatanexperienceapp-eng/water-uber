@@ -13,6 +13,7 @@ import {
 } from '../../../supabase/functions/_shared/features.ts';
 import LiveMap from '@/components/LiveMap';
 import { LanguageButton } from '@/components/LanguageButton';
+import { ShipButton } from '@/components/ShipButton';
 import { Button, Note, Segmented, Stepper } from '@/components/ui';
 import { BRAND_NAME, DEMO_MODE, HOME_CENTER } from '@/config';
 import { DIVE_SITES, type DiveSite } from '@/data/diveSites';
@@ -102,7 +103,7 @@ export default function RideScreen() {
     return best === Infinity ? null : Math.max(1, Math.ceil((best / (BOAT_MPH * KM_PER_MILE)) * 60) + 1);
   }, [boats, from]);
 
-  const start = timing === 'scheduled' ? slots[slot] : new Date(Date.now() + (pickupMin ?? 5) * 60000);
+  const start = timing === 'scheduled' ? slots[slot] : new Date(now.getTime() + (pickupMin ?? 5) * 60000);
   const arrive = new Date(start.getTime() + quote.rideMinutes * 60000);
   const inRange = boats.filter((b) => kmBetween([b.lon, b.lat], [center.longitude, center.latitude]) <= range * KM_PER_MILE).length;
   const dockName = (id: string) => DOCKS.find((d) => d.id === id)?.name ?? id;
@@ -192,7 +193,10 @@ export default function RideScreen() {
             <View style={[styles.logo, { backgroundColor: c.flame }]} />
             <Text style={[type.h2, { color: c.ink }]}>{BRAND_NAME}</Text>
           </View>
-          <LanguageButton />
+          <View style={{ flexDirection: 'row', gap: space(2) }}>
+            <ShipButton />
+            <LanguageButton />
+          </View>
         </View>
         <Text style={[type.hero, { color: c.ink, paddingHorizontal: space(4), marginBottom: space(3) }]}>{t('greet')}</Text>
 

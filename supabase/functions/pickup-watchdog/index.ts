@@ -1,5 +1,6 @@
 // POST /functions/v1/pickup-watchdog  (called every minute by the scheduler, with the secret key)
-// Reassigns unconfirmed rides, credits missed guaranteed pickups, creates tomorrow's repeat rides.
+// Reassigns unconfirmed rides, credits missed guaranteed pickups, creates tomorrow's repeat rides,
+// and expires group bookings that weren't fully paid in time.
 import { withSupabase } from 'npm:@supabase/server@1';
 import { FEATURE_SETTINGS } from '../_shared/features.ts';
 import { fail, json } from '../_shared/http.ts';
@@ -13,6 +14,9 @@ export default {
       p_grace_minutes: g.lateGraceMinutes,
     });
     if (error) return fail(500, 'watchdog_failed', error.message);
-    return json({ ok: true, result: data });
+    // Group bookings past their pay-by deadline: cancel and queue refunds.
+    const { data: splits, error: serr } = await ctx.supabaseAdmin.rpc('run_split_watchdog');
+    if (serr) return fail(500, 'split_watchdog_failed', serr.message);
+    return json({ ok: true, result: data, expiredSplits: splits });
   }),
 };

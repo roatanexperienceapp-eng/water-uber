@@ -1,6 +1,8 @@
 import { quoteFare, type FareInput } from '../../supabase/functions/_shared/pricing.ts';
 import { nightMode, passCovers } from '../../supabase/functions/_shared/features.ts';
 import { demoActivePass, demoUsePassRide } from '@/lib/stay';
+import * as Linking from 'expo-linking';
+import { Platform } from 'react-native';
 import { DEMO_MODE } from '@/config';
 import { supabase } from '@/lib/supabase';
 import { demoBoats } from '@/lib/demoFleet';
@@ -48,6 +50,10 @@ function toRide(r: Row): Ride {
 
 function toBooking(r: Row, listingName = ''): Booking {
   return {
+    ticketCode: (r.ticket_code as string) ?? undefined,
+    shipCallId: (r.ship_call_id as string) ?? undefined,
+    checkedIn: !!r.checked_in_at,
+    isSplit: Array.isArray(r.booking_splits) ? r.booking_splits.length > 0 : !!r.booking_splits,
     id: String(r.id),
     listingId: String(r.listing_id),
     listingName: listingName || String((r.listings as Row | undefined)?.name ?? r.listing_id),
@@ -60,7 +66,21 @@ function toBooking(r: Row, listingName = ''): Booking {
   };
 }
 
+/**
+ * Guests can book without creating an account (cruise visitors on the no-download web page): we give
+ * them an anonymous session. They can add an email later and keep their bookings.
+ * Requires "Allow anonymous sign-ins" in Supabase Auth (docs/PAYMENTS.md).
+ */
+export async function ensureSession(): Promise<void> {
+  if (!supabase) return;
+  const { data } = await supabase.auth.getSession();
+  if (data.session) return;
+  const { error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+}
+
 async function invoke<T>(name: string, body: Record<string, unknown>): Promise<T> {
+  await ensureSession();
   const { data, error } = await supabase!.functions.invoke<T>(name, { body });
   if (error) {
     // Surface the server's error code (e.g. "bad_time") when there is one.
@@ -188,18 +208,30 @@ export async function rideContact(id: string): Promise<{ name: string; whatsapp:
 
 export interface BookingRequest {
   listing: Listing;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM
+  date: string; // YYYY-MM-DD, island date
+  time: string; // HH:MM, island time
   quantity: number;
   note?: string;
+  /** Cruise guests: the server refuses times that would miss the ship. */
+  shipCallId?: string;
+  /** Split the price into this many shares paid separately. */
+  splitShares?: number;
 }
 
-export async function createBooking(req: BookingRequest): Promise<Booking> {
+export interface SplitInfo {
+  token: string;
+  shares: number;
+  deadlineAt: string;
+}
+
+export async function createBooking(req: BookingRequest): Promise<Booking & { split?: SplitInfo }> {
   const { listing } = req;
   if (!supabase) {
     const instant = listing.booking === 'instant' && listing.priceUsd != null;
     const total = instant ? (listing.unit === 'boat' ? listing.priceUsd! : listing.priceUsd! * req.quantity) : undefined;
-    const b: Booking = {
+    const b: Booking & { split?: SplitInfo } = {
+      ticketCode: newId(),
+      shipCallId: req.shipCallId,
       id: newId(),
       listingId: listing.id,
       listingName: listing.name,
@@ -210,28 +242,91 @@ export async function createBooking(req: BookingRequest): Promise<Booking> {
       status: instant ? 'awaiting_payment' : 'requested',
       createdAt: new Date().toISOString(),
     };
+    if (req.splitShares && total) {
+      b.split = { token: `demo${newId()}${newId()}`.toLowerCase(), shares: req.splitShares, deadlineAt: new Date(Date.now() + 2 * 3600_000).toISOString() };
+      writeJSON(SPLITS_KEY, [
+        { ...b.split, bookingId: b.id, totalCents: Math.round(total * 100), paid: 0, status: 'open', listingName: listing.name, date: req.date, time: req.time, quantity: req.quantity },
+        ...readJSON<DemoSplit[]>(SPLITS_KEY, []),
+      ]);
+    }
     writeJSON(BOOKINGS_KEY, [b, ...readJSON<Booking[]>(BOOKINGS_KEY, [])]);
     return b;
   }
-  const { booking } = await invoke<{ booking: Row }>('create-booking', {
+  const { booking, split } = await invoke<{ booking: Row; split: SplitInfo | null }>('create-booking', {
     listingId: listing.id,
     date: req.date,
     time: req.time,
     quantity: req.quantity,
     note: req.note,
+    shipCallId: req.shipCallId,
+    splitShares: req.splitShares,
   });
-  return toBooking(booking, listing.name);
+  return { ...toBooking(booking, listing.name), split: split ?? undefined };
+}
+
+// ---------- Group split ----------
+
+const SPLITS_KEY = 'demo.splits';
+type DemoSplit = SplitInfo & { bookingId: string; totalCents: number; paid: number; status: 'open' | 'complete' | 'expired'; listingName: string; date: string; time: string; quantity: number };
+
+export interface SplitStatus {
+  listingName: string;
+  date: string;
+  time: string;
+  quantity: number;
+  shares: number;
+  paidShares: number;
+  shareCents: number;
+  totalCents: number;
+  deadlineAt: string;
+  status: 'open' | 'complete' | 'expired';
+}
+
+/** Public: anyone with the link sees progress (no names, no contact details). */
+export async function splitStatus(token: string): Promise<SplitStatus | null> {
+  if (!supabase) {
+    const s = readJSON<DemoSplit[]>(SPLITS_KEY, []).find((x) => x.token === token);
+    return s
+      ? { listingName: s.listingName, date: s.date, time: s.time, quantity: s.quantity, shares: s.shares, paidShares: s.paid, shareCents: Math.floor(s.totalCents / s.shares), totalCents: s.totalCents, deadlineAt: s.deadlineAt, status: s.status }
+      : null;
+  }
+  const { data, error } = await supabase.rpc('split_status', { p_token: token });
+  if (error) throw error;
+  const r = (data as Row[] | null)?.[0];
+  return r
+    ? {
+        listingName: String(r.listing_name), date: String(r.trip_date), time: String(r.trip_time), quantity: Number(r.quantity),
+        shares: Number(r.shares), paidShares: Number(r.paid_shares), shareCents: Number(r.share_cents), totalCents: Number(r.total_cents),
+        deadlineAt: String(r.deadline_at), status: r.status as SplitStatus['status'],
+      }
+    : null;
+}
+
+/** The organizer's split for one of their bookings. */
+export async function splitForBooking(bookingId: string): Promise<SplitInfo | null> {
+  if (!supabase) return readJSON<DemoSplit[]>(SPLITS_KEY, []).find((x) => x.bookingId === bookingId) ?? null;
+  const { data } = await supabase.from('booking_splits').select('token, shares, deadline_at').eq('booking_id', bookingId).maybeSingle();
+  return data ? { token: String(data.token), shares: Number(data.shares), deadlineAt: String(data.deadline_at) } : null;
 }
 
 export async function listMyBookings(): Promise<Booking[]> {
-  if (!supabase) return readJSON<Booking[]>(BOOKINGS_KEY, []);
+  if (!supabase) {
+    const splitIds = new Set(readJSON<DemoSplit[]>(SPLITS_KEY, []).map((x) => x.bookingId));
+    return readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => ({ ...b, isSplit: splitIds.has(b.id) }));
+  }
   const { data, error } = await supabase
     .from('bookings')
-    .select('*, listings(name)')
+    .select('*, listings(name), booking_splits(token)')
     .order('created_at', { ascending: false })
     .limit(50);
   if (error) throw error;
   return (data ?? []).map((r) => toBooking(r));
+}
+
+export async function getBooking(id: string): Promise<Booking | undefined> {
+  if (!supabase) return readJSON<Booking[]>(BOOKINGS_KEY, []).find((b) => b.id === id);
+  const { data } = await supabase.from('bookings').select('*, listings(name)').eq('id', id).maybeSingle();
+  return data ? toBooking(data) : undefined;
 }
 
 export async function bookingContact(id: string): Promise<{ name: string; whatsapp: string } | null> {
@@ -243,15 +338,26 @@ export async function bookingContact(id: string): Promise<{ name: string; whatsa
 
 // ---------- Payments ----------
 
-export type PayTarget = { rideId: string } | { bookingId: string } | { passId: string };
+export type PayTarget = { rideId: string } | { bookingId: string } | { passId: string } | { splitToken: string; shares: 'one' | 'rest' };
 
 /**
  * Starts a payment for a ride or booking. Live mode asks the server to create the payment (the server
  * decides the amount); the processor's sheet is shown by lib/payments.ts. The server marks things paid
  * only from the processor's webhook.
  */
-export async function startPayment(target: PayTarget): Promise<{ paymentId: string; amountUsd: number }> {
+export async function startPayment(target: PayTarget, returnPath = '/trips'): Promise<{ paymentId: string; amountUsd: number; checkoutUrl?: string }> {
   if (!supabase) {
+    if ('splitToken' in target) {
+      const splits = readJSON<DemoSplit[]>(SPLITS_KEY, []);
+      const sp = splits.find((x) => x.token === target.splitToken);
+      if (!sp || sp.status !== 'open') throw new Error('split_closed');
+      const count = target.shares === 'rest' ? sp.shares - sp.paid : 1;
+      if (count < 1) throw new Error('no_shares_left');
+      const paid = sp.paid + count;
+      writeJSON(SPLITS_KEY, splits.map((x) => (x.token === sp.token ? { ...x, paid, status: paid >= x.shares ? 'complete' : 'open' } : x)));
+      if (paid >= sp.shares) writeJSON(BOOKINGS_KEY, readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => (b.id === sp.bookingId ? { ...b, status: 'paid' as const } : b)));
+      return { paymentId: `DEMO-${sp.token}-${paid}`, amountUsd: (Math.floor(sp.totalCents / sp.shares) * count) / 100 };
+    }
     if ('rideId' in target) {
       const rides = readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.id === target.rideId ? { ...r, status: 'paid' as const } : r));
       writeJSON(RIDES_KEY, rides);
@@ -263,9 +369,18 @@ export async function startPayment(target: PayTarget): Promise<{ paymentId: stri
     }
     const list = readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => (b.id === target.bookingId ? { ...b, status: 'paid' as const } : b));
     writeJSON(BOOKINGS_KEY, list);
+    // Taxi rides booked with the activity are paid in the same checkout.
+    writeJSON(RIDES_KEY, readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.bookingId === target.bookingId && r.status === 'awaiting_payment' ? { ...r, status: 'paid' as const } : r)));
     return { paymentId: `DEMO-${target.bookingId}`, amountUsd: list.find((b) => b.id === target.bookingId)?.totalUsd ?? 0 };
   }
-  return invoke('create-payment', target);
+  return invoke('create-payment', { ...target, returnPath, appReturnUrl: Platform.OS === 'web' ? undefined : Linking.createURL('paid') });
+}
+
+/** The server's view of a payment (set only by the processor's signed webhook). */
+export async function paymentStatus(paymentId: string): Promise<'pending' | 'succeeded' | 'failed' | 'refunded' | null> {
+  if (!supabase) return 'succeeded';
+  const { data } = await supabase.from('payments').select('status').eq('id', paymentId).maybeSingle();
+  return (data?.status as 'pending') ?? null;
 }
 
 // ---------- Live boats ----------

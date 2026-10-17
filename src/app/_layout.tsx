@@ -22,6 +22,9 @@ export default function RootLayout() {
         <Stack.Screen name="confirmation" options={{ gestureEnabled: false }} />
         <Stack.Screen name="assistant" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />
+        <Stack.Screen name="paid" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="split/[token]" />
+        <Stack.Screen name="ticket/[id]" />
         <Stack.Screen name="captain/index" />
       </Stack>
     </SafeAreaProvider>

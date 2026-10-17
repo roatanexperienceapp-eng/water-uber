@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,14 +10,20 @@ import {
   ACTIVITY_HOURS, dockForArea, FEATURE_SETTINGS, nightMode, passBreakEvenRides, passCovers, passDefinition, pickupForActivity,
   type PassId,
 } from '../../supabase/functions/_shared/features.ts';
+import { AllAboardBar } from '@/components/AllAboardBar';
 import { Button, Card, Note, Stepper } from '@/components/ui';
 import { DEMO_MODE } from '@/config';
 import { LISTINGS } from '@/data/catalogue';
-import { createBooking, createRide, startPayment } from '@/lib/api';
-import { clock, usd } from '@/lib/format';
-import { pay } from '@/lib/payments';
+import { createBooking, createRide, isDemo } from '@/lib/api';
+import {
+  CRUISE_SETTINGS, cruiseStartTimes, fitsPortTime, islandClock, islandDay, roatanDate, roatanInstant, useMyShip,
+} from '@/lib/cruise';
+import { usd } from '@/lib/format';
+import { meetingText } from '@/lib/meeting';
+import { pay, type PayOutcome } from '@/lib/payments';
 import { buyPass, createRepeatRide, currentPass, savedPlaces, type GuestPass } from '@/lib/stay';
-import { hhmm, hourLabel, shortDate, ymd } from '@/lib/stayUi';
+import { hhmm, hourLabel, ymd } from '@/lib/stayUi';
+import { useNow } from '@/lib/useNow';
 import { radius, space, type, useTheme } from '@/theme';
 
 type Params = {
@@ -65,7 +71,11 @@ export default function Checkout() {
         {p.kind === 'listing' && <ListingCheckout id={p.id ?? ''} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {p.kind === 'pass' && <PassCheckout passId={p.passId ?? 'week'} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {err ? <Text style={[type.small, { color: c.sos, textAlign: 'center' }]}>{err}</Text> : null}
-        <Note center>{DEMO_MODE ? t('demoPay') : t('lock')}</Note>
+        <View style={styles.secure}>
+          <Ionicons name="lock-closed" size={14} color={c.muted} />
+          <Note center>{DEMO_MODE ? t('demoPay') : t('securePay')}</Note>
+        </View>
+        <Note center>{t('lock')}</Note>
       </ScrollView>
     </SafeAreaView>
   );
@@ -73,20 +83,29 @@ export default function Checkout() {
 
 type Flow = { busy: boolean; setBusy: (b: boolean) => void; setErr: (s: string) => void };
 
-/** Runs the processor sheet for something the server already priced. */
-async function payFor(target: { rideId: string } | { bookingId: string } | { passId: string }, description: string) {
-  const { paymentId, amountUsd } = await startPayment(target);
-  if (amountUsd <= 0) return;
-  const res = await pay({ amountUsd, description, referenceId: paymentId });
-  if (!res.ok) throw new Error(res.error ?? 'payment_failed');
-}
-
 function errorText(t: (k: string) => string, e: unknown): string {
   const code = e instanceof Error ? e.message : '';
-  if (code === 'boats_closed') return t('closedH');
-  if (code === 'payments_not_configured') return t('payNotReady');
-  return t('cardErr');
+  const known: Record<string, string> = {
+    boats_closed: 'closedH',
+    payments_not_configured: 'payNotReady',
+    misses_ship: 'missesShip',
+    too_late_to_split: 'tooLateSplit',
+    split_closed: 'splitClosed',
+    no_shares_left: 'splitFull',
+  };
+  return t(known[code] ?? 'payFailed');
 }
+
+/** After pay(): go to the confirmation, or explain what happened. */
+function afterPay(outcome: PayOutcome, t: (k: string) => string, setErr: (s: string) => void, confirmation: { pathname: '/confirmation'; params: Record<string, string> }) {
+  if (outcome === 'redirected') return; // web: the checkout page takes over and comes back on /paid
+  if (outcome === 'cancelled') return setErr(t('payCancelled'));
+  if (outcome === 'failed') return setErr(t('payFailed'));
+  // 'paid' or 'pending' (webhook not in yet): the confirmation screen shows the live status.
+  router.replace(confirmation);
+}
+
+const confirmPath = (kind: string, id: string) => `/confirmation?kind=${kind}&id=${encodeURIComponent(id)}`;
 
 // ---------------------------------------------------------------------------------------------
 function RideCheckout({ p, busy, setBusy, setErr }: { p: Params } & Flow) {
@@ -117,14 +136,17 @@ function RideCheckout({ p, busy, setBusy, setErr }: { p: Params } & Flow) {
     setErr('');
     try {
       const ride = await createRide({ from, to, riders, mode, timing, scheduledFor: p.scheduledFor || undefined, hasKids: p.kids === '1', needsTowels: p.towels === '1' });
-      if (ride.status === 'awaiting_payment') await payFor({ rideId: ride.id }, `${dockName(from)} → ${dockName(to)}`);
       if (repeat) {
-        // The first pickup is the ride just booked; the repeat rule starts the next day.
+        // The first pickup is the ride just booked; the repeat rule starts the next day. Created before
+        // paying so nothing is lost if the web checkout navigates away.
         const start = new Date(at.getTime() + 86_400_000);
         const end = new Date(at.getTime() + Number(p.repeatFor ?? 6) * 86_400_000);
         await createRepeatRide({ from, to, riders, time: hhmm(at), weekdays, startDate: ymd(start), endDate: ymd(end) });
       }
-      router.replace({ pathname: '/confirmation', params: { kind: 'ride', id: ride.id } });
+      const target = { pathname: '/confirmation' as const, params: { kind: 'ride', id: ride.id } };
+      if (ride.status !== 'awaiting_payment') return router.replace(target);
+      const { outcome } = await pay({ rideId: ride.id }, confirmPath('ride', ride.id));
+      afterPay(outcome, t, setErr, target);
     } catch (e) {
       setErr(errorText(t, e));
     } finally {
@@ -140,7 +162,7 @@ function RideCheckout({ p, busy, setBusy, setErr }: { p: Params } & Flow) {
           {dockName(from)} → {dockName(to)}
         </Text>
         <Note>
-          {riders} {t('u_rider').toLowerCase()} · {t(mode === 'shared' ? 'shared' : 'private')} · {timing === 'scheduled' ? `${shortDate(at, i18n.language)} ${clock(at, i18n.language)}` : t('now')}
+          {riders} {t('u_rider').toLowerCase()} · {t(mode === 'shared' ? 'shared' : 'private')} · {timing === 'scheduled' ? `${islandDay(at, i18n.language)} ${islandClock(at, i18n.language)}` : t('now')}
         </Note>
         {p.joinMin ? <Note>{t('joinedBoat').replace('{m}', p.joinMin)}</Note> : null}
         <Note>{quote.breakdown}</Note>
@@ -154,7 +176,7 @@ function RideCheckout({ p, busy, setBusy, setErr }: { p: Params } & Flow) {
         <Row
           icon="repeat"
           title={t('repeatToggle')}
-          body={`${weekdays.length ? weekdays.map((d) => t(`wd${d}`)).join(' ') : t('everyDay')} · ${clock(at, i18n.language)} · ${t('passDays').replace('{d}', p.repeatFor ?? '6')} · ${t('perRide').replace('{p}', covered ? t('included') : usd(quote.total))}`}
+          body={`${weekdays.length ? weekdays.map((d) => t(`wd${d}`)).join(' ') : t('everyDay')} · ${islandClock(at, i18n.language)} · ${t('passDays').replace('{d}', p.repeatFor ?? '6')} · ${t('perRide').replace('{p}', covered ? t('included') : usd(quote.total))}`}
         />
       )}
       {covered && (
@@ -179,11 +201,15 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const listing = LISTINGS.find((l) => l.id === id);
-  const days = useMemo(() => Array.from({ length: 10 }, (_, i) => new Date(Date.now() + i * 86_400_000)), []);
+  const ship = useMyShip();
+    const now = useNow();
+  const [days] = useState(() => Array.from({ length: 10 }, (_, i) => roatanDate(new Date(new Date().getTime() + i * 86_400_000))));
   const [day, setDay] = useState(1);
-  const [time, setTime] = useState('09:00');
+  const [pickedTime, setTime] = useState('09:00');
   const [qty, setQty] = useState(2);
   const [withTaxi, setWithTaxi] = useState(true);
+  const [split, setSplit] = useState(false);
+  const [shares, setShares] = useState(2);
   // Most week-stay rentals are in West Bay; a saved "My rental" place overrides this.
   const [home, setHome] = useState('inf');
   const [pass, setPass] = useState<GuestPass | null>(null);
@@ -201,45 +227,74 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   if (!listing) return <Note>{t('noResults')}</Note>;
   const instant = listing.booking === 'instant' && listing.priceUsd != null;
   const activityTotal = instant ? (listing.unit === 'boat' ? listing.priceUsd! : listing.priceUsd! * qty) : undefined;
+  const unitLabel = t(`u_${listing.unit ?? 'person'}`);
 
-  // Boat booked with the activity
+  // ---- Cruise mode: the ship's day only, and only start times that get the group back in time ----
+  const cruise = ship && ship.date >= roatanDate(now) ? ship : null;
+  const cruiseTimes = cruise ? cruiseStartTimes(cruise, listing, now) : [];
+  const date = cruise ? cruise.date : days[day];
+  const time = cruise ? (cruiseTimes.includes(pickedTime) ? pickedTime : cruiseTimes[0] ?? '') : pickedTime;
+  const start = time ? roatanInstant(date, time) : null;
+  const fit = cruise && start ? fitsPortTime(cruise, { area: listing.area, portal: listing.portal, start, durationMinutes: listing.durationMinutes }) : null;
+  const unknownArea = !!fit && !fit.fits && fit.reason === 'unknown_area';
+  const cruiseBlocked = !!cruise && (cruiseTimes.length === 0 && !unknownArea);
+
+  // ---- Boat there and back (week-stay guests; cruise guests come by road from the port) ----
   const dest = dockForArea(listing.area);
   const hours = ACTIVITY_HOURS[listing.portal] ?? 2;
-  const taxiPossible = dest !== null && dest !== home && hours > 0;
+  const offerTaxi = !cruise && dest !== null && hours > 0;
+  const taxiOn = offerTaxi && withTaxi && !split && dest !== home;
   const riders = Math.min(qty, PRICING.maxRiders);
-  const start = new Date(`${ymd(days[day])}T${time}:00`);
-  const there = taxiPossible && dest ? quoteFare({ from: home, to: dest, riders, mode: 'private', timing: 'scheduled' }) : null;
-  const pickupAt = pickupForActivity(start, there?.rideMinutes ?? 0);
-  const backAt = new Date(start.getTime() + hours * 3_600_000);
-  const tooSoon = taxiPossible && withTaxi ? pickupAt.getTime() < Date.now() + 15 * 60_000 : start.getTime() < Date.now();
-  const legFare = (at: Date) => {
-    if (!there || !dest) return 0;
+  const there = taxiOn && dest ? quoteFare({ from: home, to: dest, riders, mode: 'private', timing: 'scheduled' }) : null;
+  const pickupAt = start ? pickupForActivity(start, there?.rideMinutes ?? 0) : null;
+  const backAt = start ? new Date(start.getTime() + hours * 3_600_000) : null;
+  const tooSoon = !start || (taxiOn && pickupAt ? pickupAt.getTime() < now.getTime() + 15 * 60_000 : start.getTime() < now.getTime() + 15 * 60_000);
+  const legFare = (at: Date | null) => {
+    if (!there || !dest || !at) return 0;
     const cv = passCovers(pass, { from: home, to: dest, riders, at });
     return cv.covered ? cv.fareUsd : there.total;
   };
-  const taxiTotal = taxiPossible && withTaxi ? legFare(pickupAt) + legFare(backAt) : 0;
-  const late = taxiPossible && withTaxi && nightMode(backAt) === 'boats_closed';
+  const taxiTotal = taxiOn ? legFare(pickupAt) + legFare(backAt) : 0;
+  const late = taxiOn && !!backAt && nightMode(backAt) === 'boats_closed';
   const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
-  const unitLabel = t(`u_${listing.unit ?? 'person'}`);
+
+  // ---- Split with my group (fixed-price bookings only) ----
+  const maxShares = Math.min(CRUISE_SETTINGS.splitMaxShares, Math.max(2, qty));
+  const shareCount = Math.min(shares, maxShares);
+  const eachUsd = activityTotal ? Math.ceil((activityTotal * 100) / shareCount) / 100 : 0;
+  const payNow = split ? eachUsd : (activityTotal ?? 0) + taxiTotal;
 
   async function confirm() {
-    if (tooSoon || late) return;
+    if (tooSoon || late || cruiseBlocked) return;
     setBusy(true);
     setErr('');
     try {
-      const booking = await createBooking({ listing: listing!, date: ymd(days[day]), time, quantity: qty });
-      const paid = booking.status === 'awaiting_payment';
-      if (paid) await payFor({ bookingId: booking.id }, listing!.name);
-      if (taxiPossible && withTaxi && dest) {
+      // Everything that belongs to this purchase is created BEFORE paying (see lib/payments.ts).
+      const booking = await createBooking({
+        listing: listing!,
+        date,
+        time,
+        quantity: qty,
+        shipCallId: cruise && !isDemo ? cruise.id : undefined,
+        splitShares: split ? shareCount : undefined,
+      });
+      if (taxiOn && dest && pickupAt && backAt) {
         for (const [a, b, when] of [
           [home, dest, pickupAt],
           [dest, home, backAt],
         ] as const) {
-          const ride = await createRide({ from: a, to: b, riders, mode: 'private', timing: 'scheduled', scheduledFor: when.toISOString(), hasKids: false, needsTowels: listing!.portal === 'snork' || listing!.portal === 'dive', bookingId: booking.id });
-          if (ride.status === 'awaiting_payment') await payFor({ rideId: ride.id }, `${dockName(a)} → ${dockName(b)}`);
+          await createRide({ from: a, to: b, riders, mode: 'private', timing: 'scheduled', scheduledFor: when.toISOString(), hasKids: false, needsTowels: listing!.portal === 'snork' || listing!.portal === 'dive', bookingId: booking.id });
         }
       }
-      router.replace({ pathname: '/confirmation', params: { kind: 'booking', id: booking.id, taxi: taxiPossible && withTaxi ? '1' : '0', paid: paid ? '1' : '0' } });
+      const target = { pathname: '/confirmation' as const, params: { kind: 'booking', id: booking.id } };
+      if (booking.split) {
+        const { outcome } = await pay({ splitToken: booking.split.token, shares: 'one' }, confirmPath('booking', booking.id));
+        return afterPay(outcome, t, setErr, target);
+      }
+      if (booking.status !== 'awaiting_payment') return router.replace(target); // request: price comes later
+      // One checkout pays the activity and its taxi rides together.
+      const { outcome } = await pay({ bookingId: booking.id }, confirmPath('booking', booking.id));
+      afterPay(outcome, t, setErr, target);
     } catch (e) {
       setErr(errorText(t, e));
     } finally {
@@ -249,6 +304,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
 
   return (
     <>
+      {cruise && <AllAboardBar />}
       <Card>
         <Text style={[type.label, { color: c.muted }]}>{t('what')}</Text>
         <Text style={[type.h2, { color: c.ink }]}>{listing.name}</Text>
@@ -258,79 +314,146 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
       </Card>
 
       <Text style={[type.bodyStrong, { color: c.ink }]}>{t('date')}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
-        {days.map((d, i) => (
-          <Pressable key={i} onPress={() => setDay(i)} style={[styles.pill, { backgroundColor: i === day ? c.ink : c.tile }]}>
-            <Text style={[type.label, { fontSize: 14, color: i === day ? c.onInk : c.ink }]}>{i === 0 ? t('today') : shortDate(d, i18n.language)}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-      <Text style={[type.bodyStrong, { color: c.ink }]}>{t('time')}</Text>
-      <View style={styles.wrap}>
-        {ACTIVITY_TIMES.map((x) => (
-          <Pressable key={x} onPress={() => setTime(x)} style={[styles.pill, { backgroundColor: x === time ? c.ink : c.tile }]}>
-            <Text style={[type.label, { fontSize: 14, color: x === time ? c.onInk : c.ink }]}>{clock(new Date(`2026-01-01T${x}:00`), i18n.language)}</Text>
-          </Pressable>
-        ))}
-      </View>
+      {cruise ? (
+        <Note>
+          {islandDay(cruise.allAboardAt, i18n.language)} · {t('shipDayOnly').replace('{ship}', cruise.ship)}
+        </Note>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
+          {days.map((d, i) => (
+            <Pressable key={d} onPress={() => setDay(i)} style={[styles.pill, { backgroundColor: i === day ? c.ink : c.tile }]}>
+              <Text style={[type.label, { fontSize: 14, color: i === day ? c.onInk : c.ink }]}>{i === 0 ? t('today') : islandDay(roatanInstant(d, '12:00'), i18n.language)}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      )}
+
+      <Text style={[type.bodyStrong, { color: c.ink }]}>
+        {t('time')} <Text style={[type.small, { color: c.muted }]}>· {t('islandTime')}</Text>
+      </Text>
+      {cruise && cruiseTimes.length === 0 && !unknownArea ? (
+        <View style={[styles.row, { backgroundColor: '#FDECEA' }]}>
+          <Ionicons name="alert-circle" size={20} color={c.sos} />
+          <Text style={[type.small, { color: '#5a1a12', flex: 1 }]}>{t('noTimeFits')}</Text>
+        </View>
+      ) : (
+        <View style={styles.wrap}>
+          {(cruise && !unknownArea
+            ? cruiseTimes
+            : cruise
+              ? // Unknown drive time: at least never offer a start after the guest must be back at the port.
+                ACTIVITY_TIMES.filter((x) => {
+                  const at = roatanInstant(date, x).getTime();
+                  return at > now.getTime() + 30 * 60_000 && at < cruise.allAboardAt.getTime() - CRUISE_SETTINGS.backAtPortMinutesBefore * 60_000;
+                })
+              : ACTIVITY_TIMES
+          ).map((x) => (
+            <Pressable key={x} onPress={() => setTime(x)} style={[styles.pill, { backgroundColor: x === time ? c.ink : c.tile }]}>
+              <Text style={[type.label, { fontSize: 14, color: x === time ? c.onInk : c.ink }]}>{islandClock(roatanInstant(date, x), i18n.language)}</Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+      {fit?.fits && (
+        <View style={[styles.row, { backgroundColor: '#E8F7EE' }]}>
+          <Ionicons name="checkmark-circle" size={20} color="#16A34A" />
+          <Text style={[type.small, { color: '#14532D', flex: 1 }]}>
+            {t('backInTime').replace('{t}', islandClock(fit.backAtPort, i18n.language)).replace('{m}', String(fit.spareMinutes))}
+          </Text>
+        </View>
+      )}
+      {unknownArea && <Note>{t('fitUnknown')}</Note>}
+
       <Stepper label={unitLabel} value={qty} min={1} max={20} onChange={setQty} />
 
-      {/* Feature 7: the boat there and back is booked with the activity */}
+      {/* Where to meet */}
       <Card>
-        {dest !== null && hours > 0 ? (
-          <>
-            <View style={styles.switchRow}>
-              <Ionicons name="boat" size={20} color={c.flame} />
-              <Text style={[type.bodyStrong, { color: c.ink, flex: 1 }]}>{t('addTaxi')}</Text>
-              <Switch value={withTaxi} onValueChange={setWithTaxi} trackColor={{ true: c.flame }} />
-            </View>
-            {withTaxi && (
-              <>
-                <Text style={[type.label, { color: c.muted }]}>{t('from_')}</Text>
-                <View style={styles.wrap}>
-                  {FLAT_DOCKS.map((d) => (
-                    <Pressable key={d} onPress={() => setHome(d)} style={[styles.pill, { backgroundColor: d === home ? c.ink : c.bg }]}>
-                      <Text style={[type.label, { fontSize: 13, color: d === home ? c.onInk : c.ink }]}>{dockName(d)}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-                {taxiPossible ? (
-                  <>
-                    <Note>• {t('taxiThere').replace('{t}', clock(pickupAt, i18n.language)).replace('{dock}', dockName(home))}</Note>
-                    <Note>• {t('taxiBack').replace('{t}', clock(backAt, i18n.language))}</Note>
-                    <Note>• {t('guaranteeH')}</Note>
-                  </>
-                ) : (
-                  <Note>{t('sameDock')}</Note>
-                )}
-                {late ? <Text style={[type.small, { color: c.sos }]}>{t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}</Text> : null}
-              </>
-            )}
-          </>
-        ) : (
-          <Note>{dest === null ? t('noDockNear') : t('goRide')}</Note>
-        )}
+        <Text style={[type.bodyStrong, { color: c.ink }]}>📍 {t('meetH')}</Text>
+        <Note>{meetingText(listing, cruise, t)}</Note>
       </Card>
+
+      {/* Split with my group */}
+      {instant && (
+        <Card>
+          <View style={styles.switchRow}>
+            <Ionicons name="people" size={20} color={c.flame} />
+            <View style={{ flex: 1 }}>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>{t('splitToggle')}</Text>
+              <Note>{t('splitHint')}</Note>
+            </View>
+            <Switch value={split} onValueChange={setSplit} trackColor={{ true: c.flame }} />
+          </View>
+          {split && (
+            <>
+              <Stepper label={t('splitWays')} value={shareCount} min={2} max={maxShares} onChange={setShares} />
+              <Note>{t('splitEach').replace('{p}', usd(eachUsd)).replace('{n}', String(shareCount))}</Note>
+              <Note>{t('splitRule').replace('{m}', String(CRUISE_SETTINGS.splitPayBeforeMinutes))}</Note>
+              {offerTaxi && <Note>{t('splitNoTaxi')}</Note>}
+            </>
+          )}
+        </Card>
+      )}
+
+      {/* Boat there and back (week-stay guests) */}
+      {offerTaxi && !split && (
+        <Card>
+          <View style={styles.switchRow}>
+            <Ionicons name="boat" size={20} color={c.flame} />
+            <Text style={[type.bodyStrong, { color: c.ink, flex: 1 }]}>{t('addTaxi')}</Text>
+            <Switch value={withTaxi} onValueChange={setWithTaxi} trackColor={{ true: c.flame }} />
+          </View>
+          {withTaxi && (
+            <>
+              <Text style={[type.label, { color: c.muted }]}>{t('from_')}</Text>
+              <View style={styles.wrap}>
+                {FLAT_DOCKS.map((d) => (
+                  <Pressable key={d} onPress={() => setHome(d)} style={[styles.pill, { backgroundColor: d === home ? c.ink : c.bg }]}>
+                    <Text style={[type.label, { fontSize: 13, color: d === home ? c.onInk : c.ink }]}>{dockName(d)}</Text>
+                  </Pressable>
+                ))}
+              </View>
+              {taxiOn && pickupAt && backAt ? (
+                <>
+                  <Note>• {t('taxiThere').replace('{t}', islandClock(pickupAt, i18n.language)).replace('{dock}', dockName(home))}</Note>
+                  <Note>• {t('taxiBack').replace('{t}', islandClock(backAt, i18n.language))}</Note>
+                  <Note>• {t('guaranteeH')} · {t('oneCheckout')}</Note>
+                </>
+              ) : (
+                <Note>{t('sameDock')}</Note>
+              )}
+              {late ? <Text style={[type.small, { color: c.sos }]}>{t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}</Text> : null}
+            </>
+          )}
+        </Card>
+      )}
+      {!offerTaxi && !cruise && dest === null && ACTIVITY_HOURS[listing.portal] ? <Note>{t('noDockNear')}</Note> : null}
 
       <View style={{ gap: 4 }}>
         <View style={styles.total}>
           <Text style={[type.body, { color: c.ink }]}>{listing.name}</Text>
           <Text style={[type.bodyStrong, { color: c.ink }]}>{activityTotal != null ? usd(activityTotal) : t('byOperator')}</Text>
         </View>
-        {taxiTotal > 0 || (taxiPossible && withTaxi) ? (
+        {taxiOn ? (
           <View style={styles.total}>
             <Text style={[type.body, { color: c.ink }]}>{t('withTaxi')}</Text>
             <Text style={[type.bodyStrong, { color: c.ink }]}>{taxiTotal === 0 ? t('included') : usd(taxiTotal)}</Text>
           </View>
         ) : null}
+        {split && (
+          <View style={styles.total}>
+            <Text style={[type.bodyStrong, { color: c.ink }]}>{t('yourShare')}</Text>
+            <Text style={[type.bodyStrong, { color: c.ink }]}>{usd(eachUsd)}</Text>
+          </View>
+        )}
       </View>
       {!instant && <Note>{t('quoteHint')}</Note>}
-      {tooSoon && <Text style={[type.small, { color: c.sos }]}>{t('noTaxi')}</Text>}
+      {!instant && taxiOn && <Note>{t('taxiWithQuote')}</Note>}
+      {tooSoon && !cruiseBlocked && <Text style={[type.small, { color: c.sos }]}>{t('tooSoon')}</Text>}
       <Button
         label={instant ? t('payBtn') : t('sendReq')}
-        trailing={instant ? usd((activityTotal ?? 0) + taxiTotal) : taxiTotal ? usd(taxiTotal) : undefined}
+        trailing={instant ? usd(payNow) : undefined}
         loading={busy}
-        disabled={tooSoon || late}
+        disabled={tooSoon || late || cruiseBlocked}
         onPress={confirm}
       />
     </>
@@ -348,8 +471,8 @@ function PassCheckout({ passId, busy, setBusy, setErr }: { passId: PassId } & Fl
     setErr('');
     try {
       const { id } = await buyPass(passId);
-      await payFor({ passId: id }, t(`pass_${passId}`));
-      router.replace({ pathname: '/confirmation', params: { kind: 'pass', id } });
+      const { outcome } = await pay({ passId: id }, confirmPath('pass', id));
+      afterPay(outcome, t, setErr, { pathname: '/confirmation', params: { kind: 'pass', id } });
     } catch (e) {
       setErr(errorText(t, e));
     } finally {
@@ -399,4 +522,5 @@ const styles = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space(2) },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: space(3) },
   row: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.md, padding: space(3) },
+  secure: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
 });

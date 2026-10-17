@@ -36,4 +36,14 @@ npm run test:server     # pricing checks (needs Deno)
 | `supabase/functions/_shared/pricing.ts` | **The only place prices are defined** |
 | `supabase/functions/_shared/features.ts` | Week-stay feature rules and owner settings (pass prices, credits, night hours) |
 | `src/lib/stay.ts` | Passes, shared seats, sea reports, saved places, repeat rides |
+| `supabase/functions/_shared/cruise.ts` | Cruise rules: port-time fit, transfer times, crowd meter, split deadlines |
+| `supabase/functions/_shared/payments.ts` | Payment provider boundary (Stripe adapter, signature checks, cents maths) |
+| `docs/PAYMENTS.md` | How money works + go-live checklist |
+| `docs/CRUISE.md` | Cruise features + what the team maintains (ship schedule, meeting points) |
 | `supabase/migrations/` | Database tables and security rules |
+
+## Open decisions
+
+- **Payment processor**: Stripe (needs a US company) or a Honduran processor. See docs/PAYMENTS.md.
+- **Brand name and bundle ids**: "Water Uber" carries trademark risk; bundle ids can't change after the first store release.
+- **Website domain** for no-download booking (`EXPO_PUBLIC_WEB_URL`).

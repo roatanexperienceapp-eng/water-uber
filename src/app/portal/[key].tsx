@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AllAboardBar } from '@/components/AllAboardBar';
 import { ListingRow } from '@/components/ListingRow';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
 import { radius, space, type, useTheme } from '@/theme';
@@ -40,6 +41,7 @@ export default function PortalScreen() {
               {items.length} {t('options')}
               {info ? ` · ${t('infoNote')}` : ''}
             </Text>
+            <AllAboardBar />
             {key === 'med' ? (
               <Pressable accessibilityRole="button" onPress={() => import('react-native').then(({ Linking }) => Linking.openURL('tel:911'))} style={[styles.sos]}>
                 <View style={{ flex: 1 }}>

@@ -212,6 +212,7 @@ export const LISTINGS: Listing[] = [
   "description": "Reef and offshore fishing on our own boat with a local captain.",
   "unit": "person",
   "ours": true,
+  "portPickup": true,
   "booking": "request"
  },
  {
@@ -412,6 +413,7 @@ export const LISTINGS: Listing[] = [
   "priceUsd": 85.0,
   "unit": "person",
   "ours": true,
+  "portPickup": true,
   "booking": "instant"
  },
  {
@@ -424,6 +426,7 @@ export const LISTINGS: Listing[] = [
   "priceUsd": 45.0,
   "unit": "person",
   "ours": true,
+  "portPickup": true,
   "booking": "instant"
  },
  {

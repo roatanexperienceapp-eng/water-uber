@@ -28,14 +28,14 @@ const out = [
   'insert into public.portals (key, icon, names, kind, sort) values',
   portals.map((p, i) => `  (${q(p.key)}, ${q(p.icon)}, ${q(JSON.stringify(p.names))}::jsonb, ${q(p.kind)}, ${i})`).join(',\n') +
     '\non conflict (key) do update set icon = excluded.icon, names = excluded.names, kind = excluded.kind, sort = excluded.sort;\n',
-  'insert into public.listings (id, portal_key, operator_id, name, area, description, price_usd, price_is_from, price_text, unit, rating, reviews, phone, lon, lat, tag, ours, booking, sort) values',
+  'insert into public.listings (id, portal_key, operator_id, name, area, description, price_usd, price_is_from, price_text, unit, rating, reviews, phone, lon, lat, tag, ours, booking, sort, port_pickup, meeting_text, duration_minutes) values',
   listings
     .map((l, i) => {
       const [lon, lat] = l.coords ?? [null, null];
-      return `  (${q(l.id)}, ${q(l.portal)}, ${l.ours ? OWNER : 'null'}, ${q(l.name)}, ${q(l.area)}, ${q(l.description ?? '')}, ${n(l.priceUsd)}, ${b(l.priceIsFrom)}, ${q(l.priceText)}, ${q(l.unit ?? 'person')}, ${n(l.rating)}, ${n(l.reviews)}, ${q(l.phone)}, ${n(lon)}, ${n(lat)}, ${q(l.tag)}, ${b(l.ours)}, ${q(l.booking)}, ${i})`;
+      return `  (${q(l.id)}, ${q(l.portal)}, ${l.ours ? OWNER : 'null'}, ${q(l.name)}, ${q(l.area)}, ${q(l.description ?? '')}, ${n(l.priceUsd)}, ${b(l.priceIsFrom)}, ${q(l.priceText)}, ${q(l.unit ?? 'person')}, ${n(l.rating)}, ${n(l.reviews)}, ${q(l.phone)}, ${n(lon)}, ${n(lat)}, ${q(l.tag)}, ${b(l.ours)}, ${q(l.booking)}, ${i}, ${b(l.portPickup)}, ${q(l.meeting)}, ${n(l.durationMinutes)})`;
     })
     .join(',\n') +
-    '\non conflict (id) do update set portal_key = excluded.portal_key, name = excluded.name, area = excluded.area, description = excluded.description, price_usd = excluded.price_usd, price_is_from = excluded.price_is_from, price_text = excluded.price_text, unit = excluded.unit, rating = excluded.rating, reviews = excluded.reviews, phone = excluded.phone, lon = excluded.lon, lat = excluded.lat, tag = excluded.tag, ours = excluded.ours, booking = excluded.booking, sort = excluded.sort, updated_at = now();\n',
+    '\non conflict (id) do update set portal_key = excluded.portal_key, name = excluded.name, area = excluded.area, description = excluded.description, price_usd = excluded.price_usd, price_is_from = excluded.price_is_from, price_text = excluded.price_text, unit = excluded.unit, rating = excluded.rating, reviews = excluded.reviews, phone = excluded.phone, lon = excluded.lon, lat = excluded.lat, tag = excluded.tag, ours = excluded.ours, booking = excluded.booking, sort = excluded.sort, port_pickup = excluded.port_pickup, meeting_text = excluded.meeting_text, duration_minutes = excluded.duration_minutes, updated_at = now();\n',
 ];
 writeFileSync('supabase/seed.sql', out.join('\n'));
 console.log(`seed.sql: ${docks.length} docks, ${portals.length} portals, ${listings.length} listings`);

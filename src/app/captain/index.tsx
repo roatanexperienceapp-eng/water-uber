@@ -9,6 +9,7 @@ import { Button, Card, Note } from '@/components/ui';
 import { acceptRide, advanceRide, confirmRide, myBoat, openRides, setOnline } from '@/lib/api';
 import { clock, usd } from '@/lib/format';
 import { reportSea } from '@/lib/stay';
+import { useNow } from '@/lib/useNow';
 import { SEA_COLOR } from '@/lib/stayUi';
 import { radius, space, type, useTheme } from '@/theme';
 import type { Ride } from '@/types';
@@ -24,6 +25,7 @@ export default function Captain() {
   const [online, setOn] = useState(false);
   const [rides, setRides] = useState<Ride[]>([]);
   const [msg, setMsg] = useState('');
+  const nowDate = useNow(15_000);
   const [reported, setReported] = useState<Partial<Record<SeaArea, SeaState>>>({});
 
   const load = useCallback(() => {
@@ -70,7 +72,7 @@ export default function Captain() {
   }
 
   const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
-  const now = Date.now();
+  const now = nowDate.getTime();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>

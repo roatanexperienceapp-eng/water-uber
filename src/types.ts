@@ -28,6 +28,12 @@ export interface Listing {
   tag?: string;
   ours?: boolean;
   booking: BookingMode;
+  /** Where to meet the guide (falls back to the port gate for cruise guests on port-pickup tours). */
+  meeting?: string;
+  /** The operator collects cruise guests at the port gate. */
+  portPickup?: boolean;
+  /** Activity length; defaults to the typical length for the portal. */
+  durationMinutes?: number;
 }
 
 export type BoatKind = 'taxi' | 'tour' | 'fish';
@@ -89,4 +95,10 @@ export interface Booking {
   status: 'requested' | 'quoted' | 'awaiting_payment' | 'paid' | 'cancelled' | 'completed';
   createdAt: string;
   operatorWhatsApp?: string;
+  /** Shown as a QR on the ticket; the operator scans it to check the group in. */
+  ticketCode?: string;
+  shipCallId?: string;
+  checkedIn?: boolean;
+  /** Paid in shares by a group (pay through the group link, not the single Pay button). */
+  isSplit?: boolean;
 }

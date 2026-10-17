@@ -46,7 +46,7 @@ five server functions. The app never sets a price or a status itself.
    npx supabase link --project-ref YOUR_PROJECT_REF
    npx supabase db push                  # creates all tables and rules
    npx supabase db push --include-seed   # loads docks, portals and listings
-   npx supabase functions deploy         # deploys all eight functions
+   npx supabase functions deploy         # deploys all nine functions
    npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    ```
 4. **Authentication → Providers → Email**: keep it on; the app signs people in with a 6-digit email code.
@@ -65,6 +65,11 @@ five server functions. The app never sets a price or a status itself.
    Every minute it re-assigns rides whose captain hasn't confirmed 15 min before pickup, credits guests
    for missed pickups, creates the next 24 h of repeat rides, and closes shared boats that have left.
    Store the secret key in Vault rather than pasting it if you prefer (`vault.create_secret`).
+
+## Payments and cruise features
+
+See **docs/PAYMENTS.md** (how money flows, go-live checklist, daily money checks) and **docs/CRUISE.md**
+(ship schedule, meeting points, QR links, universal links).
 
 ## Week-stay features (the 7)
 
@@ -122,8 +127,9 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 
 ## Not done yet (by design)
 
-- **Payment processor.** `create-payment` and `payment-webhook` contain the full flow and the database side,
-  but the processor-specific calls are marked `TODO(payments)`. Pick the processor first (docs/DECISIONS.md).
+- **Payment processor account.** The full payment system is built and tested (docs/PAYMENTS.md): hosted
+  checkout, signed webhooks, amount checks, refunds, group splits, commission ledger. It needs a processor
+  account and keys to take real money.
 - **Push notifications** to captains for new rides. Today the captain app refreshes; add Expo push next.
 - **Refunds** after a cancellation are manual from the processor dashboard.
 - **Share-my-ride page.** The app creates a secret link (`islandride.app/track/<token>`) and the database
@@ -134,7 +140,7 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 
 ```bash
 npm i -D @electric-sql/pglite   # once
-npm run test:db                 # 71 database checks in an embedded Postgres (security + week-stay features)
-npm run test:server             # 16 pricing and feature-rule checks (needs Deno: https://deno.com)
+npm run test:db                 # 109 database checks in an embedded Postgres (security, week-stay, payments, cruise)
+npm run test:server             # 24 pricing, feature, payment and cruise-rule checks (needs Deno: https://deno.com)
 npm run typecheck
 ```

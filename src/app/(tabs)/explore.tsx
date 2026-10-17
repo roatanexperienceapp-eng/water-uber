@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ListingRow } from '@/components/ListingRow';
+import { AllAboardBar } from '@/components/AllAboardBar';
+import { CrowdMeter } from '@/components/CrowdMeter';
 import { LanguageButton } from '@/components/LanguageButton';
+import { ShipButton } from '@/components/ShipButton';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
 import { searchListings } from '@/lib/search';
 import { radius, space, type, useTheme } from '@/theme';
@@ -26,9 +29,13 @@ export default function ExploreScreen() {
   const header = (
     <View style={{ gap: space(4), paddingBottom: space(2) }}>
       <View style={styles.titleRow}>
-        <Text style={[type.h1, { color: c.ink }]}>{t('exploreH')}</Text>
-        <LanguageButton />
+        <Text style={[type.h1, { color: c.ink, flexShrink: 1 }]}>{t('exploreH')}</Text>
+        <View style={styles.headBtns}>
+          <ShipButton />
+          <LanguageButton />
+        </View>
       </View>
+      <AllAboardBar />
       <View style={[styles.search, { backgroundColor: c.tile }]}>
         <Ionicons name="search" size={20} color={c.muted} />
         <TextInput
@@ -74,6 +81,7 @@ export default function ExploreScreen() {
         </View>
       ) : (
         <View style={{ gap: space(4) }}>
+          <CrowdMeter />
           <View style={styles.promo}>
             <Image source={require('../../../assets/images/promo.jpg')} style={StyleSheet.absoluteFill} resizeMode="cover" />
             <View style={styles.promoShade} />
@@ -119,7 +127,8 @@ export default function ExploreScreen() {
 }
 
 const styles = StyleSheet.create({
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space(2) },
+  headBtns: { flexDirection: 'row', gap: space(2) },
   search: { flexDirection: 'row', alignItems: 'center', gap: space(2), borderRadius: radius.pill, paddingHorizontal: space(4), minHeight: 50 },
   input: { flex: 1, paddingVertical: 12 },
   notice: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.md, padding: space(4) },

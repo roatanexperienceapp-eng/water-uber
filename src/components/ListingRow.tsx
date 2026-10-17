@@ -1,7 +1,9 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ShareQR } from '@/components/ShareQR';
 import { PORTALS } from '@/data/catalogue';
+import { listingFit, useMyShip } from '@/lib/cruise';
 import { phone as fmtPhone } from '@/lib/format';
 import { radius, space, type, useTheme } from '@/theme';
 import type { Listing } from '@/types';
@@ -14,9 +16,11 @@ export function ListingRow({ listing: l, likely, showPortal }: { listing: Listin
   const info = l.booking === 'info';
   const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.name}, ${l.area}, Roatán, Honduras`)}`;
   const tag = l.ours ? t('ours') : l.tag ? t(l.tag) : likely ? t('likelySells') : '';
+  const ship = useMyShip();
+  const fit = listingFit(ship, l);
 
   return (
-    <View style={[styles.row, { borderBottomColor: c.line }]}>
+    <View style={[styles.row, { borderBottomColor: c.line, opacity: fit === 'no' ? 0.55 : 1 }]}>
       <View style={styles.top}>
         <View style={[styles.thumb, { backgroundColor: c.tile }]}>
           <Text style={{ fontSize: 24 }}>{portal?.icon ?? '📍'}</Text>
@@ -30,6 +34,12 @@ export function ListingRow({ listing: l, likely, showPortal }: { listing: Listin
               .join(' · ')}
           </Text>
           {l.description ? <Text style={[type.small, { color: c.muted }]}>{l.description}</Text> : null}
+          {fit ? (
+            <Text style={[type.label, { color: fit === 'fits' ? '#16A34A' : fit === 'no' ? c.sos : c.muted }]}>
+              {fit === 'fits' ? `✓ ${t('fitsPort')}` : fit === 'no' ? `✕ ${t('missesPort')}` : t('fitUnknownShort')}
+              {fit === 'fits' && l.portPickup ? ` · ${t('portPickup')}` : ''}
+            </Text>
+          ) : null}
         </View>
       </View>
       <View style={styles.foot}>
@@ -46,9 +56,12 @@ export function ListingRow({ listing: l, likely, showPortal }: { listing: Listin
             <Pressable accessibilityRole="button" onPress={() => Linking.openURL(maps)} style={[styles.btn, { backgroundColor: c.ink }]}>
               <Text style={[type.label, { color: c.onInk, fontSize: 14 }]}>{t('directions')}</Text>
             </Pressable>
-          ) : (
+          ) : null}
+          {!info ? <ShareQR id={l.id} name={l.name} /> : null}
+          {info ? null : (
             <Pressable
               accessibilityRole="button"
+              disabled={fit === 'no'}
               onPress={() => router.push({ pathname: '/checkout', params: { kind: 'listing', id: l.id } })}
               style={[styles.btn, { backgroundColor: c.ink }]}
             >
