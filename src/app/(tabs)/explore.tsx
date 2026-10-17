@@ -94,9 +94,9 @@ export default function ExploreScreen() {
             {PORTALS.map((p) => (
               <Pressable key={p.key} accessibilityRole="button" onPress={() => router.push(`/portal/${p.key}`)} style={styles.tile}>
                 <View style={[styles.tileIcon, { backgroundColor: c.tile }]}>
-                  <Text style={{ fontSize: 28 }}>{p.icon}</Text>
+                  <Text style={styles.tileEmoji}>{p.icon}</Text>
                 </View>
-                <Text style={[type.label, { color: c.ink, textAlign: 'center' }]} numberOfLines={2}>
+                <Text style={[styles.tileLabel, { color: c.ink }]} numberOfLines={2}>
                   {p.names[lang] ?? p.names.en}
                 </Text>
               </Pressable>
@@ -137,9 +137,12 @@ const styles = StyleSheet.create({
   promo: { height: 150, borderRadius: radius.lg, overflow: 'hidden' },
   promoShade: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)' },
   promoText: { position: 'absolute', left: space(4), bottom: space(4), right: '35%', gap: 2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space(4) },
-  tile: { width: '25%', alignItems: 'center', gap: 6, paddingHorizontal: 4 },
-  tileIcon: { width: '100%', aspectRatio: 1.15, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  // Round tiles, three per row: big light circle, large icon, label underneath.
+  grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space(5) },
+  tile: { width: '33.333%', alignItems: 'center', gap: space(2), paddingHorizontal: space(2) },
+  tileIcon: { width: '92%', aspectRatio: 1, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  tileEmoji: { fontSize: 48, lineHeight: 58 },
+  tileLabel: { fontSize: 16, fontWeight: '600', textAlign: 'center', letterSpacing: -0.2 },
   give: { borderRadius: radius.lg, overflow: 'hidden' },
   giveImg: { width: '100%', aspectRatio: 1000 / 656 },
 });
