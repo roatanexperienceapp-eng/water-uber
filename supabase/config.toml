@@ -433,3 +433,13 @@ verify_jwt = true
 
 [functions.payment-webhook]
 verify_jwt = false
+
+[functions.create-pass]
+verify_jwt = true
+
+[functions.create-repeat-ride]
+verify_jwt = true
+
+# Called by the scheduler with the secret key, not a user login.
+[functions.pickup-watchdog]
+verify_jwt = false

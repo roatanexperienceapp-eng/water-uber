@@ -24,7 +24,8 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="index" options={{ title: t('tab_ride'), tabBarIcon: icon('boat') }} />
       <Tabs.Screen name="explore" options={{ title: t('tab_explore'), tabBarIcon: icon('compass') }} />
-      {/* Trips and Account tabs are added when those screens are built. */}
+      <Tabs.Screen name="trips" options={{ title: t('tab_trips'), tabBarIcon: icon('receipt') }} />
+      <Tabs.Screen name="account" options={{ title: t('tab_account'), tabBarIcon: icon('person-circle') }} />
     </Tabs>
   );
 }

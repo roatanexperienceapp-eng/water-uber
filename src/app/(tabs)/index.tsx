@@ -1,18 +1,24 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from 'expo-location';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DOCKS, kmBetween, KM_PER_MILE, routeFor } from '../../../supabase/functions/_shared/geo.ts';
 import { isFlatZone, needsFamilyBoat, PRICING, quoteFare, type RideMode, type RideTiming } from '../../../supabase/functions/_shared/pricing.ts';
+import {
+  conditionAdvice, FEATURE_SETTINGS, joinableBoats, nightMode, passCovers, routeCondition,
+  type OpenSharedBoat, type SeaReport,
+} from '../../../supabase/functions/_shared/features.ts';
 import LiveMap from '@/components/LiveMap';
 import { LanguageButton } from '@/components/LanguageButton';
 import { Button, Note, Segmented, Stepper } from '@/components/ui';
 import { BRAND_NAME, DEMO_MODE, HOME_CENTER } from '@/config';
 import { DIVE_SITES, type DiveSite } from '@/data/diveSites';
 import { subscribeBoats } from '@/lib/api';
+import { currentPass, openSharedBoats, savedPlaces, savePlace, seaReports, type GuestPass, type SavedPlace } from '@/lib/stay';
+import { hourLabel, PLACE_ICONS, SEA_COLOR, WEEKDAYS } from '@/lib/stayUi';
 import { clock, usd } from '@/lib/format';
 import { radius, space, type, useTheme } from '@/theme';
 import type { LiveBoat } from '@/types';
@@ -46,8 +52,40 @@ export default function RideScreen() {
   const [picker, setPicker] = useState<null | 'from' | 'to'>(null);
   const [popup, setPopup] = useState<null | { kind: 'boat'; boat: LiveBoat } | { kind: 'dive'; site: DiveSite }>(null);
   const [locNote, setLocNote] = useState<string>(t('ctrWE'));
+  // Week-stay features
+  const [places, setPlaces] = useState<SavedPlace[]>([]);
+  const [pass, setPass] = useState<GuestPass | null>(null);
+  const [reports, setReports] = useState<SeaReport[]>([]);
+  const [shared, setShared] = useState<OpenSharedBoat[]>([]);
+  const [joinId, setJoinId] = useState<string | null>(null);
+  const [repeat, setRepeat] = useState(false);
+  const [repeatDays, setRepeatDays] = useState<number[]>([]);
+  const [repeatFor, setRepeatFor] = useState(6);
+  const [saving, setSaving] = useState(false);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => subscribeBoats(setBoats), []);
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      savedPlaces().then(setPlaces).catch(() => {});
+      currentPass().then(setPass).catch(() => {});
+      seaReports().then(setReports).catch(() => {});
+    }, []),
+  );
+  useEffect(() => {
+    let alive = true;
+    const load = () => openSharedBoats(from, to).then((b) => alive && setShared(b)).catch(() => {});
+    load();
+    const id = setInterval(load, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [from, to]);
 
   const slots = useMemo(() => nextSlots(16), [timing]);
   const route = useMemo(() => routeFor(from, to), [from, to]);
@@ -68,6 +106,33 @@ export default function RideScreen() {
   const arrive = new Date(start.getTime() + quote.rideMinutes * 60000);
   const inRange = boats.filter((b) => kmBetween([b.lon, b.lat], [center.longitude, center.latitude]) <= range * KM_PER_MILE).length;
   const dockName = (id: string) => DOCKS.find((d) => d.id === id)?.name ?? id;
+
+  const night = nightMode(start);
+  const cond = routeCondition(reports, from, to, now);
+  const advice = conditionAdvice(cond.state);
+  const condAgo = (() => {
+    const times = reports.filter((r) => cond.areas.includes(r.area)).map((r) => now.getTime() - r.reportedAt.getTime());
+    return times.length ? Math.max(1, Math.round(Math.min(...times) / 60_000)) : null;
+  })();
+  const cover = passCovers(pass, { from, to, riders, at: start });
+  const covered = cover.covered;
+  const nightExtra = night === 'night' ? FEATURE_SETTINGS.night.surchargePerRider * riders : 0;
+  const price = covered ? cover.fareUsd : quote.total + nightExtra;
+  const blocked = night === 'boats_closed' || advice === 'land_taxi';
+  const joinable = flat && timing === 'now' && mode === 'shared' ? joinableBoats(shared, { from, to, riders, now }) : [];
+  const joined = joinable.find((b) => b.id === joinId) ?? null;
+  const minsUntil = (d: Date) => Math.max(1, Math.round((d.getTime() - now.getTime()) / 60_000));
+
+  function goTo(dockId: string) {
+    if (dockId === from) setFrom(to);
+    setTo(dockId);
+  }
+
+  async function saveCurrent(label: string, icon: SavedPlace['icon']) {
+    setSaving(false);
+    await savePlace({ label, dockId: to, icon }).catch(() => {});
+    setPlaces(await savedPlaces().catch(() => places));
+  }
 
   async function nearMe() {
     try {
@@ -111,6 +176,10 @@ export default function RideScreen() {
         scheduledFor: timing === 'scheduled' ? slots[slot].toISOString() : '',
         kids: kids ? '1' : '0',
         towels: towels ? '1' : '0',
+        repeat: timing === 'scheduled' && repeat ? '1' : '0',
+        weekdays: repeatDays.join(','),
+        repeatFor: String(repeatFor),
+        joinMin: joined ? String(minsUntil(joined.departsAt)) : '',
       },
     });
   }
@@ -243,12 +312,52 @@ export default function RideScreen() {
             ))}
           </View>
 
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
+            {places.map((p) => (
+              <Pressable key={p.id} accessibilityRole="button" onPress={() => goTo(p.dockId)} style={[styles.chip, { backgroundColor: to === p.dockId ? c.ink : c.tile }]}>
+                <Ionicons name={PLACE_ICONS[p.icon]} size={15} color={to === p.dockId ? c.onInk : c.ink} />
+                <Text style={[type.label, { fontSize: 14, color: to === p.dockId ? c.onInk : c.ink }]}>{p.label}</Text>
+              </Pressable>
+            ))}
+            <Pressable accessibilityRole="button" onPress={() => setSaving(true)} style={[styles.chip, { borderWidth: 1, borderColor: c.line }]}>
+              <Ionicons name="bookmark-outline" size={15} color={c.ink} />
+              <Text style={[type.label, { fontSize: 14, color: c.ink }]}>{t('savePlace')}</Text>
+            </Pressable>
+          </ScrollView>
+
           <View style={{ gap: 2 }}>
             <Text style={[type.bodyStrong, { color: c.ink }]}>
               {quote.miles.toFixed(1)} mi · {t('rideMin').replace('{m}', String(quote.rideMinutes))} · {t('arrive')} ~{clock(arrive, i18n.language)}
             </Text>
             {timing === 'now' && <Note>{pickupMin ? t('pickup').replace('{m}', String(pickupMin)) : t('noTaxi')}</Note>}
           </View>
+
+          <View style={[styles.banner, { backgroundColor: c.tile }]}>
+            <View style={[styles.seaDot, { backgroundColor: SEA_COLOR[cond.state] }]} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>
+                {t('seaTitle')}: {t(`sea_${cond.state}`)}
+              </Text>
+              <Note>
+                {t({ none: 'seaCalmMsg', expect_spray: 'seaChoppyMsg', land_taxi: 'seaRoughMsg' }[advice])}
+                {cond.state === 'unknown' ? '' : condAgo ? ` ${t('reportedAgo').replace('{m}', String(condAgo))}` : ''}
+              </Note>
+            </View>
+          </View>
+
+          {night !== 'day' && (
+            <View style={[styles.banner, { backgroundColor: night === 'night' ? '#14213D' : '#3A1410' }]}>
+              <Ionicons name={night === 'night' ? 'moon' : 'close-circle'} size={20} color="#fff" />
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={[type.bodyStrong, { color: '#fff' }]}>{t(night === 'night' ? 'nightH' : 'closedH')}</Text>
+                <Text style={[type.small, { color: '#E5E7EB' }]}>
+                  {night === 'night' ? t('nightMsg') : t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {blocked && <Button variant="ink" label={t('landTaxi')} onPress={() => router.push('/assistant')} />}
 
           {!flat && (
             <View style={[styles.mileNote, { backgroundColor: c.tile }]}>
@@ -267,7 +376,7 @@ export default function RideScreen() {
                     <Text style={{ fontSize: 30 }}>{m === 'shared' ? '🚤' : '🛥️'}</Text>
                     <View style={{ flex: 1 }}>
                       <Text style={[type.bodyStrong, { color: c.ink }]}>{t(m)}</Text>
-                      <Note>{t(`${m}Sub`)}</Note>
+                      <Note>{t(`${m}Sub`).replace('{n}', String(FEATURE_SETTINGS.shared.seatsToDepart)).replace('{m}', String(FEATURE_SETTINGS.shared.maxWaitMinutes))}</Note>
                     </View>
                   </Pressable>
                 );
@@ -275,11 +384,36 @@ export default function RideScreen() {
             </View>
           )}
 
+          {flat && timing === 'now' && mode === 'shared' && (
+            <View style={{ gap: space(2) }}>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>{t('sharedH')}</Text>
+              {joinable.length === 0 ? (
+                <Note>
+                  {t('noShared').replace('{n}', String(FEATURE_SETTINGS.shared.seatsToDepart)).replace('{m}', String(FEATURE_SETTINGS.shared.maxWaitMinutes))}
+                </Note>
+              ) : (
+                joinable.map((b) => {
+                  const on = b.id === joinId;
+                  return (
+                    <Pressable key={b.id} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setJoinId(on ? null : b.id)} style={[styles.opt, { borderColor: on ? c.ink : c.line }]}>
+                      <Ionicons name="people" size={22} color={c.flame} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[type.bodyStrong, { color: c.ink }]}>{t('leavesIn').replace('{m}', String(minsUntil(b.departsAt)))}</Text>
+                        <Note>{t('seatsTaken').replace('{n}', String(b.seatsTaken)).replace('{t}', String(b.seatsTotal))}</Note>
+                      </View>
+                      <Text style={[type.label, { color: on ? c.flame : c.ink, fontSize: 14 }]}>{on ? '✓' : t('joinBoat')}</Text>
+                    </Pressable>
+                  );
+                })
+              )}
+            </View>
+          )}
+
           <Segmented
             value={timing}
             onChange={(v) => {
               setTiming(v);
-              if (v === 'scheduled') setMode('private');
+              setMode(v === 'scheduled' ? 'private' : 'shared');
             }}
             options={[
               { value: 'now', label: t('now') },
@@ -305,12 +439,67 @@ export default function RideScreen() {
                 <Switch value={kids} onValueChange={setKids} trackColor={{ true: c.flame }} />
               </View>
               <Note>{needsFamilyBoat(riders, kids) ? `${t('cap2')} · ${t('jackets')}` : t('cap1')}</Note>
+
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[type.body, { color: c.ink }]}>{t('repeatToggle')}</Text>
+                  <Note>{t('repeatHint')}</Note>
+                </View>
+                <Switch value={repeat} onValueChange={setRepeat} trackColor={{ true: c.flame }} />
+              </View>
+              {repeat && (
+                <View style={{ gap: space(3) }}>
+                  <View style={styles.days}>
+                    <Pressable onPress={() => setRepeatDays([])} style={[styles.day, { backgroundColor: repeatDays.length === 0 ? c.ink : c.tile, paddingHorizontal: 12 }]}>
+                      <Text style={[type.label, { color: repeatDays.length === 0 ? c.onInk : c.ink }]}>{t('everyDay')}</Text>
+                    </Pressable>
+                    {WEEKDAYS.map((d) => {
+                      const on = repeatDays.includes(d);
+                      return (
+                        <Pressable key={d} onPress={() => setRepeatDays(on ? repeatDays.filter((x) => x !== d) : [...repeatDays, d].sort())} style={[styles.day, { backgroundColor: on ? c.ink : c.tile }]}>
+                          <Text style={[type.label, { color: on ? c.onInk : c.ink }]}>{t(`wd${d}`)}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <Stepper label={t('repeatUntil')} value={repeatFor} min={1} max={14} onChange={setRepeatFor} />
+                </View>
+              )}
+
+              <View style={[styles.banner, { backgroundColor: c.tile }]}>
+                <Ionicons name="shield-checkmark" size={20} color={c.flame} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[type.bodyStrong, { color: c.ink }]}>{t('guaranteeH')}</Text>
+                  <Note>{t('guaranteeMsg').replace('{c}', String(FEATURE_SETTINGS.guarantee.missedPickupCreditUsd))}</Note>
+                </View>
+              </View>
             </View>
           )}
 
           <Stepper label={t('riders')} value={riders} min={1} max={PRICING.maxRiders} onChange={setRiders} />
 
-          <Button label={timing === 'scheduled' ? t('reserve') : t('request')} trailing={usd(quote.total)} onPress={request} />
+          {covered ? (
+            <View style={[styles.banner, { backgroundColor: c.tile }]}>
+              <Ionicons name="ticket" size={20} color={c.flame} />
+              <View style={{ flex: 1 }}>
+                <Text style={[type.bodyStrong, { color: c.ink }]}>{t('passCovered')}</Text>
+                {cover.extraRiders > 0 && <Note>{t('passExtra').replace('{n}', String(cover.extraRiders)).replace('{p}', usd(cover.fareUsd))}</Note>}
+              </View>
+            </View>
+          ) : flat && !pass ? (
+            <Pressable accessibilityRole="button" onPress={() => router.push('/pass')} style={[styles.banner, { backgroundColor: c.tile }]}>
+              <Ionicons name="ticket-outline" size={20} color={c.flame} />
+              <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('passPromo').replace('{p}', String(FEATURE_SETTINGS.passes[0].priceUsd))}</Text>
+              <Text style={[type.label, { color: c.flame, fontSize: 14 }]}>{t('passSeeOptions')} ›</Text>
+            </Pressable>
+          ) : null}
+
+          <Button
+            label={joined ? t('joinedBoat').replace('{m}', String(minsUntil(joined.departsAt))) : timing === 'scheduled' ? t('reserve') : t('request')}
+            trailing={usd(price)}
+            disabled={blocked}
+            onPress={request}
+          />
           <Note center>{timing === 'scheduled' && flat ? t('feeNote') : t('note')}</Note>
         </View>
       </ScrollView>
@@ -330,6 +519,24 @@ export default function RideScreen() {
                 <Pressable key={d.id} onPress={() => chooseDock(d.id)} style={[styles.sheetItem, on && { backgroundColor: c.tile }]}>
                   <Ionicons name="boat-outline" size={18} color={c.ink} />
                   <Text style={[type.body, { color: c.ink, fontWeight: on ? '700' : '500' }]}>{d.name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={saving} transparent animationType="fade" onRequestClose={() => setSaving(false)}>
+        <Pressable style={styles.scrim} onPress={() => setSaving(false)}>
+          <View style={[styles.sheet, { backgroundColor: c.bg }]}>
+            <Text style={[type.h2, { color: c.ink }]}>{t('savePlace')}</Text>
+            <Note>{dockName(to)}</Note>
+            {(['home', 'dive', 'food', 'star'] as const).map((icon) => {
+              const label = t({ home: 'placeHome', dive: 'placeDive', food: 'placeFood', star: 'placeStar' }[icon]);
+              return (
+                <Pressable key={icon} onPress={() => saveCurrent(label, icon)} style={styles.sheetItem}>
+                  <Ionicons name={PLACE_ICONS[icon]} size={18} color={c.ink} />
+                  <Text style={[type.body, { color: c.ink }]}>{label}</Text>
                 </Pressable>
               );
             })}
@@ -364,6 +571,11 @@ const styles = StyleSheet.create({
   dotTo: { width: 9, height: 9 },
   mileNote: { borderRadius: radius.sm, padding: space(3) },
   opt: { flexDirection: 'row', alignItems: 'center', gap: space(3), padding: space(3), borderRadius: radius.md, borderWidth: 2 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
+  banner: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.md, padding: space(3) },
+  seaDot: { width: 12, height: 12, borderRadius: 6 },
+  days: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  day: { minWidth: 40, height: 34, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8 },
   slot: { borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 10 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: space(3) },
   fab: { position: 'absolute', right: space(4), bottom: space(4), flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: radius.pill, paddingHorizontal: 18, paddingVertical: 13, shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6 },

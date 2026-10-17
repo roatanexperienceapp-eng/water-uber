@@ -46,12 +46,45 @@ five server functions. The app never sets a price or a status itself.
    npx supabase link --project-ref YOUR_PROJECT_REF
    npx supabase db push                  # creates all tables and rules
    npx supabase db push --include-seed   # loads docks, portals and listings
-   npx supabase functions deploy         # deploys all five functions
+   npx supabase functions deploy         # deploys all eight functions
    npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    ```
 4. **Authentication → Providers → Email**: keep it on; the app signs people in with a 6-digit email code.
    In **Authentication → Email Templates → Magic Link**, include `{{ .Token }}` so the email shows the code.
 5. Put the project URL and publishable key in `.env` (see `.env.example`).
+6. **Turn on the pickup watchdog** (guaranteed pickups, repeat rides, shared boats depend on it). In
+   **Database → Extensions** enable `pg_cron` and `pg_net`, then run once in the SQL editor:
+   ```sql
+   select cron.schedule('pickup-watchdog', '* * * * *', $$
+     select net.http_post(
+       url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/pickup-watchdog',
+       headers := jsonb_build_object('apikey', 'YOUR_SB_SECRET_KEY', 'Content-Type', 'application/json'),
+       body := '{}'::jsonb)
+   $$);
+   ```
+   Every minute it re-assigns rides whose captain hasn't confirmed 15 min before pickup, credits guests
+   for missed pickups, creates the next 24 h of repeat rides, and closes shared boats that have left.
+   Store the secret key in Vault rather than pasting it if you prefer (`vault.create_secret`).
+
+## Week-stay features (the 7)
+
+All business numbers live in `supabase/functions/_shared/features.ts` → `FEATURE_SETTINGS`. Change a value
+there, redeploy functions and ship an app update; app and server read the same file.
+
+| # | Feature | Server side | App side |
+|---|---|---|---|
+| 1 | Guaranteed pickup | `confirm_ride`, `run_pickup_watchdog`, `ride_credits` | badge on Ride/Checkout, status on Confirmation/Trips, captain "On my way" |
+| 2 | Safe night rides | `create-ride` blocks after last boat; `needs_lit_boat`; `boats.has_lights` checked in `accept_ride` | night banner, land-taxi button, captain sees "lights required" |
+| 3 | Shared-seat matching | `shared_boats`, `take_shared_seats` | "Shared boats leaving soon" cards on Ride |
+| 4 | Week pass / ride packs | `guest_passes`, `create-pass`, `consume_pass_ride` | `/pass`, "Covered by your pass" on Ride/Checkout |
+| 5 | Repeat rides + saved places | `repeat_rides`, `create-repeat-ride`, `saved_places` | place chips + save on Ride, repeat switch, pause/resume on Trips, Account |
+| 6 | Sea alerts from captains | `sea_reports`, `report_sea` (3 h expiry) | sea strip on Ride; captain buttons per coast |
+| 7 | Boat booked with the activity | `rides.booking_id`, ownership check in `create-ride` | "Add a water taxi there and back" on activity checkout |
+
+Mark which boats have running lights (only those get night rides):
+```sql
+update boats set has_lights = true where name in ('Water taxi 03', 'Water taxi 07');
+```
 
 ## Day-to-day operations (Supabase dashboard → SQL editor)
 
@@ -93,12 +126,15 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
   but the processor-specific calls are marked `TODO(payments)`. Pick the processor first (docs/DECISIONS.md).
 - **Push notifications** to captains for new rides. Today the captain app refreshes; add Expo push next.
 - **Refunds** after a cancellation are manual from the processor dashboard.
+- **Share-my-ride page.** The app creates a secret link (`islandride.app/track/<token>`) and the database
+  answers `shared_ride_status(token)`, but the small public web page at that address isn't hosted yet.
+- **Pass ride refunds.** Cancelling a ride paid by a 10-ride pack doesn't give the ride back yet.
 
 ## Running the tests
 
 ```bash
 npm i -D @electric-sql/pglite   # once
-npm run test:db                 # 35 database checks in an embedded Postgres
-npm run test:server             # 9 pricing checks (needs Deno: https://deno.com)
+npm run test:db                 # 71 database checks in an embedded Postgres (security + week-stay features)
+npm run test:server             # 16 pricing and feature-rule checks (needs Deno: https://deno.com)
 npm run typecheck
 ```

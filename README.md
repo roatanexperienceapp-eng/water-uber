@@ -34,4 +34,6 @@ npm run test:server     # pricing checks (needs Deno)
 | `src/lib/search.ts` | Business and product search |
 | `src/data/catalogue.ts` | 14 portals and 157 Roatán listings (seeds the database) |
 | `supabase/functions/_shared/pricing.ts` | **The only place prices are defined** |
+| `supabase/functions/_shared/features.ts` | Week-stay feature rules and owner settings (pass prices, credits, night hours) |
+| `src/lib/stay.ts` | Passes, shared seats, sea reports, saved places, repeat rides |
 | `supabase/migrations/` | Database tables and security rules |

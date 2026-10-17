@@ -7,13 +7,14 @@ import { fail, json, readBody } from '../_shared/http.ts';
 interface Body {
   rideId?: string;
   bookingId?: string;
+  passId?: string;
 }
 
 export default {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
     if (req.method !== 'POST') return fail(405, 'method_not_allowed', 'Use POST');
     const b = await readBody<Body>(req);
-    if (!b || !!b.rideId === !!b.bookingId) return fail(400, 'bad_body', 'Send exactly one of rideId or bookingId');
+    if (!b || [b.rideId, b.bookingId, b.passId].filter(Boolean).length !== 1) return fail(400, 'bad_body', 'Send exactly one of rideId, bookingId or passId');
     const uid = ctx.userClaims!.id;
 
     let amount: number | null = null;
@@ -22,6 +23,11 @@ export default {
       if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Ride not found');
       if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This ride is not awaiting payment');
       amount = Number(data.fare_usd);
+    } else if (b.passId) {
+      const { data } = await ctx.supabaseAdmin.from('guest_passes').select('guest_id, status, price_usd').eq('id', b.passId).single();
+      if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Pass not found');
+      if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This pass is not awaiting payment');
+      amount = Number(data.price_usd);
     } else {
       const { data } = await ctx.supabaseAdmin.from('bookings').select('guest_id, status, total_usd').eq('id', b.bookingId!).single();
       if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Booking not found');
@@ -34,7 +40,7 @@ export default {
     const provider = Deno.env.get('PAYMENT_PROVIDER') ?? 'unconfigured';
     const { data: payment, error } = await ctx.supabaseAdmin
       .from('payments')
-      .insert({ guest_id: uid, ride_id: b.rideId ?? null, booking_id: b.bookingId ?? null, amount_usd: amount, provider })
+      .insert({ guest_id: uid, ride_id: b.rideId ?? null, booking_id: b.bookingId ?? null, pass_id: b.passId ?? null, amount_usd: amount, provider })
       .select()
       .single();
     if (error) return fail(500, 'insert_failed', error.message);

@@ -61,6 +61,20 @@ export interface Ride {
   createdAt: string;
   captainName?: string;
   captainWhatsApp?: string;
+  /** When the boat should be at the dock. */
+  pickupAt?: string;
+  /** Captain confirmed he is on the way (guaranteed pickup). */
+  captainConfirmed?: boolean;
+  /** Paid by a ride pass. */
+  coveredByPass?: boolean;
+  /** Night ride: only boats with running lights. */
+  needsLitBoat?: boolean;
+  /** Linked tour/dive/dinner booking. */
+  bookingId?: string;
+  /** Shared boat this rider joined. */
+  sharedBoatId?: string;
+  /** Part of a repeat ride. */
+  repeatId?: string;
 }
 
 export interface Booking {

@@ -37,7 +37,7 @@ await db.exec(`
   grant usage on schema public, auth to anon, authenticated, service_role;
   grant execute on function auth.uid() to anon, authenticated, service_role;
 `);
-await db.exec(readFileSync(path.join(root, 'migrations/20261008000000_init.sql'), 'utf8'));
+for (const f of (await import('node:fs')).readdirSync(path.join(root, 'migrations')).sort()) await db.exec(readFileSync(path.join(root, 'migrations', f), 'utf8'));
 await db.exec(`
   -- Same as Supabase's defaults: full table privileges for API roles; Row Level Security is the only guard.
   grant all on all tables in schema public to anon, authenticated, service_role;

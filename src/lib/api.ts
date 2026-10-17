@@ -1,4 +1,6 @@
 import { quoteFare, type FareInput } from '../../supabase/functions/_shared/pricing.ts';
+import { nightMode, passCovers } from '../../supabase/functions/_shared/features.ts';
+import { demoActivePass, demoUsePassRide } from '@/lib/stay';
 import { DEMO_MODE } from '@/config';
 import { supabase } from '@/lib/supabase';
 import { demoBoats } from '@/lib/demoFleet';
@@ -34,6 +36,13 @@ function toRide(r: Row): Ride {
     miles: Number(r.miles),
     status: r.status as Ride['status'],
     createdAt: String(r.created_at),
+    pickupAt: (r.pickup_at as string) ?? undefined,
+    captainConfirmed: !!r.captain_confirmed_at,
+    coveredByPass: !!r.pass_id,
+    needsLitBoat: !!r.needs_lit_boat,
+    bookingId: (r.booking_id as string) ?? undefined,
+    sharedBoatId: (r.shared_boat_id as string) ?? undefined,
+    repeatId: (r.repeat_id as string) ?? undefined,
   };
 }
 
@@ -95,11 +104,19 @@ export interface RideRequest extends FareInput {
   scheduledFor?: string;
   hasKids: boolean;
   needsTowels: boolean;
+  usePass?: boolean;
+  bookingId?: string;
 }
 
 export async function createRide(req: RideRequest): Promise<Ride> {
   if (!supabase) {
     const q = quoteFare(req);
+    const at = req.scheduledFor ? new Date(req.scheduledFor) : new Date();
+    if (nightMode(at) === 'boats_closed') throw new Error('boats_closed');
+    const pass = req.usePass === false ? null : demoActivePass();
+    const cover = passCovers(pass, { from: req.from, to: req.to, riders: req.riders, at });
+    const covered = cover.covered;
+    if (covered) demoUsePassRide();
     const ride: Ride = {
       id: newId(),
       from: req.from,
@@ -110,10 +127,14 @@ export async function createRide(req: RideRequest): Promise<Ride> {
       scheduledFor: req.scheduledFor,
       hasKids: req.hasKids,
       needsTowels: req.needsTowels,
-      fareUsd: q.total,
+      fareUsd: covered ? cover.fareUsd : q.total,
       miles: q.miles,
-      status: 'awaiting_payment',
+      status: covered && cover.fareUsd === 0 ? 'paid' : 'awaiting_payment',
       createdAt: new Date().toISOString(),
+      pickupAt: at.toISOString(),
+      coveredByPass: covered,
+      needsLitBoat: nightMode(at) === 'night',
+      bookingId: req.bookingId,
     };
     writeJSON(RIDES_KEY, [ride, ...readJSON<Ride[]>(RIDES_KEY, [])]);
     return ride;
@@ -127,6 +148,8 @@ export async function createRide(req: RideRequest): Promise<Ride> {
     scheduledFor: req.scheduledFor,
     hasKids: req.hasKids,
     needsTowels: req.needsTowels,
+    usePass: req.usePass,
+    bookingId: req.bookingId,
   });
   return toRide(ride);
 }
@@ -220,7 +243,7 @@ export async function bookingContact(id: string): Promise<{ name: string; whatsa
 
 // ---------- Payments ----------
 
-export type PayTarget = { rideId: string } | { bookingId: string };
+export type PayTarget = { rideId: string } | { bookingId: string } | { passId: string };
 
 /**
  * Starts a payment for a ride or booking. Live mode asks the server to create the payment (the server
@@ -230,9 +253,13 @@ export type PayTarget = { rideId: string } | { bookingId: string };
 export async function startPayment(target: PayTarget): Promise<{ paymentId: string; amountUsd: number }> {
   if (!supabase) {
     if ('rideId' in target) {
-      const rides = readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.id === target.rideId ? { ...r, status: 'accepted' as const } : r));
+      const rides = readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.id === target.rideId ? { ...r, status: 'paid' as const } : r));
       writeJSON(RIDES_KEY, rides);
       return { paymentId: `DEMO-${target.rideId}`, amountUsd: rides.find((r) => r.id === target.rideId)?.fareUsd ?? 0 };
+    }
+    if ('passId' in target) {
+      const { demoActivatePass } = await import('@/lib/stay');
+      return demoActivatePass(target.passId);
     }
     const list = readJSON<Booking[]>(BOOKINGS_KEY, []).map((b) => (b.id === target.bookingId ? { ...b, status: 'paid' as const } : b));
     writeJSON(BOOKINGS_KEY, list);
@@ -300,7 +327,7 @@ export async function setOnline(boatId: string, online: boolean, pos?: { lon: nu
 }
 
 export async function openRides(): Promise<Ride[]> {
-  if (!supabase) return [];
+  if (!supabase) return readJSON<Ride[]>(RIDES_KEY, []).filter((r) => ['paid', 'accepted', 'onboard'].includes(r.status)).reverse();
   const { data, error } = await supabase
     .from('rides')
     .select('*')
@@ -310,14 +337,30 @@ export async function openRides(): Promise<Ride[]> {
   return (data ?? []).map(toRide);
 }
 
+function demoUpdateRide(id: string, patch: Partial<Ride>) {
+  writeJSON(RIDES_KEY, readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.id === id ? { ...r, ...patch } : r)));
+}
+
 export async function acceptRide(id: string): Promise<void> {
-  if (!supabase) return;
+  if (!supabase) {
+    // Same rule as the server: accepting within the confirm window counts as confirming.
+    const r = readJSON<Ride[]>(RIDES_KEY, []).find((x) => x.id === id);
+    const soon = !r?.pickupAt || Date.parse(r.pickupAt) - Date.now() <= 15 * 60_000;
+    return demoUpdateRide(id, { status: 'accepted', captainConfirmed: soon });
+  }
   const { error } = await supabase.rpc('accept_ride', { p_ride_id: id });
   if (error) throw new Error(error.message);
 }
 
+/** Guaranteed pickup: the captain taps "On my way" before the confirm deadline. */
+export async function confirmRide(id: string): Promise<void> {
+  if (!supabase) return demoUpdateRide(id, { captainConfirmed: true });
+  const { error } = await supabase.rpc('confirm_ride', { p_ride_id: id });
+  if (error) throw new Error(error.message);
+}
+
 export async function advanceRide(id: string, status: 'onboard' | 'completed'): Promise<void> {
-  if (!supabase) return;
+  if (!supabase) return demoUpdateRide(id, { status });
   const { error } = await supabase.rpc('advance_ride', { p_ride_id: id, p_status: status });
   if (error) throw new Error(error.message);
 }
