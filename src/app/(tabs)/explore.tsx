@@ -10,6 +10,7 @@ import { CrowdMeter } from '@/components/CrowdMeter';
 import { LanguageButton } from '@/components/LanguageButton';
 import { ShipButton } from '@/components/ShipButton';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
+import { PORTAL_ART } from '@/data/portalArt';
 import { searchListings } from '@/lib/search';
 import { radius, space, type, useTheme } from '@/theme';
 import type { LangCode } from '@/types';
@@ -94,7 +95,11 @@ export default function ExploreScreen() {
             {PORTALS.map((p) => (
               <Pressable key={p.key} accessibilityRole="button" onPress={() => router.push(`/portal/${p.key}`)} style={styles.tile}>
                 <View style={[styles.tileIcon, { backgroundColor: c.tile }]}>
-                  <Text style={styles.tileEmoji}>{p.icon}</Text>
+                  {PORTAL_ART[p.key] ? (
+                    <Image source={PORTAL_ART[p.key]!} style={styles.tileArt} resizeMode="cover" accessibilityIgnoresInvertColors />
+                  ) : (
+                    <Text style={styles.tileEmoji}>{p.icon}</Text>
+                  )}
                 </View>
                 <Text style={[styles.tileLabel, { color: c.ink }]} numberOfLines={2}>
                   {p.names[lang] ?? p.names.en}
@@ -149,7 +154,8 @@ const styles = StyleSheet.create({
   // Round tiles, three per row: big light circle, large icon, label underneath.
   grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space(5) },
   tile: { width: '33.333%', alignItems: 'center', gap: space(2), paddingHorizontal: space(2) },
-  tileIcon: { width: '92%', aspectRatio: 1, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  tileIcon: { width: '92%', aspectRatio: 1, borderRadius: radius.pill, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  tileArt: { width: '100%', height: '100%' },
   tileEmoji: { fontSize: 48, lineHeight: 58 },
   tileLabel: { fontSize: 16, fontWeight: '600', textAlign: 'center', letterSpacing: -0.2 },
   give: { borderRadius: radius.lg, overflow: 'hidden' },
