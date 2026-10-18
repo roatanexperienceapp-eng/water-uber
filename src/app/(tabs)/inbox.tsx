@@ -6,7 +6,6 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Note } from '@/components/ui';
 import { listInbox, markRead, safeInboxPath, type InboxCategory, type InboxMessage } from '@/lib/inbox';
-import { localeFor } from '@/i18n';
 import { radius, space, type, useTheme } from '@/theme';
 
 type Filter = 'all' | InboxCategory;
@@ -24,12 +23,25 @@ const ICON: Record<InboxCategory, keyof typeof Ionicons.glyphMap> = {
   priority: 'alert-circle',
 };
 
-function ago(iso: string, lang: string): string {
-  const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60_000));
-  const rtf = new Intl.RelativeTimeFormat(localeFor(lang), { numeric: 'auto', style: 'short' });
-  if (m < 60) return rtf.format(-m, 'minute');
-  if (m < 48 * 60) return rtf.format(-Math.round(m / 60), 'hour');
-  return rtf.format(-Math.round(m / 1440), 'day');
+// Our own wording on purpose: iPhones (Hermes engine) have no Intl.RelativeTimeFormat, and
+// calling it crashed this screen in Expo Go. Same text on every phone and in every language.
+const AGO: Record<string, [now: string, min: string, hour: string, day: string]> = {
+  en: ['just now', '{n} min ago', '{n} h ago', '{n} d ago'],
+  es: ['ahora', 'hace {n} min', 'hace {n} h', 'hace {n} d'],
+  fr: ["à l'instant", 'il y a {n} min', 'il y a {n} h', 'il y a {n} j'],
+  de: ['gerade eben', 'vor {n} Min.', 'vor {n} Std.', 'vor {n} T.'],
+  pt: ['agora', 'há {n} min', 'há {n} h', 'há {n} d'],
+  it: ['ora', '{n} min fa', '{n} h fa', '{n} g fa'],
+  zh: ['刚刚', '{n}分钟前', '{n}小时前', '{n}天前'],
+};
+
+function ago(iso: string, lang: string, now = Date.now()): string {
+  const w = AGO[lang] ?? AGO.en;
+  const m = Math.max(0, Math.round((now - Date.parse(iso)) / 60_000));
+  if (m < 1) return w[0];
+  if (m < 60) return w[1].replace('{n}', String(m));
+  if (m < 48 * 60) return w[2].replace('{n}', String(Math.round(m / 60)));
+  return w[3].replace('{n}', String(Math.round(m / 1440)));
 }
 
 export default function Inbox() {
