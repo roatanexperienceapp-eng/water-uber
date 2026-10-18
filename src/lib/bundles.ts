@@ -1,3 +1,4 @@
+import { activityTotalUsd } from '../../supabase/functions/_shared/tours.ts';
 import { passDefinition, type PassId } from '../../supabase/functions/_shared/features.ts';
 import { BUNDLE_SETTINGS, bundleQuote, type BundleQuote, type BundleTourPrice } from '../../supabase/functions/_shared/bundle.ts';
 import { LISTINGS } from '@/data/catalogue';
@@ -69,7 +70,7 @@ export async function createPackage(passId: PassId, picked: PickedTour[]): Promi
       const l = LISTINGS.find((x) => x.id === p.listingId)!;
       return {
         id: newId(), listingId: l.id, listingName: l.name, date: p.date, time: p.time, quantity: pass.riders,
-        totalUsd: l.unit === 'person' ? l.priceUsd! * pass.riders : l.priceUsd!, status: 'awaiting_payment', createdAt: new Date().toISOString(), ticketCode: newId(),
+        totalUsd: activityTotalUsd(l.priceUsd!, l.unit, pass.riders), status: 'awaiting_payment', createdAt: new Date().toISOString(), ticketCode: newId(),
       };
     });
     writeJSON('demo.bookings', [...bookings, ...readJSON<Booking[]>('demo.bookings', [])]);

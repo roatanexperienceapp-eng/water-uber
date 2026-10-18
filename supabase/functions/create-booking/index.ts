@@ -1,6 +1,7 @@
 // POST /functions/v1/create-booking
 // Instant listings (partner + fixed price): server computes the total, status awaiting_payment.
 // Request listings: status requested; the concierge team confirms price/availability, then sets quoted.
+import { activityTotalUsd } from '../_shared/tours.ts';
 import { withSupabase } from 'npm:@supabase/server@1';
 import { fail, json, readBody } from '../_shared/http.ts';
 import { CRUISE_SETTINGS, fitsPortTime, roatanDate, roatanInstant, splitDeadline, type PortId } from '../_shared/cruise.ts';
@@ -39,7 +40,7 @@ export default {
     // deno-lint-ignore no-explicit-any
     const partner = !!(listing as any).operators?.is_partner;
     const instant = listing.booking === 'instant' && partner && listing.price_usd != null;
-    const total = instant ? (listing.unit === 'boat' ? Number(listing.price_usd) : Number(listing.price_usd) * b.quantity) : null;
+    const total = instant ? activityTotalUsd(Number(listing.price_usd), listing.unit, b.quantity) : null;
 
     const start = roatanInstant(b.date, b.time);
     if (start.getTime() < Date.now()) return fail(400, 'past_time', 'That time has passed');

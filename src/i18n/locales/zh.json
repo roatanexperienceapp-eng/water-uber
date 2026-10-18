@@ -589,5 +589,22 @@
  "pkgSubtotal": "折前价",
  "pkgOnePayment": "一次付款即确认乘船卡和所有活动，票券显示在行程中。",
  "pkgOutside": "每项活动须在乘船卡有效期内，请换一天。",
- "pkgToursBooked": "活动也已预订，票券在行程中。"
+ "pkgToursBooked": "活动也已预订，票券在行程中。",
+ "boatsNeeded": "需要 {n} 条船 · 每船最多 {s} 人",
+ "captainsH": "我们的船长",
+ "captainsSub": "每一趟水上出租车和我们自营的浮潜、钓鱼行程，都由以下船长驾驶。",
+ "captainsMenuSub": "谁为您开船，以及我们的行程",
+ "captainsCardS": "{n} 位船长 · 浮潜 {s} 起 · 钓鱼 {f} 起",
+ "certified": "已认证",
+ "licencePending": "执照审核中",
+ "role_taxi": "水上出租车",
+ "role_fishing": "钓鱼",
+ "role_snorkel": "浮潜",
+ "ourToursH": "我们的浮潜和钓鱼行程",
+ "withOurCaptains": "由我们自己的船长带队。认识他们",
+ "helmH": "当班船长",
+ "helmPick": "今天谁当班？",
+ "helmChange": "更换船长",
+ "helmUnverified": "在办公室核实您的执照之前，您不能接付费订单。",
+ "helmUnlinked": "您的账户尚未关联船长身份。请联系办公室关联账户并核实执照。"
 }

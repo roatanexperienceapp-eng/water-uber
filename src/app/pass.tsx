@@ -1,3 +1,4 @@
+import { activityTotalUsd, boatsFor } from '../../supabase/functions/_shared/tours.ts';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -173,9 +174,9 @@ export default function PassScreen() {
                         <Note>
                           {o.priceUsd == null
                             ? t('pkgComingSoon')
-                            : o.unit === 'person'
-                              ? `${usd(o.priceUsd)} × ${size} = ${usd(o.priceUsd * size)}`
-                              : `${usd(o.priceUsd)} ${t('perBoat')}`}
+                            : o.unit === 'boat'
+                              ? `${usd(o.priceUsd)} ${t('perBoat')}${boatsFor(size) > 1 ? ` × ${boatsFor(size)} = ${usd(activityTotalUsd(o.priceUsd, o.unit, size))}` : ''}`
+                              : `${usd(o.priceUsd)} × ${size} = ${usd(o.priceUsd * size)}`}
                         </Note>
                       </View>
                     </Pressable>
@@ -223,7 +224,7 @@ export default function PassScreen() {
                 <Text style={[type.body, { color: c.ink, flex: 1 }]} numberOfLines={1}>
                   {o.name} · {islandDay(roatanInstant(tr.date, tr.time), i18n.language)}
                 </Text>
-                <Text style={[type.bodyStrong, { color: c.ink }]}>{usd(o.unit === 'person' ? o.priceUsd! * size : o.priceUsd!)}</Text>
+                <Text style={[type.bodyStrong, { color: c.ink }]}>{usd(activityTotalUsd(o.priceUsd!, o.unit, size))}</Text>
               </View>
             );
           })}

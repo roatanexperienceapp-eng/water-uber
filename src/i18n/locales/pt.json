@@ -589,5 +589,22 @@
  "pkgSubtotal": "Antes do desconto",
  "pkgOnePayment": "Um só pagamento confirma o passe e os passeios. Ingressos em Viagens.",
  "pkgOutside": "Cada passeio deve ser durante o passe.",
- "pkgToursBooked": "Seus passeios estão reservados. Ingressos em Viagens."
+ "pkgToursBooked": "Seus passeios estão reservados. Ingressos em Viagens.",
+ "boatsNeeded": "Precisa de {n} barco(s) · até {s} pessoas por barco",
+ "captainsH": "Nossos capitães",
+ "captainsSub": "Cada corrida de táxi aquático e cada um dos nossos passeios de snorkel e pesca é feito por um destes capitães.",
+ "captainsMenuSub": "Quem pilota seu barco e nossos passeios",
+ "captainsCardS": "{n} capitães · snorkel a partir de {s} · pesca a partir de {f}",
+ "certified": "Certificado",
+ "licencePending": "Licença em verificação",
+ "role_taxi": "Táxi aquático",
+ "role_fishing": "Pesca",
+ "role_snorkel": "Snorkel",
+ "ourToursH": "Nossos passeios de snorkel e pesca",
+ "withOurCaptains": "Feito por um dos nossos capitães. Conheça-os",
+ "helmH": "No leme",
+ "helmPick": "Quem está no leme hoje?",
+ "helmChange": "Trocar capitão",
+ "helmUnverified": "Você não pode aceitar corridas pagas até o escritório verificar sua licença.",
+ "helmUnlinked": "Sua conta ainda não está vinculada a um capitão. Peça ao escritório para vinculá-la e verificar sua licença."
 }

@@ -45,7 +45,7 @@ await db.exec(`
 await db.exec(readFileSync(path.join(root, 'seed.sql'), 'utf8'));
 
 const count = async (sql) => Number((await db.query(sql)).rows[0].n);
-ok((await count('select count(*) n from listings')) === 157, 'seed: 157 listings');
+ok((await count('select count(*) n from listings')) === 161, 'seed: 161 listings');
 ok((await count('select count(*) n from portals')) === 14, 'seed: 14 portals');
 ok((await count("select count(*) n from docks where in_flat_zone")) === 5, 'seed: 5 flat-zone docks');
 
@@ -60,6 +60,9 @@ await db.query("update profiles set role = 'captain', full_name = 'Capt. One', w
 await db.query("update profiles set role = 'captain', full_name = 'Capt. Two', whatsapp = '+50499990002' where id = $1", [CAPT_2]);
 const boat1 = (await db.query("insert into boats (captain_id, name, kind, seats) values ($1, 'Taxi 1', 'taxi', 8) returning id", [CAPT_1])).rows[0].id;
 await db.query("insert into boats (captain_id, name, kind, seats) values ($1, 'Taxi 2', 'taxi', 4)", [CAPT_2]);
+// Both captains are verified crew (licence checked by the office). See crew.test.mjs for the refusals.
+await db.query("update crew set profile_id = $1, license_no = 'HN-T1', license_expires = '2099-12-31', verified_at = now() where id = 'fletcher'", [CAPT_1]);
+await db.query("update crew set profile_id = $1, license_no = 'HN-T2', license_expires = '2099-12-31', verified_at = now() where id = 'jordan'", [CAPT_2]);
 
 // Run a statement as a signed-in user (RLS on).
 async function as(uid, sql, params = []) {
@@ -87,7 +90,7 @@ ok((await as(GUEST_A, 'select * from rides')).rows.length === 1, 'guest A sees o
 ok((await as(GUEST_B, 'select * from rides')).rows.length === 0, 'guest B cannot see guest A ride');
 ok((await as(CAPT_1, 'select * from rides')).rows.length === 0, 'captain cannot see unpaid rides');
 ok((await as(GUEST_A, 'select * from operators')).rows.length === 0, 'guests cannot read operator contacts');
-ok((await as(GUEST_A, 'select * from listings')).rows.length === 157, 'anyone can read the catalogue');
+ok((await as(GUEST_A, 'select * from listings')).rows.length === 161, 'anyone can read the catalogue');
 
 // ---- Guests cannot tamper with their own ride or fake payments ----
 await as(GUEST_A, 'update rides set fare_usd = 0, status = $2 where id = $1', [ride.id, 'paid']);
@@ -125,6 +128,7 @@ ok((await as(CAPT_2, 'select * from rides')).rows.length === 0, "captain 2 no lo
 // ---- Contact unlock ----
 const contact = (await as(GUEST_A, 'select * from ride_contact($1)', [ride.id])).rows[0];
 ok(contact?.whatsapp === '+50499990001', 'paying guest gets the captain WhatsApp after acceptance');
+ok(contact?.captain_name === 'Captain Fletcher', 'guest sees the crew name, not the account name');
 ok((await as(GUEST_B, 'select * from ride_contact($1)', [ride.id])).rows.length === 0, 'another guest gets nothing');
 
 // ---- State machine ----

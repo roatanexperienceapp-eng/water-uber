@@ -589,5 +589,22 @@
  "pkgSubtotal": "Prima dello sconto",
  "pkgOnePayment": "Un solo pagamento conferma pass e tour. Biglietti in Viaggi.",
  "pkgOutside": "Ogni tour deve essere durante il pass.",
- "pkgToursBooked": "Anche i tour sono prenotati. Biglietti in Viaggi."
+ "pkgToursBooked": "Anche i tour sono prenotati. Biglietti in Viaggi.",
+ "boatsNeeded": "Servono {n} barca/e · fino a {s} persone per barca",
+ "captainsH": "I nostri capitani",
+ "captainsSub": "Ogni corsa in taxi d’acqua e ogni nostro tour di snorkeling e pesca è condotto da uno di questi capitani.",
+ "captainsMenuSub": "Chi guida la tua barca e i nostri tour",
+ "captainsCardS": "{n} capitani · snorkeling da {s} · pesca da {f}",
+ "certified": "Certificato",
+ "licencePending": "Licenza in verifica",
+ "role_taxi": "Taxi d’acqua",
+ "role_fishing": "Pesca",
+ "role_snorkel": "Snorkeling",
+ "ourToursH": "I nostri tour di snorkeling e pesca",
+ "withOurCaptains": "Condotto da uno dei nostri capitani. Conoscili",
+ "helmH": "Al timone",
+ "helmPick": "Chi è al timone oggi?",
+ "helmChange": "Cambia capitano",
+ "helmUnverified": "Non puoi accettare corse pagate finché l’ufficio non verifica la tua licenza.",
+ "helmUnlinked": "Il tuo account non è ancora collegato a un capitano. Chiedi all’ufficio di collegarlo e verificare la licenza."
 }

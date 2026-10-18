@@ -2,6 +2,9 @@
 // "Isla", the in-app assistant. The Anthropic API key lives only here (secret ANTHROPIC_API_KEY).
 import { withSupabase } from 'npm:@supabase/server@1';
 import { fail, json, readBody } from '../_shared/http.ts';
+import { BUNDLE_SETTINGS } from '../_shared/bundle.ts';
+import { FEATURE_SETTINGS } from '../_shared/features.ts';
+import { TOUR_SETTINGS } from '../_shared/tours.ts';
 
 interface Turn {
   role: 'user' | 'assistant';
@@ -42,7 +45,7 @@ export default {
     if (!allowed) return fail(429, 'daily_limit', 'Daily assistant limit reached');
 
     const language = LANG_NAMES[b?.language ?? 'en'] ?? 'English';
-    const system = `You are Isla, a friendly, brief assistant inside a Roatán water taxi and island guide app. Reply in ${language}, 2-4 short sentences, plain text. Do not invent business names, prices, opening hours or live schedules you were not given; say the app's listings have current details. For medical emergencies, tell the guest to call 911 first.\n\n${FACTS}`;
+    const system = `You are Isla, a friendly, brief assistant inside a Roatán water taxi and island guide app. Reply in ${language}, 2-4 short sentences, plain text. Do not invent business names, prices, opening hours or live schedules you were not given; say the app's listings have current details. For medical emergencies, tell the guest to call 911 first.\n\n${FACTS}\n\n${await ourFacts(ctx.supabaseAdmin)}`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -59,3 +62,26 @@ export default {
     return json({ text });
   }),
 };
+
+/** Our own tours, prices and captains, read live so Isla never quotes an old price. */
+// deno-lint-ignore no-explicit-any
+async function ourFacts(db: any): Promise<string> {
+  const [{ data: tours }, { data: crew }] = await Promise.all([
+    db.from('listings').select('name, price_text, portal_key').eq('ours', true).eq('active', true).eq('booking', 'instant').not('price_text', 'is', null).order('sort'),
+    db.rpc('crew_public'),
+  ]);
+  const p = FEATURE_SETTINGS.passPricing;
+  const d = BUNDLE_SETTINGS.discountPctByTours;
+  const lines = [
+    `Our own tours (book and pay in the app's Explore tab):`,
+    ...((tours ?? []) as { name: string; price_text: string }[]).map((t) => `- ${t.name}: ${t.price_text}`),
+    `- Per-boat charters take up to ${TOUR_SETTINGS.seatsPerBoat} people per boat; bigger groups need more boats.`,
+    `Week pass: unlimited West End-West Bay water taxi rides, $${p.perPersonPerWeek} per person per week, groups of ${p.minGroup}-${p.maxGroup}; two weeks costs double.`,
+    `Packages: a week pass plus one of our tours is ${d[1]}% off everything; pass + a snorkel tour + a fishing tour is ${d[2]}% off. Build one on the Passes page.`,
+  ];
+  const names = ((crew ?? []) as { display_name: string; certified: boolean }[]);
+  if (names.length) {
+    lines.push(`Our captains: ${names.map((c) => c.display_name + (c.certified ? ' (certified)' : '')).join(', ')}. Only call a captain certified if marked (certified) here. You cannot pick a specific captain for a ride.`);
+  }
+  return lines.join('\n');
+}

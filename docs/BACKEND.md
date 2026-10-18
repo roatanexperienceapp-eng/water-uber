@@ -90,13 +90,25 @@ Ride pass prices (owner prices): **$35 per person per week, any group from 2 to 
 (2 people $70 / $140 … 3 people $105 / $210 … 12 people $420 / $840). Change `passPricing` and `passes` in
 `supabase/functions/_shared/features.ts`.
 
+**Your tours** (`src/data/catalogue.ts`, then `node scripts/generate-seed.mjs`):
+- Snorkel: Shipwreck $95 pp · Pigeon Key nurse shark swim $190 pp · Blue Channel $30 pp · Dolphin show $45 pp · Cayos Cochinos (full day) $190 pp
+- Fishing: Bottom fishing $60 pp · Deep sea trolling, half day, $350 per boat (up to 6 people per boat → 8 people pay for 2 boats; `TOUR_SETTINGS.seatsPerBoat` in `supabase/functions/_shared/tours.ts`)
+
 **Packages** (`supabase/functions/_shared/bundle.ts` → `BUNDLE_SETTINGS`): a pass plus your own tours, bought in
-one payment. Add 1 tour → **10% off everything**, snorkel + fishing → **15% off**. Package tours: Shipwreck
-snorkel, Dolphins & mangroves, and Our fishing tour. A tour only appears as buyable once it has a fixed price:
+one payment. Add 1 tour → **10% off everything**, snorkel + fishing → **15% off**. Every tour above can go in a package
+(one snorkel + one fishing per package). Prices always come from the database at checkout, never from the phone.
+
+**Captains** (`supabase/functions/_shared/crew.ts` → table `crew`): Captain Fletcher, Captain Jordan, Captain Patrick,
+Captain Big John, Gordo, David, Justin, Captain Quinn, Captain Darcy, Captain Carter — water taxi, fishing and snorkel.
+Guests see names on the "Our captains" page, in Explore, on your tours and on their ride. The **Certified** badge only
+shows once the office has entered a licence number + expiry; a captain cannot accept paying rides without it, and the badge
+disappears the day after the licence expires:
 ```sql
-update listings set booking = 'instant', price_usd = 120, unit = 'person' where id = 'fish-our-fishing-tour';
+-- as an admin, once per captain (from the Supabase SQL editor or the admin tools):
+select verify_crew_license('fletcher', '<licence number>', '2027-06-30');
+-- link the captain's app account after he signs in:
+update crew set profile_id = (select id from auth.users where email = 'fletcher@example.com') where id = 'fletcher';
 ```
-(and set the same price in `src/data/catalogue.ts` so the app shows it).
 
 Mark which boats have running lights (only those get night rides):
 ```sql
@@ -151,7 +163,7 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 
 ```bash
 npm i -D @electric-sql/pglite   # once
-npm run test:db                 # 179 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account, packages)
+npm run test:db                 # 197 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account, packages, captains)
 npm run test:server             # 24 pricing, feature, payment and cruise-rule checks (needs Deno: https://deno.com)
 npm run typecheck
 ```

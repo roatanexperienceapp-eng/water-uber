@@ -1,6 +1,7 @@
 // Packages: a water taxi pass + your own snorkel and/or fishing tour, at a discount.
 // Pure TypeScript shared by the app (shows the price) and the server (charges it). Owner settings below.
 import { toCents } from './payments.ts';
+import { activityTotalUsd } from './tours.ts';
 
 export const BUNDLE_SETTINGS = {
   /** Discount on the WHOLE package (pass + tours) by number of tours added. OWNER: confirm these. */
@@ -8,8 +9,12 @@ export const BUNDLE_SETTINGS = {
   /** Tours that can be packaged. Only fixed-price tours qualify; a tour without a price is shown as "coming soon". */
   tours: [
     { listingId: 'snork-shipwreck-snorkel-tour', kind: 'snorkel' },
-    { listingId: 'snork-dolphins-mangroves-tour', kind: 'snorkel' },
-    { listingId: 'fish-our-fishing-tour', kind: 'fishing' },
+    { listingId: 'snork-pigeon-key-nurse-sharks', kind: 'snorkel' },
+    { listingId: 'snork-blue-channel', kind: 'snorkel' },
+    { listingId: 'snork-dolphin-show', kind: 'snorkel' },
+    { listingId: 'snork-cayos-cochinos', kind: 'snorkel' },
+    { listingId: 'fish-bottom-fishing', kind: 'fishing' },
+    { listingId: 'fish-deep-sea-trolling', kind: 'fishing' },
   ] as { listingId: string; kind: 'snorkel' | 'fishing' }[],
 } as const;
 
@@ -43,7 +48,7 @@ export function bundleQuote(passPriceUsd: number, groupSize: number, tours: Bund
   const discountPct = BUNDLE_SETTINGS.discountPctByTours[tours.length];
   if (discountPct == null) throw new Error('too_many_tours');
   const passCents = toCents(passPriceUsd);
-  const toursCents = tours.reduce((sum, t) => sum + toCents(t.unit === 'person' ? t.priceUsd * groupSize : t.priceUsd), 0);
+  const toursCents = tours.reduce((sum, t) => sum + toCents(activityTotalUsd(t.priceUsd, t.unit, groupSize)), 0);
   const subtotalCents = passCents + toursCents;
   const discountCents = Math.round((subtotalCents * discountPct) / 100);
   const totalCents = subtotalCents - discountCents;

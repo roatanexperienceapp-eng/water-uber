@@ -589,5 +589,22 @@
  "pkgSubtotal": "Avant remise",
  "pkgOnePayment": "Un seul paiement confirme le pass et chaque sortie. Billets dans Trajets.",
  "pkgOutside": "Chaque sortie doit avoir lieu pendant le pass.",
- "pkgToursBooked": "Vos sorties sont réservées. Billets dans Trajets."
+ "pkgToursBooked": "Vos sorties sont réservées. Billets dans Trajets.",
+ "boatsNeeded": "{n} bateau(x) nécessaire(s) · jusqu’à {s} personnes par bateau",
+ "captainsH": "Nos capitaines",
+ "captainsSub": "Chaque trajet en bateau-taxi et chacune de nos sorties snorkeling et pêche est assurée par l’un de ces capitaines.",
+ "captainsMenuSub": "Qui pilote votre bateau, et nos sorties",
+ "captainsCardS": "{n} capitaines · snorkeling dès {s} · pêche dès {f}",
+ "certified": "Certifié",
+ "licencePending": "Permis en vérification",
+ "role_taxi": "Bateau-taxi",
+ "role_fishing": "Pêche",
+ "role_snorkel": "Snorkeling",
+ "ourToursH": "Nos sorties snorkeling et pêche",
+ "withOurCaptains": "Assuré par l’un de nos capitaines. Faites connaissance",
+ "helmH": "À la barre",
+ "helmPick": "Qui est à la barre aujourd’hui ?",
+ "helmChange": "Changer de capitaine",
+ "helmUnverified": "Vous ne pouvez pas prendre de courses payées tant que le bureau n’a pas vérifié votre permis.",
+ "helmUnlinked": "Votre compte n’est pas encore lié à un capitaine. Demandez au bureau de le lier et de vérifier votre permis."
 }

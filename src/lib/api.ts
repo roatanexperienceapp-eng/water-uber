@@ -1,3 +1,5 @@
+import { crewFor } from '../../supabase/functions/_shared/crew.ts';
+import { activityTotalUsd } from '../../supabase/functions/_shared/tours.ts';
 import { quoteFare, type FareInput } from '../../supabase/functions/_shared/pricing.ts';
 import { nightMode, passCovers } from '../../supabase/functions/_shared/features.ts';
 import { demoActivePass, demoUsePassRide } from '@/lib/stay';
@@ -188,7 +190,7 @@ export async function cancelRide(id: string): Promise<void> {
 
 /** Captain name + WhatsApp. The server only returns it after payment and acceptance. */
 export async function rideContact(id: string): Promise<{ name: string; whatsapp: string } | null> {
-  if (!supabase) return { name: 'Capt. Marlon (demo)', whatsapp: '' };
+  if (!supabase) return { name: crewFor(id).name, whatsapp: '' };
   const { data } = await supabase.rpc('ride_contact', { p_ride_id: id });
   const row = (data as Row[] | null)?.[0];
   return row ? { name: String(row.captain_name ?? ''), whatsapp: String(row.whatsapp ?? '') } : null;
@@ -218,7 +220,7 @@ export async function createBooking(req: BookingRequest): Promise<Booking & { sp
   const { listing } = req;
   if (!supabase) {
     const instant = listing.booking === 'instant' && listing.priceUsd != null;
-    const total = instant ? (listing.unit === 'boat' ? listing.priceUsd! : listing.priceUsd! * req.quantity) : undefined;
+    const total = instant ? activityTotalUsd(listing.priceUsd!, listing.unit, req.quantity) : undefined;
     const b: Booking & { split?: SplitInfo } = {
       ticketCode: newId(),
       shipCallId: req.shipCallId,

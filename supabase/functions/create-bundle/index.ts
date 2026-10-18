@@ -2,6 +2,7 @@
 //   { passType: 'week3', startsAt?: ISO, tours: [{ listingId, date: 'YYYY-MM-DD', time: 'HH:MM' }] }
 // Creates a package: the water taxi pass + the guest's tours, priced on the SERVER with the package discount.
 // Everything is awaiting payment; one payment (create-payment { bundleId }) confirms it all.
+import { activityTotalUsd } from '../_shared/tours.ts';
 import { withSupabase } from 'npm:@supabase/server@1';
 import { FEATURE_SETTINGS, passDefinition, type PassId } from '../_shared/features.ts';
 import { bundleQuote, bundleTour, type BundleTourPrice } from '../_shared/bundle.ts';
@@ -70,7 +71,7 @@ export default {
 
     const rows = b.tours.map((t, i) => ({
       guest_id: uid, listing_id: t.listingId, trip_date: t.date, trip_time: t.time, quantity: pass.riders,
-      total_usd: priced[i].unit === 'person' ? priced[i].priceUsd * pass.riders : priced[i].priceUsd,
+      total_usd: activityTotalUsd(priced[i].priceUsd, priced[i].unit, pass.riders),
       status: 'awaiting_payment', bundle_id: bundle.id,
     }));
     const { error: kerr } = await db.from('bookings').insert(rows);

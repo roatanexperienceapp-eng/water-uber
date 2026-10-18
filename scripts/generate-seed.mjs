@@ -4,10 +4,12 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const cat = readFileSync('src/data/catalogue.ts', 'utf8');
 const geo = readFileSync('supabase/functions/_shared/geo.ts', 'utf8');
+const crewSrc = readFileSync('supabase/functions/_shared/crew.ts', 'utf8');
 const pick = (src, re) => JSON.parse(src.match(re)[1]);
 const portals = pick(cat, /export const PORTALS: Portal\[\] = (\[[\s\S]*?\]);\n\nexport/);
 const listings = pick(cat, /export const LISTINGS: Listing\[\] = (\[[\s\S]*\]);/);
 const docks = pick(geo, /export const DOCKS: Dock\[\] = (\[[\s\S]*?\]);/);
+const crew = pick(crewSrc, /export const CREW: CrewMember\[\] = (\[[\s\S]*?\]);/);
 const zone = pick(geo, /export const FLAT_ZONE: readonly string\[\] = (\[.*?\]);/);
 
 const q = (v) => (v === null || v === undefined ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
@@ -37,5 +39,11 @@ const out = [
     .join(',\n') +
     '\non conflict (id) do update set portal_key = excluded.portal_key, name = excluded.name, area = excluded.area, description = excluded.description, price_usd = excluded.price_usd, price_is_from = excluded.price_is_from, price_text = excluded.price_text, unit = excluded.unit, rating = excluded.rating, reviews = excluded.reviews, phone = excluded.phone, lon = excluded.lon, lat = excluded.lat, tag = excluded.tag, ours = excluded.ours, booking = excluded.booking, sort = excluded.sort, port_pickup = excluded.port_pickup, meeting_text = excluded.meeting_text, duration_minutes = excluded.duration_minutes, updated_at = now();\n',
 ];
+out.push(
+  '-- Captains (names and roles only; licences are entered and verified by the office in the admin tools).',
+  'insert into public.crew (id, display_name, roles, sort) values',
+  crew.map((c, i) => `  (${q(c.id)}, ${q(c.name)}, array[${c.roles.map(q).join(', ')}]::text[], ${i})`).join(',\n') +
+    '\non conflict (id) do update set display_name = excluded.display_name, roles = excluded.roles, sort = excluded.sort;\n',
+);
 writeFileSync('supabase/seed.sql', out.join('\n'));
-console.log(`seed.sql: ${docks.length} docks, ${portals.length} portals, ${listings.length} listings`);
+console.log(`seed.sql: ${docks.length} docks, ${portals.length} portals, ${listings.length} listings, ${crew.length} crew`);

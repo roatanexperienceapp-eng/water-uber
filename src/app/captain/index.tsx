@@ -6,8 +6,11 @@ import { DOCKS } from '../../../supabase/functions/_shared/geo.ts';
 import { FEATURE_SETTINGS, type SeaArea, type SeaState } from '../../../supabase/functions/_shared/features.ts';
 import { LanguageButton } from '@/components/LanguageButton';
 import { Button, Card, Note } from '@/components/ui';
+import { DEMO_MODE } from '@/config';
 import { acceptRide, advanceRide, confirmRide, myBoat, openRides, setOnline } from '@/lib/api';
 import { clock, usd } from '@/lib/format';
+import { CREW } from '../../../supabase/functions/_shared/crew.ts';
+import { demoSetHelm, myHelm, type Helm } from '@/lib/crew';
 import { reportSea } from '@/lib/stay';
 import { useNow } from '@/lib/useNow';
 import { SEA_COLOR } from '@/lib/stayUi';
@@ -27,16 +30,21 @@ export default function Captain() {
   const [msg, setMsg] = useState('');
   const nowDate = useNow(15_000);
   const [reported, setReported] = useState<Partial<Record<SeaArea, SeaState>>>({});
+  const [helm, setHelm] = useState<Helm | null>(null);
+  const loadHelm = useCallback(() => {
+    myHelm().then(setHelm).catch(() => {});
+  }, []);
 
   const load = useCallback(() => {
     openRides().then(setRides).catch(() => {});
   }, []);
   useEffect(() => {
     myBoat().then(setBoat).catch(() => {});
+    loadHelm();
     load();
     const id = setInterval(load, 10_000);
     return () => clearInterval(id);
-  }, [load]);
+  }, [load, loadHelm]);
 
   async function toggle() {
     if (!boat) return;
@@ -81,6 +89,38 @@ export default function Captain() {
           <Text style={[type.h1, { color: c.ink }]}>{t('captain_title')}</Text>
           <LanguageButton />
         </View>
+        {/* Who is at the helm (crew roster). Live: linked by the office; demo: pick a name. */}
+        <Card>
+          {helm?.status === 'ok' ? (
+            <>
+              <Text style={[type.label, { color: c.muted }]}>{t('helmH')}</Text>
+              <View style={styles.helmRow}>
+                <Text style={[type.h2, { color: c.ink, flex: 1 }]}>{helm.crew.name}</Text>
+                {helm.crew.certified ? (
+                  <Text style={[type.label, { color: '#16A34A' }]}>✓ {t('certified')}</Text>
+                ) : (
+                  <Text style={[type.label, { color: c.sos }]}>{t('licencePending')}</Text>
+                )}
+              </View>
+              {!helm.crew.certified && <Note>{t('helmUnverified')}</Note>}
+              {DEMO_MODE && <Button small variant="tile" label={t('helmChange')} onPress={() => { demoSetHelm(null); loadHelm(); }} />}
+            </>
+          ) : helm?.status === 'pick' ? (
+            <>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>{t('helmPick')}</Text>
+              <View style={styles.helmWrap}>
+                {CREW.filter((m) => m.roles.includes('taxi')).map((m) => (
+                  <Pressable key={m.id} accessibilityRole="button" onPress={() => { demoSetHelm(m.id); loadHelm(); }} style={[styles.helmChip, { backgroundColor: c.bg, borderColor: c.line, borderWidth: 1 }]}>
+                    <Text style={[type.label, { color: c.ink }]}>{m.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          ) : helm?.status === 'unlinked' ? (
+            <Note>{t('helmUnlinked')}</Note>
+          ) : null}
+        </Card>
+
         <Card>
           <Text style={[type.bodyStrong, { color: c.ink }]}>{boat?.name ?? '—'}</Text>
           <Button variant={online ? 'ink' : 'brand'} label={online ? t('goOffline') : t('goOnline')} onPress={toggle} />
@@ -139,5 +179,8 @@ export default function Captain() {
 const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   seaRow: { flexDirection: 'row', alignItems: 'center', gap: space(2) },
+  helmRow: { flexDirection: 'row', alignItems: 'center', gap: space(2) },
+  helmWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space(2) },
+  helmChip: { borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 9 },
   seaBtn: { flex: 1, alignItems: 'center', borderRadius: radius.pill, paddingVertical: 9 },
 });

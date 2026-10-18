@@ -589,5 +589,22 @@
  "pkgSubtotal": "Before discount",
  "pkgOnePayment": "One payment confirms the pass and every tour. Your tour tickets appear in Trips.",
  "pkgOutside": "Each tour has to be during your pass. Pick another day.",
- "pkgToursBooked": "Your tours are booked too. Tickets are in Trips."
+ "pkgToursBooked": "Your tours are booked too. Tickets are in Trips.",
+ "boatsNeeded": "Needs {n} boat(s) · up to {s} people per boat",
+ "captainsH": "Our captains",
+ "captainsSub": "Every water taxi ride and every one of our own snorkel and fishing tours is run by one of these captains.",
+ "captainsMenuSub": "Who drives your boat, and our own tours",
+ "captainsCardS": "{n} captains · snorkel from {s} · fishing from {f}",
+ "certified": "Certified",
+ "licencePending": "Licence check pending",
+ "role_taxi": "Water taxi",
+ "role_fishing": "Fishing",
+ "role_snorkel": "Snorkel",
+ "ourToursH": "Our snorkel & fishing tours",
+ "withOurCaptains": "Run by one of our own captains. Meet them",
+ "helmH": "At the helm",
+ "helmPick": "Who’s at the helm today?",
+ "helmChange": "Change captain",
+ "helmUnverified": "You can’t take paying rides until the office checks your licence.",
+ "helmUnlinked": "Your account isn’t linked to a captain yet. Ask the office to link it and check your licence."
 }

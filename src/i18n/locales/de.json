@@ -589,5 +589,22 @@
  "pkgSubtotal": "Vor Rabatt",
  "pkgOnePayment": "Eine Zahlung bestätigt Pass und Touren. Tickets unter Fahrten.",
  "pkgOutside": "Jede Tour muss in deiner Passzeit liegen.",
- "pkgToursBooked": "Deine Touren sind gebucht. Tickets unter Fahrten."
+ "pkgToursBooked": "Deine Touren sind gebucht. Tickets unter Fahrten.",
+ "boatsNeeded": "{n} Boot(e) nötig · bis zu {s} Personen pro Boot",
+ "captainsH": "Unsere Kapitäne",
+ "captainsSub": "Jede Wassertaxi-Fahrt und jede unserer eigenen Schnorchel- und Angeltouren fährt einer dieser Kapitäne.",
+ "captainsMenuSub": "Wer Ihr Boot fährt, und unsere Touren",
+ "captainsCardS": "{n} Kapitäne · Schnorcheln ab {s} · Angeln ab {f}",
+ "certified": "Zertifiziert",
+ "licencePending": "Lizenz wird geprüft",
+ "role_taxi": "Wassertaxi",
+ "role_fishing": "Angeln",
+ "role_snorkel": "Schnorcheln",
+ "ourToursH": "Unsere Schnorchel- & Angeltouren",
+ "withOurCaptains": "Gefahren von einem unserer Kapitäne. Lernen Sie sie kennen",
+ "helmH": "Am Steuer",
+ "helmPick": "Wer steht heute am Steuer?",
+ "helmChange": "Kapitän wechseln",
+ "helmUnverified": "Sie können keine bezahlten Fahrten annehmen, bis das Büro Ihre Lizenz geprüft hat.",
+ "helmUnlinked": "Ihr Konto ist noch keinem Kapitän zugeordnet. Bitten Sie das Büro, es zu verknüpfen und Ihre Lizenz zu prüfen."
 }

@@ -29,6 +29,7 @@ await db.query("update profiles set role='captain', full_name='Capt One' where i
 await db.query("update profiles set role='captain', full_name='Capt Two' where id=$1", [C2]);
 const b1 = (await db.query("insert into boats (captain_id,name,kind,seats,has_lights) values ($1,'Lit boat','taxi',8,true) returning id", [C1])).rows[0].id;
 const b2 = (await db.query("insert into boats (captain_id,name,kind,seats,has_lights) values ($1,'Dark boat','taxi',8,false) returning id", [C2])).rows[0].id;
+for (const [id, crew] of [[C1, 'patrick'], [C2, 'quinn']]) await db.query("update crew set profile_id=$1, license_no='HN-X', license_expires='2099-12-31', verified_at=now() where id=$2", [id, crew]);
 await db.query('insert into boat_positions (boat_id, lon, lat, online) values ($1,-86.6,16.3,true), ($2,-86.6,16.29,true)', [b1, b2]);
 
 async function as(uid, sql, params = []) {

@@ -1,3 +1,4 @@
+import { activityTotalUsd, boatsFor, TOUR_SETTINGS } from '../../supabase/functions/_shared/tours.ts';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -230,8 +231,10 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
 
   if (!listing) return <Note>{t('noResults')}</Note>;
   const instant = listing.booking === 'instant' && listing.priceUsd != null;
-  const activityTotal = instant ? (listing.unit === 'boat' ? listing.priceUsd! : listing.priceUsd! * qty) : undefined;
-  const unitLabel = t(`u_${listing.unit ?? 'person'}`);
+  const activityTotal = instant ? activityTotalUsd(listing.priceUsd!, listing.unit, qty) : undefined;
+  // Per-boat charters still count people: it decides how many boats the group needs.
+  const unitLabel = t(`u_${listing.unit === 'boat' ? 'person' : listing.unit ?? 'person'}`);
+  const boats = listing.unit === 'boat' ? boatsFor(qty) : 0;
 
   // ---- Cruise mode: the ship's day only, and only start times that get the group back in time ----
   const cruise = ship && ship.date >= roatanDate(now) ? ship : null;
@@ -369,6 +372,16 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
       {unknownArea && <Note>{t('fitUnknown')}</Note>}
 
       <Stepper label={unitLabel} value={qty} min={1} max={20} onChange={setQty} />
+      {boats > 0 && <Note>{t('boatsNeeded').replace('{n}', String(boats)).replace('{s}', String(TOUR_SETTINGS.seatsPerBoat))}</Note>}
+
+      {/* Our own tours: run by our captains */}
+      {listing.ours && (listing.portal === 'snork' || listing.portal === 'fish') && (
+        <Pressable accessibilityRole="button" onPress={() => router.push('/captains')} style={[styles.row, { backgroundColor: c.tile }]}>
+          <Ionicons name="shield-checkmark" size={20} color={c.flame} />
+          <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('withOurCaptains')}</Text>
+          <Ionicons name="chevron-forward" size={16} color={c.muted} />
+        </Pressable>
+      )}
 
       {/* Where to meet */}
       <Card>

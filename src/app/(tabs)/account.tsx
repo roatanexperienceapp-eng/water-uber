@@ -126,6 +126,7 @@ export default function Account() {
           <MenuRow icon="person-circle-outline" title={t('manageAccount')} sub={t('manageAccountSub')} onPress={() => router.push('/me/profile')} />
           <MenuRow icon="settings-outline" title={t('settingsH')} onPress={() => router.push('/me/settings')} />
           <MenuRow icon="bookmark-outline" title={t('savedPlacesH')} sub={t('savedPlacesSub')} onPress={() => router.push('/me/places')} />
+          <MenuRow icon="people-outline" title={t('captainsH')} sub={t('captainsMenuSub')} onPress={() => router.push('/captains')} />
           <MenuRow icon="ticket-outline" title={t('passTitle')} sub={t('passesSub')} onPress={() => router.push('/pass')} />
           <MenuRow icon="pricetag-outline" title={t('inboxOffers')} sub={t('offersSub')} onPress={() => router.push('/inbox')} />
           <MenuRow icon="boat-outline" title={t('driveH')} sub={t('driveSub')} onPress={() => router.push({ pathname: '/me/partner', params: { kind: 'captain' } })} />

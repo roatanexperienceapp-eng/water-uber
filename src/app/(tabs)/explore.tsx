@@ -11,6 +11,8 @@ import { LanguageButton } from '@/components/LanguageButton';
 import { ShipButton } from '@/components/ShipButton';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
 import { PORTAL_ART } from '@/data/portalArt';
+import { useCrew } from '@/lib/crew';
+import { usd } from '@/lib/format';
 import { searchListings } from '@/lib/search';
 import { radius, space, type, useTheme } from '@/theme';
 import type { LangCode } from '@/types';
@@ -19,6 +21,7 @@ export default function ExploreScreen() {
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const lang = i18n.language as LangCode;
+  const crew = useCrew();
   const [q, setQ] = useState('');
   const result = useMemo(() => searchListings(q, LISTINGS, PORTALS, lang), [q, lang]);
   const searching = q.trim().length >= 2;
@@ -107,6 +110,22 @@ export default function ExploreScreen() {
               </Pressable>
             ))}
           </View>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('captainsH')} onPress={() => router.push('/captains')} style={[styles.crewCard, { backgroundColor: c.ink }]}>
+            <View style={styles.crewFaces}>
+              {crew.slice(0, 4).map((m, i) => (
+                <View key={m.id} style={[styles.face, { backgroundColor: c.flame, borderColor: c.ink, marginLeft: i ? -10 : 0 }]}>
+                  <Text style={[type.label, { color: '#fff', fontSize: 12 }]}>{m.name.replace(/^Captain\s+/i, '')[0]}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={[type.bodyStrong, { color: c.onInk }]}>{t('captainsH')}</Text>
+              <Text style={[type.small, { color: c.onInk, opacity: 0.8 }]}>
+                {t('captainsCardS').replace('{n}', String(crew.length)).replace('{s}', usd(fromPrice('snork'))).replace('{f}', usd(fromPrice('fish')))}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={c.onInk} />
+          </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel={t('giveCardH')} onPress={() => router.push('/give')} style={[styles.give, { backgroundColor: c.tile }]}>
             <Image source={require('../../../assets/images/giveback.jpg')} style={styles.giveImg} resizeMode="cover" />
             <View style={styles.giveBar}>
@@ -155,6 +174,9 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space(5) },
   tile: { width: '33.333%', alignItems: 'center', gap: space(2), paddingHorizontal: space(2) },
   tileIcon: { width: '92%', aspectRatio: 1, borderRadius: radius.pill, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  crewCard: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.lg, padding: space(4) },
+  crewFaces: { flexDirection: 'row' },
+  face: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   tileArt: { width: '100%', height: '100%' },
   tileEmoji: { fontSize: 48, lineHeight: 58 },
   tileLabel: { fontSize: 16, fontWeight: '600', textAlign: 'center', letterSpacing: -0.2 },
@@ -163,3 +185,8 @@ const styles = StyleSheet.create({
   giveBar: { flexDirection: 'row', alignItems: 'center', gap: space(3), padding: space(4) },
   giveBtn: { borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
 });
+
+/** Cheapest of our own priced tours in a portal (shown as "from $30"). */
+function fromPrice(portal: 'snork' | 'fish'): number {
+  return Math.min(...LISTINGS.filter((l) => l.ours && l.portal === portal && l.priceUsd != null).map((l) => l.priceUsd!));
+}
