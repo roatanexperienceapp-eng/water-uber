@@ -491,9 +491,9 @@ export default function RideScreen() {
               </View>
             </View>
           ) : flat && !pass ? (
-            <Pressable accessibilityRole="button" onPress={() => router.push('/pass')} style={[styles.banner, { backgroundColor: c.tile }]}>
+            <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/pass', params: { group: String(riders) } })} style={[styles.banner, { backgroundColor: c.tile }]}>
               <Ionicons name="ticket-outline" size={20} color={c.flame} />
-              <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('passPromo').replace('{p}', String(FEATURE_SETTINGS.passes[0].priceUsd))}</Text>
+              <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('passPromo').replace('{p}', String(FEATURE_SETTINGS.passes[0].priceUsd / FEATURE_SETTINGS.passes[0].riders))}</Text>
               <Text style={[type.label, { color: c.flame, fontSize: 14 }]}>{t('passSeeOptions')} ›</Text>
             </Pressable>
           ) : null}

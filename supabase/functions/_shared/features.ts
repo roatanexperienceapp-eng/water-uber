@@ -28,12 +28,23 @@ export const FEATURE_SETTINGS = {
     /** Longest a guest waits for a shared boat to fill, in minutes. */
     maxWaitMinutes: 15,
   },
-  /** Ride passes. Only flat-zone rides (West End ↔ West Bay) are covered. */
+  /**
+   * Ride passes (owner prices, Oct 2026): $35 per person per week, by group size. Two weeks = double.
+   * Unlimited West End ↔ West Bay rides for the whole group. Only flat-zone rides are covered.
+   */
   passes: [
-    { id: 'week', days: 7, rides: null as number | null, priceUsd: 49, riders: 1 },
-    { id: 'twoWeek', days: 14, rides: null as number | null, priceUsd: 89, riders: 1 },
-    { id: 'tenPack', days: 30, rides: 10 as number | null, priceUsd: 40, riders: 1 },
-    { id: 'family', days: 7, rides: null as number | null, priceUsd: 129, riders: 4 },
+    { id: 'week2', days: 7, rides: null as number | null, priceUsd: 70, riders: 2 },
+    { id: 'week4', days: 7, rides: null as number | null, priceUsd: 140, riders: 4 },
+    { id: 'week6', days: 7, rides: null as number | null, priceUsd: 210, riders: 6 },
+    { id: 'week8', days: 7, rides: null as number | null, priceUsd: 280, riders: 8 },
+    { id: 'week10', days: 7, rides: null as number | null, priceUsd: 350, riders: 10 },
+    { id: 'week12', days: 7, rides: null as number | null, priceUsd: 420, riders: 12 },
+    { id: 'twoWeek2', days: 14, rides: null as number | null, priceUsd: 140, riders: 2 },
+    { id: 'twoWeek4', days: 14, rides: null as number | null, priceUsd: 280, riders: 4 },
+    { id: 'twoWeek6', days: 14, rides: null as number | null, priceUsd: 420, riders: 6 },
+    { id: 'twoWeek8', days: 14, rides: null as number | null, priceUsd: 560, riders: 8 },
+    { id: 'twoWeek10', days: 14, rides: null as number | null, priceUsd: 700, riders: 10 },
+    { id: 'twoWeek12', days: 14, rides: null as number | null, priceUsd: 840, riders: 12 },
   ],
   activity: {
     /** Arrive this many minutes before a tour, dive or dinner starts. */
@@ -133,6 +144,20 @@ export interface ActivePass {
   passId: PassId;
   startsAt: Date;
   ridesUsed: number;
+}
+
+/** Group sizes and lengths on sale, for the pass picker. */
+export const PASS_GROUP_SIZES = [2, 4, 6, 8, 10, 12] as const;
+export const PASS_LENGTHS = [7, 14] as const;
+
+/** The pass for a group size and length (7 or 14 days). */
+export function passFor(riders: number, days: number) {
+  return FEATURE_SETTINGS.passes.find((p) => p.riders === riders && p.days === days);
+}
+
+/** Smallest pass that fits a group (3 people → the 4-person pass). */
+export function passSizeFor(groupSize: number): number {
+  return PASS_GROUP_SIZES.find((n) => n >= groupSize) ?? PASS_GROUP_SIZES[PASS_GROUP_SIZES.length - 1];
 }
 
 export function passDefinition(id: PassId) {

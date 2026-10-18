@@ -19,6 +19,7 @@ import {
   CRUISE_SETTINGS, cruiseStartTimes, fitsPortTime, islandClock, islandDay, roatanDate, roatanInstant, useMyShip,
 } from '@/lib/cruise';
 import { usd } from '@/lib/format';
+import { passName } from '@/lib/passName';
 import { meetingText } from '@/lib/meeting';
 import { pay, type PayOutcome } from '@/lib/payments';
 import { buyPass, createRepeatRide, currentPass, savedPlaces, type GuestPass } from '@/lib/stay';
@@ -69,7 +70,7 @@ export default function Checkout() {
       <ScrollView contentContainerStyle={{ padding: space(4), gap: space(4), paddingBottom: space(12) }}>
         {p.kind === 'ride' && <RideCheckout p={p} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {p.kind === 'listing' && <ListingCheckout id={p.id ?? ''} busy={busy} setBusy={setBusy} setErr={setErr} />}
-        {p.kind === 'pass' && <PassCheckout passId={p.passId ?? 'week'} busy={busy} setBusy={setBusy} setErr={setErr} />}
+        {p.kind === 'pass' && <PassCheckout passId={p.passId ?? 'week2'} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {err ? <Text style={[type.small, { color: c.sos, textAlign: 'center' }]}>{err}</Text> : null}
         <View style={styles.secure}>
           <Ionicons name="lock-closed" size={14} color={c.muted} />
@@ -183,7 +184,7 @@ function RideCheckout({ p, busy, setBusy, setErr }: { p: Params } & Flow) {
         <Row
           icon="ticket"
           title={t('passCovered')}
-          body={`${pass ? t(`pass_${pass.passId}`) : ''}${cover.extraRiders ? ` · ${t('passExtra').replace('{n}', String(cover.extraRiders)).replace('{p}', usd(cover.fareUsd))}` : ''}`}
+          body={`${pass ? passName(t, pass.passId) : ''}${cover.extraRiders ? ` · ${t('passExtra').replace('{n}', String(cover.extraRiders)).replace('{p}', usd(cover.fareUsd))}` : ''}`}
         />
       )}
 
@@ -484,10 +485,10 @@ function PassCheckout({ passId, busy, setBusy, setErr }: { passId: PassId } & Fl
     <>
       <Card>
         <Text style={[type.label, { color: c.muted }]}>{t('passTitle')}</Text>
-        <Text style={[type.h2, { color: c.ink }]}>{t(`pass_${passId}`)}</Text>
+        <Text style={[type.h2, { color: c.ink }]}>{passName(t, passId)}</Text>
         <Note>
           {t('passDays').replace('{d}', String(def.days))} · {def.rides ? t('passRides').replace('{n}', String(def.rides)) : t('passUnlimited')} ·{' '}
-          {def.riders === 1 ? t('passOneRider') : t('passRiders').replace('{n}', String(def.riders))}
+          {t('passUnlimitedGroup').replace('{n}', String(def.riders))}
         </Note>
         <Note>{t('passBreakEven').replace('{n}', String(passBreakEvenRides(passId)))}</Note>
         <Note>{t('passOnlyZone')}</Note>

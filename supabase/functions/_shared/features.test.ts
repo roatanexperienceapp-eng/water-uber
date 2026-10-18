@@ -2,7 +2,7 @@
 import { deepStrictEqual as eq, ok } from 'node:assert';
 import {
   conditionAdvice, dockForArea, FEATURE_SETTINGS, guaranteeState, joinableBoats, nextOccurrences, nightMode,
-  passBreakEvenRides, passCovers, pickupForActivity, ridesLeft, routeCondition, sharedDeparture,
+  PASS_GROUP_SIZES, passBreakEvenRides, passCovers, passFor, passSizeFor, pickupForActivity, ridesLeft, routeCondition, sharedDeparture,
 } from './features.ts';
 
 const T = (iso: string) => new Date(iso);
@@ -40,19 +40,33 @@ Deno.test('shared seats: only same route, enough room, leaving within the wait w
 });
 
 Deno.test('passes: cover flat-zone rides only, within dates, riders and ride count', () => {
-  const pass = { passId: 'week' as const, startsAt: T('2026-11-01T12:00:00Z'), ridesUsed: 3 };
+  const pass = { passId: 'week2' as const, startsAt: T('2026-11-01T12:00:00Z'), ridesUsed: 3 };
   const at = T('2026-11-03T15:00:00Z');
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 1, at }).covered, true);
   eq(passCovers(pass, { from: 'we', to: 'sandyD', riders: 1, at }).reason, 'outside_zone');
-  eq(passCovers(pass, { from: 'we', to: 'inf', riders: 2, at }).covered, true);
-  eq(passCovers(pass, { from: 'we', to: 'inf', riders: 3, at }).fareUsd, 10);
+  eq(passCovers(pass, { from: 'we', to: 'inf', riders: 2, at }).fareUsd, 0); // 2-person pass covers both
+  eq(passCovers(pass, { from: 'we', to: 'inf', riders: 3, at }).fareUsd, 5); // a friend tagging along pays $5
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 1, at }).fareUsd, 0);
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 1, at: T('2026-11-09T15:00:00Z') }).reason, 'expired');
   eq(passCovers(null, { from: 'we', to: 'inf', riders: 1, at }).reason, 'no_pass');
-  const pack = { passId: 'tenPack' as const, startsAt: T('2026-11-01T12:00:00Z'), ridesUsed: 10 };
-  eq(ridesLeft(pack), 0);
-  eq(passCovers(pack, { from: 'we', to: 'inf', riders: 1, at }).reason, 'used_up');
-  eq(passBreakEvenRides('week'), 10);
+  eq(ridesLeft(pass), null); // unlimited
+  eq(passBreakEvenRides('week2'), 7); // $70 ÷ ($5 × 2 people)
+  const twoWeeks = { passId: 'twoWeek4' as const, startsAt: T('2026-11-01T12:00:00Z'), ridesUsed: 0 };
+  eq(passCovers(twoWeeks, { from: 'we', to: 'inf', riders: 4, at: T('2026-11-13T15:00:00Z') }).covered, true); // day 12
+});
+
+Deno.test('pass prices: $35 per person per week, two weeks is double, every group size', () => {
+  for (const n of PASS_GROUP_SIZES) {
+    eq(passFor(n, 7)!.priceUsd, 35 * n);
+    eq(passFor(n, 14)!.priceUsd, 70 * n);
+  }
+  eq(passFor(2, 7)!.priceUsd, 70);
+  eq(passFor(12, 7)!.priceUsd, 420);
+  eq(passFor(2, 14)!.priceUsd, 140);
+  eq(passSizeFor(1), 2);
+  eq(passSizeFor(3), 4);
+  eq(passSizeFor(12), 12);
+  eq(passSizeFor(15), 12);
 });
 
 Deno.test('repeat rides: right local time, right weekdays, stops at end date', () => {

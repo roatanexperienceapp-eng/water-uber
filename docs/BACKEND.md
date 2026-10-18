@@ -86,6 +86,18 @@ there, redeploy functions and ship an app update; app and server read the same f
 | 6 | Sea alerts from captains | `sea_reports`, `report_sea` (3 h expiry) | sea strip on Ride; captain buttons per coast |
 | 7 | Boat booked with the activity | `rides.booking_id`, ownership check in `create-ride` | "Add a water taxi there and back" on activity checkout |
 
+Ride pass prices (owner prices): **$35 per person per week**, sold for groups of 2, 4, 6, 8, 10 and 12;
+two weeks costs double. Edit `FEATURE_SETTINGS.passes` in `supabase/functions/_shared/features.ts` to change them.
+
+| Group | 1 week | 2 weeks |
+|---|---|---|
+| 2 | $70 | $140 |
+| 4 | $140 | $280 |
+| 6 | $210 | $420 |
+| 8 | $280 | $560 |
+| 10 | $350 | $700 |
+| 12 | $420 | $840 |
+
 Mark which boats have running lights (only those get night rides):
 ```sql
 update boats set has_lights = true where name in ('Water taxi 03', 'Water taxi 07');
@@ -134,7 +146,6 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 - **Refunds** after a cancellation are manual from the processor dashboard.
 - **Share-my-ride page.** The app creates a secret link (`islandride.app/track/<token>`) and the database
   answers `shared_ride_status(token)`, but the small public web page at that address isn't hosted yet.
-- **Pass ride refunds.** Cancelling a ride paid by a 10-ride pack doesn't give the ride back yet.
 
 ## Running the tests
 

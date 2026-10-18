@@ -1,26 +1,35 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FEATURE_SETTINGS, passBreakEvenRides } from '../../supabase/functions/_shared/features.ts';
-import { Card, Note } from '@/components/ui';
+import { PASS_GROUP_SIZES, passBreakEvenRides, passFor, passSizeFor } from '../../supabase/functions/_shared/features.ts';
+import { Button, Card, Note } from '@/components/ui';
 import { usd } from '@/lib/format';
+import { passName } from '@/lib/passName';
 import { currentPass, type GuestPass } from '@/lib/stay';
 import { shortDate } from '@/lib/stayUi';
 import { radius, space, type, useTheme } from '@/theme';
 
-/** Feature 4: week passes and ride packs. Prices come from FEATURE_SETTINGS (owner options). */
+/**
+ * Ride passes: pick your group size and 1 or 2 weeks. Prices come from FEATURE_SETTINGS (owner prices):
+ * $35 per person per week; two weeks is double. Unlimited West End ↔ West Bay rides for the whole group.
+ */
 export default function PassScreen() {
+  const { group } = useLocalSearchParams<{ group?: string }>();
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const [active, setActive] = useState<GuestPass | null>(null);
+  const [size, setSize] = useState<number>(passSizeFor(Number(group) || 2));
+  const [days, setDays] = useState<7 | 14>(7);
   useFocusEffect(
     useCallback(() => {
       currentPass().then(setActive).catch(() => {});
     }, []),
   );
+  const pass = passFor(size, days)!;
+  const perPersonWeek = pass.priceUsd / pass.riders / (days / 7);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
@@ -34,39 +43,51 @@ export default function PassScreen() {
         {active && (
           <Card style={{ backgroundColor: c.ink }}>
             <Text style={[type.label, { color: c.flame }]}>{t('passActive')}</Text>
-            <Text style={[type.h2, { color: c.onInk }]}>{t(`pass_${active.passId}`)}</Text>
+            <Text style={[type.h2, { color: c.onInk }]}>{passName(t, active.passId)}</Text>
             <Text style={[type.small, { color: c.onInk, opacity: 0.8 }]}>
-              {t('passExpires').replace('{d}', shortDate(active.expiresAt, i18n.language))} ·{' '}
-              {active.ridesLeft === null ? t('passUnlimited') : t('passLeft').replace('{n}', String(active.ridesLeft))}
+              {t('passExpires').replace('{d}', shortDate(active.expiresAt, i18n.language))} · {t('passUnlimited')}
             </Text>
           </Card>
         )}
 
-        {FEATURE_SETTINGS.passes.map((p, i) => (
-          <Pressable
-            key={p.id}
-            accessibilityRole="button"
-            onPress={() => router.push({ pathname: '/checkout', params: { kind: 'pass', passId: p.id } })}
-            style={[styles.option, { borderColor: i === 0 ? c.flame : c.line }]}
-          >
-            <View style={{ flex: 1, gap: 2 }}>
-              {i === 0 && <Text style={[type.label, { color: c.flame }]}>{t('passPopular')}</Text>}
-              <Text style={[type.h2, { color: c.ink }]}>{t(`pass_${p.id}`)}</Text>
-              <Note>
-                {t('passDays').replace('{d}', String(p.days))} · {p.rides ? t('passRides').replace('{n}', String(p.rides)) : t('passUnlimited')}
-              </Note>
-              <Note>{p.riders === 1 ? t('passOneRider') : t('passRiders').replace('{n}', String(p.riders))}</Note>
-              <Text style={[type.small, { color: c.ink, fontWeight: '700' }]}>{t('passBreakEven').replace('{n}', String(passBreakEvenRides(p.id)))}</Text>
-            </View>
-            <View style={{ alignItems: 'flex-end', gap: space(2) }}>
-              <Text style={[type.h1, { color: c.ink }]}>{usd(p.priceUsd)}</Text>
-              <View style={[styles.buy, { backgroundColor: c.flame }]}>
-                <Text style={[type.label, { color: '#fff', fontSize: 14 }]}>{t('buyPass')}</Text>
-              </View>
-            </View>
-          </Pressable>
-        ))}
-        <Note>{t('passOnlyZone')}</Note>
+        <Text style={[type.bodyStrong, { color: c.ink }]}>{t('passHowMany')}</Text>
+        <View style={styles.sizes}>
+          {PASS_GROUP_SIZES.map((n) => {
+            const on = n === size;
+            return (
+              <Pressable key={n} accessibilityRole="radio" accessibilityState={{ checked: on }} accessibilityLabel={t('passPeople').replace('{n}', String(n))} onPress={() => setSize(n)} style={[styles.size, { backgroundColor: on ? c.ink : c.tile }]}>
+                <Text style={[type.h2, { color: on ? c.onInk : c.ink }]}>{n}</Text>
+                <Text style={[type.label, { color: on ? c.onInk : c.muted }]}>{t('peopleShort')}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <Note>{t('passOddGroup')}</Note>
+
+        <Text style={[type.bodyStrong, { color: c.ink }]}>{t('passHowLong')}</Text>
+        <View style={styles.lengths}>
+          {([7, 14] as const).map((d) => {
+            const on = d === days;
+            const opt = passFor(size, d)!;
+            return (
+              <Pressable key={d} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setDays(d)} style={[styles.length, { borderColor: on ? c.flame : c.line }]}>
+                <Text style={[type.bodyStrong, { color: c.ink }]}>{d === 7 ? t('oneWeek') : t('twoWeeks')}</Text>
+                <Text style={[type.h1, { color: c.ink }]}>{usd(opt.priceUsd)}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Card>
+          <Text style={[type.h2, { color: c.ink }]}>{passName(t, pass.id)}</Text>
+          <Note>✓ {t('passUnlimitedGroup').replace('{n}', String(pass.riders))}</Note>
+          <Note>✓ {t('passPerPerson').replace('{p}', usd(perPersonWeek))}</Note>
+          <Note>✓ {t('passBreakEven').replace('{n}', String(passBreakEvenRides(pass.id)))}</Note>
+          <Note>✓ {t('passExtraRule')}</Note>
+          <Note>{t('passOnlyZone')}</Note>
+        </Card>
+
+        <Button label={t('buyPass')} trailing={usd(pass.priceUsd)} onPress={() => router.push({ pathname: '/checkout', params: { kind: 'pass', passId: pass.id } })} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -74,6 +95,8 @@ export default function PassScreen() {
 
 const styles = StyleSheet.create({
   round: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  option: { flexDirection: 'row', gap: space(3), borderWidth: 2, borderRadius: radius.lg, padding: space(4) },
-  buy: { borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8 },
+  sizes: { flexDirection: 'row', gap: space(2) },
+  size: { flex: 1, borderRadius: radius.md, paddingVertical: space(3), alignItems: 'center' },
+  lengths: { flexDirection: 'row', gap: space(3) },
+  length: { flex: 1, borderWidth: 2, borderRadius: radius.lg, padding: space(4), gap: 4 },
 });

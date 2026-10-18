@@ -1,4 +1,4 @@
-// POST /functions/v1/create-pass  { passType: 'week' | 'twoWeek' | 'tenPack' | 'family', startsAt?: ISO }
+// POST /functions/v1/create-pass  { passType: 'week2' … 'week12' | 'twoWeek2' … 'twoWeek12', startsAt?: ISO }
 // Creates a ride pass in awaiting_payment. It becomes active only when the payment webhook confirms payment.
 import { withSupabase } from 'npm:@supabase/server@1';
 import { FEATURE_SETTINGS, passDefinition, type PassId } from '../_shared/features.ts';

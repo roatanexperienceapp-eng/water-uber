@@ -15,6 +15,7 @@ import { cancelRide, listMyBookings, listMyRides } from '@/lib/api';
 import { clock, usd } from '@/lib/format';
 import { currentPass, myCredits, myRepeatRides, setRepeatActive, type GuestPass, type RepeatRide, type RideCredit } from '@/lib/stay';
 import { shortDate } from '@/lib/stayUi';
+import { passName } from '@/lib/passName';
 import { radius, space, type, useTheme } from '@/theme';
 import type { Booking, Ride } from '@/types';
 
@@ -119,7 +120,7 @@ export default function Trips() {
           <Pressable onPress={() => router.push('/pass')}>
             <Card style={{ backgroundColor: c.ink }}>
               <Text style={[type.label, { color: c.flame }]}>{t('passActive')}</Text>
-              <Text style={[type.h2, { color: c.onInk }]}>{t(`pass_${pass.passId}`)}</Text>
+              <Text style={[type.h2, { color: c.onInk }]}>{passName(t, pass.passId)}</Text>
               <Text style={[type.small, { color: c.onInk, opacity: 0.8 }]}>
                 {t('passExpires').replace('{d}', shortDate(pass.expiresAt, i18n.language))} ·{' '}
                 {pass.ridesLeft === null ? t('passUnlimited') : t('passLeft').replace('{n}', String(pass.ridesLeft))}

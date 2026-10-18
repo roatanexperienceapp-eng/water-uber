@@ -12,6 +12,7 @@ import { bookingContact, getBooking, getRide, listMyRides, rideContact, splitFor
 import { clock, usd } from '@/lib/format';
 import { myPasses, shareRideLink, type GuestPass } from '@/lib/stay';
 import { shortDate } from '@/lib/stayUi';
+import { passName } from '@/lib/passName';
 import { space, type, useTheme } from '@/theme';
 import { AllAboardBar } from '@/components/AllAboardBar';
 import { SplitCard } from '@/components/SplitCard';
@@ -159,7 +160,7 @@ export default function Confirmation() {
 
         {pass && (
           <Card>
-            <Text style={[type.h2, { color: c.ink }]}>{t(`pass_${pass.passId}`)}</Text>
+            <Text style={[type.h2, { color: c.ink }]}>{passName(t, pass.passId)}</Text>
             <Note>{t('passExpires').replace('{d}', shortDate(pass.expiresAt, i18n.language))}</Note>
             <Note>{pass.ridesLeft === null ? t('passUnlimited') : t('passLeft').replace('{n}', String(pass.ridesLeft))}</Note>
             <Note>{t('passOnlyZone')}</Note>

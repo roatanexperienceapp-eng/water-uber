@@ -7,6 +7,7 @@ import { SubScreen } from '@/components/AccountKit';
 import { Card, Note } from '@/components/ui';
 import { myReceipts, type Receipt } from '@/lib/account';
 import { usd } from '@/lib/format';
+import { passName } from '@/lib/passName';
 import { currentPass, myCredits, type GuestPass, type RideCredit } from '@/lib/stay';
 import { shortDate } from '@/lib/stayUi';
 import { radius, space, type, useTheme } from '@/theme';
@@ -39,7 +40,7 @@ export default function WalletScreen() {
         </View>
         <Pressable accessibilityRole="button" onPress={() => router.push('/pass')} style={[styles.box, { backgroundColor: pass ? c.ink : c.tile }]}>
           <Text style={[type.label, { color: pass ? c.flame : c.muted }]}>{t('passActive')}</Text>
-          <Text style={[type.h2, { color: pass ? c.onInk : c.ink }]}>{pass ? t(`pass_${pass.passId}`) : t('noPass')}</Text>
+          <Text style={[type.h2, { color: pass ? c.onInk : c.ink }]}>{pass ? passName(t, pass.passId) : t('noPass')}</Text>
           <Text style={[type.small, { color: pass ? c.onInk : c.muted }]}>
             {pass ? t('passExpires').replace('{d}', shortDate(pass.expiresAt, i18n.language)) : `${t('passSeeOptions')} ›`}
           </Text>
