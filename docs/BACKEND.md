@@ -46,7 +46,7 @@ five server functions. The app never sets a price or a status itself.
    npx supabase link --project-ref YOUR_PROJECT_REF
    npx supabase db push                  # creates all tables and rules
    npx supabase db push --include-seed   # loads docks, portals and listings
-   npx supabase functions deploy         # deploys all ten functions
+   npx supabase functions deploy         # deploys all eleven functions
    npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
    ```
 4. **Authentication → Providers → Email**: keep it on; the app signs people in with a 6-digit email code.
@@ -86,17 +86,17 @@ there, redeploy functions and ship an app update; app and server read the same f
 | 6 | Sea alerts from captains | `sea_reports`, `report_sea` (3 h expiry) | sea strip on Ride; captain buttons per coast |
 | 7 | Boat booked with the activity | `rides.booking_id`, ownership check in `create-ride` | "Add a water taxi there and back" on activity checkout |
 
-Ride pass prices (owner prices): **$35 per person per week**, sold for groups of 2, 4, 6, 8, 10 and 12;
-two weeks costs double. Edit `FEATURE_SETTINGS.passes` in `supabase/functions/_shared/features.ts` to change them.
+Ride pass prices (owner prices): **$35 per person per week, any group from 2 to 12; two weeks costs double**
+(2 people $70 / $140 … 3 people $105 / $210 … 12 people $420 / $840). Change `passPricing` and `passes` in
+`supabase/functions/_shared/features.ts`.
 
-| Group | 1 week | 2 weeks |
-|---|---|---|
-| 2 | $70 | $140 |
-| 4 | $140 | $280 |
-| 6 | $210 | $420 |
-| 8 | $280 | $560 |
-| 10 | $350 | $700 |
-| 12 | $420 | $840 |
+**Packages** (`supabase/functions/_shared/bundle.ts` → `BUNDLE_SETTINGS`): a pass plus your own tours, bought in
+one payment. Add 1 tour → **10% off everything**, snorkel + fishing → **15% off**. Package tours: Shipwreck
+snorkel, Dolphins & mangroves, and Our fishing tour. A tour only appears as buyable once it has a fixed price:
+```sql
+update listings set booking = 'instant', price_usd = 120, unit = 'person' where id = 'fish-our-fishing-tour';
+```
+(and set the same price in `src/data/catalogue.ts` so the app shows it).
 
 Mark which boats have running lights (only those get night rides):
 ```sql
@@ -151,7 +151,7 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 
 ```bash
 npm i -D @electric-sql/pglite   # once
-npm run test:db                 # 166 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account)
+npm run test:db                 # 179 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account, packages)
 npm run test:server             # 24 pricing, feature, payment and cruise-rule checks (needs Deno: https://deno.com)
 npm run typecheck
 ```

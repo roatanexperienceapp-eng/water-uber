@@ -55,7 +55,8 @@ Deno.test('passes: cover flat-zone rides only, within dates, riders and ride cou
   eq(passCovers(twoWeeks, { from: 'we', to: 'inf', riders: 4, at: T('2026-11-13T15:00:00Z') }).covered, true); // day 12
 });
 
-Deno.test('pass prices: $35 per person per week, two weeks is double, every group size', () => {
+Deno.test('pass prices: $35 per person per week, two weeks is double, every group size 2–12', () => {
+  eq(PASS_GROUP_SIZES, [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   for (const n of PASS_GROUP_SIZES) {
     eq(passFor(n, 7)!.priceUsd, 35 * n);
     eq(passFor(n, 14)!.priceUsd, 70 * n);
@@ -63,8 +64,11 @@ Deno.test('pass prices: $35 per person per week, two weeks is double, every grou
   eq(passFor(2, 7)!.priceUsd, 70);
   eq(passFor(12, 7)!.priceUsd, 420);
   eq(passFor(2, 14)!.priceUsd, 140);
+  eq(passFor(3, 7)!.priceUsd, 105); // family of 3
+  eq(passFor(5, 14)!.priceUsd, 350);
+  eq(passFor(11, 7)!.priceUsd, 385);
   eq(passSizeFor(1), 2);
-  eq(passSizeFor(3), 4);
+  eq(passSizeFor(3), 3);
   eq(passSizeFor(12), 12);
   eq(passSizeFor(15), 12);
 });

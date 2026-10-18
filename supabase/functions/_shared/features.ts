@@ -3,6 +3,25 @@
 import { FLAT_ZONE } from './geo.ts';
 import { PRICING } from './pricing.ts';
 
+export interface PassDef {
+  id: PassId;
+  days: number;
+  rides: number | null;
+  priceUsd: number;
+  riders: number;
+}
+
+/** week2…week12 and twoWeek2…twoWeek12: price = per person per week × people × weeks. */
+function buildPasses(perPersonPerWeek: number, min: number, max: number): PassDef[] {
+  const out: PassDef[] = [];
+  for (const days of [7, 14]) {
+    for (let n = min; n <= max; n++) {
+      out.push({ id: `${days === 7 ? 'week' : 'twoWeek'}${n}` as PassId, days, rides: null, priceUsd: perPersonPerWeek * n * (days / 7), riders: n });
+    }
+  }
+  return out;
+}
+
 // =====================================================================================
 // Owner settings (the "options to choose from"). Change values here; app and server both follow.
 // =====================================================================================
@@ -29,30 +48,19 @@ export const FEATURE_SETTINGS = {
     maxWaitMinutes: 15,
   },
   /**
-   * Ride passes (owner prices, Oct 2026): $35 per person per week, by group size. Two weeks = double.
+   * Ride passes (owner prices, Oct 2026): $35 per person per week, any group from 2 to 12; two weeks = double.
    * Unlimited West End ↔ West Bay rides for the whole group. Only flat-zone rides are covered.
    */
-  passes: [
-    { id: 'week2', days: 7, rides: null as number | null, priceUsd: 70, riders: 2 },
-    { id: 'week4', days: 7, rides: null as number | null, priceUsd: 140, riders: 4 },
-    { id: 'week6', days: 7, rides: null as number | null, priceUsd: 210, riders: 6 },
-    { id: 'week8', days: 7, rides: null as number | null, priceUsd: 280, riders: 8 },
-    { id: 'week10', days: 7, rides: null as number | null, priceUsd: 350, riders: 10 },
-    { id: 'week12', days: 7, rides: null as number | null, priceUsd: 420, riders: 12 },
-    { id: 'twoWeek2', days: 14, rides: null as number | null, priceUsd: 140, riders: 2 },
-    { id: 'twoWeek4', days: 14, rides: null as number | null, priceUsd: 280, riders: 4 },
-    { id: 'twoWeek6', days: 14, rides: null as number | null, priceUsd: 420, riders: 6 },
-    { id: 'twoWeek8', days: 14, rides: null as number | null, priceUsd: 560, riders: 8 },
-    { id: 'twoWeek10', days: 14, rides: null as number | null, priceUsd: 700, riders: 10 },
-    { id: 'twoWeek12', days: 14, rides: null as number | null, priceUsd: 840, riders: 12 },
-  ],
+  passPricing: { perPersonPerWeek: 35, minGroup: 2, maxGroup: 12 },
+  passes: buildPasses(35, 2, 12),
   activity: {
     /** Arrive this many minutes before a tour, dive or dinner starts. */
     arriveEarlyMinutes: 15,
   },
 } as const;
 
-export type PassId = (typeof FEATURE_SETTINGS.passes)[number]['id'];
+/** Current passes are week{n} / twoWeek{n}; the old fixed names stay valid for passes already sold. */
+export type PassId = `${'week' | 'twoWeek'}${number}` | 'week' | 'twoWeek' | 'tenPack' | 'family';
 
 // =====================================================================================
 // 1. Guaranteed pickup
@@ -146,18 +154,22 @@ export interface ActivePass {
   ridesUsed: number;
 }
 
-/** Group sizes and lengths on sale, for the pass picker. */
-export const PASS_GROUP_SIZES = [2, 4, 6, 8, 10, 12] as const;
+/** Lengths on sale, for the pass picker. Any group size from passPricing.minGroup to maxGroup. */
 export const PASS_LENGTHS = [7, 14] as const;
+export const PASS_GROUP_SIZES = Array.from(
+  { length: FEATURE_SETTINGS.passPricing.maxGroup - FEATURE_SETTINGS.passPricing.minGroup + 1 },
+  (_, i) => FEATURE_SETTINGS.passPricing.minGroup + i,
+);
 
 /** The pass for a group size and length (7 or 14 days). */
 export function passFor(riders: number, days: number) {
   return FEATURE_SETTINGS.passes.find((p) => p.riders === riders && p.days === days);
 }
 
-/** Smallest pass that fits a group (3 people → the 4-person pass). */
+/** The pass size for a group: clamped to what's on sale (1 person → the 2-person pass). */
 export function passSizeFor(groupSize: number): number {
-  return PASS_GROUP_SIZES.find((n) => n >= groupSize) ?? PASS_GROUP_SIZES[PASS_GROUP_SIZES.length - 1];
+  const { minGroup, maxGroup } = FEATURE_SETTINGS.passPricing;
+  return Math.min(maxGroup, Math.max(minGroup, Math.round(groupSize) || minGroup));
 }
 
 export function passDefinition(id: PassId) {

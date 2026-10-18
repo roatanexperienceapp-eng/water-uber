@@ -573,5 +573,21 @@
  "passHowLong": "How long?",
  "passUnlimitedGroup": "Unlimited West End ↔ West Bay rides for up to {n} people",
  "passPerPerson": "{p} per person per week",
- "passExtraRule": "Friends who tag along pay $5 each"
+ "passExtraRule": "Friends who tag along pay $5 each",
+ "fewerPeople": "Fewer people",
+ "morePeople": "More people",
+ "passGroupRange": "groups of {min}–{max}",
+ "passTotalFor": "total for {n} people",
+ "pkgH": "Make it a package and save",
+ "pkgSave": "Add a tour: {a}% off everything. Add snorkel + fishing: {b}% off.",
+ "pkgSnorkel": "Snorkel tour",
+ "pkgFishing": "Fishing trip",
+ "pkgComingSoon": "Package price coming soon",
+ "perBoat": "per boat",
+ "pkgDiscount": "Package discount ({p}%)",
+ "pkgBuy": "Buy package",
+ "pkgSubtotal": "Before discount",
+ "pkgOnePayment": "One payment confirms the pass and every tour. Your tour tickets appear in Trips.",
+ "pkgOutside": "Each tour has to be during your pass. Pick another day.",
+ "pkgToursBooked": "Your tours are booked too. Tickets are in Trips."
 }

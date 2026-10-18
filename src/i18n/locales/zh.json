@@ -573,5 +573,21 @@
  "passHowLong": "多长时间？",
  "passUnlimitedGroup": "最多{n}人不限次往返 West End ↔ West Bay",
  "passPerPerson": "每人每周 {p}",
- "passExtraRule": "额外同行者每人 $5"
+ "passExtraRule": "额外同行者每人 $5",
+ "fewerPeople": "减少人数",
+ "morePeople": "增加人数",
+ "passGroupRange": "{min}–{max}人团体",
+ "passTotalFor": "{n}人总价",
+ "pkgH": "组合套餐更省钱",
+ "pkgSave": "加一项活动全单{a}%折扣，浮潜+钓鱼{b}%折扣。",
+ "pkgSnorkel": "浮潜之旅",
+ "pkgFishing": "钓鱼之旅",
+ "pkgComingSoon": "套餐价即将公布",
+ "perBoat": "每船",
+ "pkgDiscount": "套餐折扣（{p}%）",
+ "pkgBuy": "购买套餐",
+ "pkgSubtotal": "折前价",
+ "pkgOnePayment": "一次付款即确认乘船卡和所有活动，票券显示在行程中。",
+ "pkgOutside": "每项活动须在乘船卡有效期内，请换一天。",
+ "pkgToursBooked": "活动也已预订，票券在行程中。"
 }

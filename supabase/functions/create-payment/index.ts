@@ -11,6 +11,7 @@ interface Body {
   bookingId?: string;
   passId?: string;
   donationId?: string;
+  bundleId?: string;
   splitToken?: string;
   shares?: 'one' | 'rest';
   /** App path to land on after the checkout page (web), e.g. "/confirmation?kind=ride&id=…". */
@@ -35,8 +36,8 @@ export default {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
     if (req.method !== 'POST') return fail(405, 'method_not_allowed', 'Use POST');
     const b = await readBody<Body>(req);
-    if (!b || [b.rideId, b.bookingId, b.passId, b.donationId, b.splitToken].filter(Boolean).length !== 1) {
-      return fail(400, 'bad_body', 'Send exactly one of rideId, bookingId, passId, donationId or splitToken');
+    if (!b || [b.rideId, b.bookingId, b.passId, b.donationId, b.bundleId, b.splitToken].filter(Boolean).length !== 1) {
+      return fail(400, 'bad_body', 'Send exactly one of rideId, bookingId, passId, donationId, bundleId or splitToken');
     }
     const uid = ctx.userClaims!.id;
     const db = ctx.supabaseAdmin;
@@ -80,6 +81,12 @@ export default {
         if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This pass is not awaiting payment');
         amount = Number(data.price_usd);
         description = 'Water taxi ride pass';
+      } else if (b.bundleId) {
+        const { data } = await db.from('bundles').select('guest_id, status, total_cents').eq('id', b.bundleId).single();
+        if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Package not found');
+        if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This package is already paid');
+        amount = data.total_cents / 100;
+        description = 'Water taxi pass + tours package';
       } else if (b.donationId) {
         const { data } = await db.from('donations').select('donor_id, status, amount_usd').eq('id', b.donationId).single();
         if (!data || data.donor_id !== uid) return fail(404, 'not_found', 'Donation not found');
@@ -107,7 +114,7 @@ export default {
       // Donations may only be paid on the website (Apple: no in-app charity payments unless approved nonprofit).
       if (b.donationId && b.appReturnUrl) return fail(409, 'donate_on_web', 'Donations are completed on the website');
 
-      const target = b.rideId ? { ride_id: b.rideId } : b.passId ? { pass_id: b.passId } : b.donationId ? { donation_id: b.donationId } : { booking_id: b.bookingId };
+      const target = b.rideId ? { ride_id: b.rideId } : b.passId ? { pass_id: b.passId } : b.donationId ? { donation_id: b.donationId } : b.bundleId ? { bundle_id: b.bundleId } : { booking_id: b.bookingId };
       const [col, val] = Object.entries(target)[0];
       const { data: open } = await db
         .from('payments')

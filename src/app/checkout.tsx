@@ -23,12 +23,13 @@ import { passName } from '@/lib/passName';
 import { meetingText } from '@/lib/meeting';
 import { pay, type PayOutcome } from '@/lib/payments';
 import { buyPass, createRepeatRide, currentPass, savedPlaces, type GuestPass } from '@/lib/stay';
+import { createPackage, packageTourOptions, quotePackage, type PickedTour } from '@/lib/bundles';
 import { hhmm, hourLabel, ymd } from '@/lib/stayUi';
 import { useNow } from '@/lib/useNow';
 import { radius, space, type, useTheme } from '@/theme';
 
 type Params = {
-  kind: 'ride' | 'listing' | 'pass';
+  kind: 'ride' | 'listing' | 'pass' | 'bundle';
   // ride
   from?: string;
   to?: string;
@@ -44,8 +45,9 @@ type Params = {
   joinMin?: string;
   // listing
   id?: string;
-  // pass
+  // pass / bundle
   passId?: PassId;
+  tours?: string; // JSON PickedTour[]
 };
 
 const ACTIVITY_TIMES = ['08:00', '09:00', '10:00', '13:00', '14:00', '18:00'];
@@ -71,6 +73,7 @@ export default function Checkout() {
         {p.kind === 'ride' && <RideCheckout p={p} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {p.kind === 'listing' && <ListingCheckout id={p.id ?? ''} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {p.kind === 'pass' && <PassCheckout passId={p.passId ?? 'week2'} busy={busy} setBusy={setBusy} setErr={setErr} />}
+        {p.kind === 'bundle' && <BundleCheckout passId={p.passId ?? 'week2'} toursJson={p.tours ?? '[]'} busy={busy} setBusy={setBusy} setErr={setErr} />}
         {err ? <Text style={[type.small, { color: c.sos, textAlign: 'center' }]}>{err}</Text> : null}
         <View style={styles.secure}>
           <Ionicons name="lock-closed" size={14} color={c.muted} />
@@ -498,6 +501,72 @@ function PassCheckout({ passId, busy, setBusy, setErr }: { passId: PassId } & Fl
         <Text style={[type.h2, { color: c.ink }]}>{usd(def.priceUsd)}</Text>
       </View>
       <Button label={t('payBtn')} trailing={usd(def.priceUsd)} loading={busy} onPress={confirm} />
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+/** Package: pass + tours, priced with the package discount; one payment confirms everything. */
+function BundleCheckout({ passId, toursJson, busy, setBusy, setErr }: { passId: PassId; toursJson: string } & Flow) {
+  const { t, i18n } = useTranslation();
+  const c = useTheme();
+  let tours: PickedTour[] = [];
+  try {
+    tours = JSON.parse(toursJson) as PickedTour[];
+  } catch {
+    tours = [];
+  }
+  const quote = quotePackage(passId, tours);
+  const def = passDefinition(passId);
+  const opts = packageTourOptions();
+  if (!quote) return <Note>{t('payFailed')}</Note>;
+
+  async function confirm() {
+    setBusy(true);
+    setErr('');
+    try {
+      const { bundleId, passRowId } = await createPackage(passId, tours);
+      const { outcome } = await pay({ bundleId }, `/confirmation?kind=pass&id=${encodeURIComponent(passRowId)}&bundle=1`);
+      afterPay(outcome, t, setErr, { pathname: '/confirmation', params: { kind: 'pass', id: passRowId, bundle: '1' } });
+    } catch (e) {
+      const code = e instanceof Error ? e.message : '';
+      setErr(code === 'outside_pass' ? t('pkgOutside') : code === 'tour_unavailable' ? t('pkgComingSoon') : errorText(t, e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <Card>
+        <Text style={[type.label, { color: c.flame }]}>{t('pkgH')}</Text>
+        <Text style={[type.h2, { color: c.ink }]}>{passName(t, passId)}</Text>
+        <Note>{t('passUnlimitedGroup').replace('{n}', String(def.riders))}</Note>
+        {tours.map((tr) => {
+          const o = opts.find((x) => x.listingId === tr.listingId);
+          return (
+            <Note key={tr.listingId}>
+              + {o?.name} · {islandDay(roatanInstant(tr.date, tr.time), i18n.language)} {islandClock(roatanInstant(tr.date, tr.time), i18n.language)} · {def.riders} {t('u_person').toLowerCase()}
+            </Note>
+          );
+        })}
+      </Card>
+      <View style={{ gap: 4 }}>
+        <View style={styles.total}>
+          <Text style={[type.body, { color: c.ink }]}>{t('pkgSubtotal')}</Text>
+          <Text style={[type.body, { color: c.ink }]}>{usd(quote.subtotalCents / 100)}</Text>
+        </View>
+        <View style={styles.total}>
+          <Text style={[type.bodyStrong, { color: '#16A34A' }]}>{t('pkgDiscount').replace('{p}', String(quote.discountPct))}</Text>
+          <Text style={[type.bodyStrong, { color: '#16A34A' }]}>−{usd(quote.discountCents / 100)}</Text>
+        </View>
+        <View style={styles.total}>
+          <Text style={[type.h2, { color: c.ink }]}>{t('total')}</Text>
+          <Text style={[type.h2, { color: c.ink }]}>{usd(quote.totalCents / 100)}</Text>
+        </View>
+      </View>
+      <Note>{t('pkgOnePayment')}</Note>
+      <Button label={t('payBtn')} trailing={usd(quote.totalCents / 100)} loading={busy} onPress={confirm} />
     </>
   );
 }

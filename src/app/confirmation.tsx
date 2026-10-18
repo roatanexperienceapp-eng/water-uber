@@ -24,7 +24,7 @@ import { saveTicket, type SavedTicket } from '@/lib/tickets';
 import type { Booking, Ride } from '@/types';
 
 export default function Confirmation() {
-  const { kind, id } = useLocalSearchParams<{ kind: 'ride' | 'booking' | 'pass'; id: string }>();
+  const { kind, id, bundle } = useLocalSearchParams<{ kind: 'ride' | 'booking' | 'pass'; id: string; bundle?: string }>();
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const [ride, setRide] = useState<Ride | undefined>();
@@ -164,6 +164,7 @@ export default function Confirmation() {
             <Note>{t('passExpires').replace('{d}', shortDate(pass.expiresAt, i18n.language))}</Note>
             <Note>{pass.ridesLeft === null ? t('passUnlimited') : t('passLeft').replace('{n}', String(pass.ridesLeft))}</Note>
             <Note>{t('passOnlyZone')}</Note>
+            {bundle === '1' && <Text style={[type.bodyStrong, { color: c.ink }]}>🎁 {t('pkgToursBooked')}</Text>}
           </Card>
         )}
 
