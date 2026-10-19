@@ -45,7 +45,7 @@ await db.exec(`
 await db.exec(readFileSync(path.join(root, 'seed.sql'), 'utf8'));
 
 const count = async (sql) => Number((await db.query(sql)).rows[0].n);
-ok((await count('select count(*) n from listings')) === 161, 'seed: 161 listings');
+ok((await count('select count(*) n from listings')) === 229, 'seed: 229 listings');
 ok((await count('select count(*) n from portals')) === 14, 'seed: 14 portals');
 ok((await count("select count(*) n from docks where in_flat_zone")) === 21, 'seed: 21 flat-zone docks');
 
@@ -90,7 +90,7 @@ ok((await as(GUEST_A, 'select * from rides')).rows.length === 1, 'guest A sees o
 ok((await as(GUEST_B, 'select * from rides')).rows.length === 0, 'guest B cannot see guest A ride');
 ok((await as(CAPT_1, 'select * from rides')).rows.length === 0, 'captain cannot see unpaid rides');
 ok((await as(GUEST_A, 'select * from operators')).rows.length === 0, 'guests cannot read operator contacts');
-ok((await as(GUEST_A, 'select * from listings')).rows.length === 161, 'anyone can read the catalogue');
+ok((await as(GUEST_A, 'select * from listings')).rows.length === 229, 'anyone can read the catalogue');
 
 // ---- Guests cannot tamper with their own ride or fake payments ----
 await as(GUEST_A, 'update rides set fare_usd = 0, status = $2 where id = $1', [ride.id, 'paid']);
