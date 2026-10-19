@@ -138,7 +138,7 @@ export default {
     if (payment!.checkout_url && new Date(String(payment!.checkout_expires_at)) > new Date()) {
       return json({ paymentId: payment!.id, amountUsd: Number(payment!.amount_usd), checkoutUrl: payment!.checkout_url });
     }
-    const web = Deno.env.get('PUBLIC_WEB_URL') ?? 'https://wateruber.app';
+    const web = Deno.env.get('PUBLIC_WEB_URL') ?? 'https://roatanwatertaxi.com';
     const appUrl = safeAppUrl(b.appReturnUrl);
     const back = `payment=${payment!.id}&back=${encodeURIComponent(returnPath)}${appUrl ? `&app=${encodeURIComponent(appUrl)}` : ''}`;
     const { data: user } = await db.auth.admin.getUserById(uid);

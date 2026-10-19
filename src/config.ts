@@ -17,4 +17,4 @@ export const DEMO_MODE = !SUPABASE_URL || !SUPABASE_KEY;
 export const HOME_CENTER = { latitude: 16.3033, longitude: -86.596 };
 
 /** Public website for no-download booking, QR codes and group-split links. */
-export const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL ?? 'https://wateruber.app').replace(/\/$/, '');
+export const WEB_URL = (process.env.EXPO_PUBLIC_WEB_URL ?? 'https://roatanwatertaxi.com').replace(/\/$/, '');

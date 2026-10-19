@@ -13,7 +13,7 @@ const BUNDLE_BASE = process.env.BUNDLE_ID_BASE ?? 'com.roatanexperience.watertax
 const IS_CAPTAIN = VARIANT === 'captain';
 // No-download website. Booking links (/l/…, /split/…, /ship/…) open the app when it's installed.
 // Requires the two verification files on that site — see docs/CRUISE.md "Universal links".
-const WEB_HOST = new URL(process.env.EXPO_PUBLIC_WEB_URL ?? 'https://wateruber.app').host;
+const WEB_HOST = new URL(process.env.EXPO_PUBLIC_WEB_URL ?? 'https://roatanwatertaxi.com').host;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
