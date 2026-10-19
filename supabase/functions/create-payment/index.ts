@@ -5,6 +5,7 @@
 import { withSupabase } from 'npm:@supabase/server@1';
 import { fail, json, readBody } from '../_shared/http.ts';
 import { getProvider, toCents } from '../_shared/payments.ts';
+import { ZELLE, zelleMemo } from '../_shared/business.ts';
 
 interface Body {
   rideId?: string;
@@ -18,6 +19,8 @@ interface Body {
   returnPath?: string;
   /** Native app only: the deep link the checkout page hands back to (e.g. "islandride://paid"). */
   appReturnUrl?: string;
+  /** 'zelle': no checkout page; the guest sends a Zelle transfer and the team confirms it (confirm_zelle). */
+  method?: 'card' | 'zelle';
 }
 
 /** Only our own app schemes (and Expo Go's during development). */
@@ -42,13 +45,21 @@ export default {
     const uid = ctx.userClaims!.id;
     const db = ctx.supabaseAdmin;
 
-    let provider;
-    try {
-      provider = getProvider(Deno.env);
-    } catch (e) {
-      return fail(500, 'payments_misconfigured', String(e));
+    const zelle = b.method === 'zelle';
+    if (zelle && (!ZELLE.enabled || b.rideId || b.donationId || b.splitToken)) {
+      // Rides are needed right away and splits are paid by several people: card only.
+      return fail(409, 'zelle_not_allowed', 'Zelle is for passes, packages and tours booked ahead');
     }
-    if (!provider) return fail(501, 'payments_not_configured', 'Set PAYMENT_PROVIDER and its keys (docs/PAYMENTS.md)');
+
+    let provider: ReturnType<typeof getProvider> = null;
+    if (!zelle) {
+      try {
+        provider = getProvider(Deno.env);
+      } catch (e) {
+        return fail(500, 'payments_misconfigured', String(e));
+      }
+      if (!provider) return fail(501, 'payments_not_configured', 'Set PAYMENT_PROVIDER and its keys (docs/PAYMENTS.md)');
+    }
 
     // ---- Work out what is being paid and how much (server-side only) ----
     let payment: Record<string, unknown> | null = null;
@@ -62,7 +73,7 @@ export default {
       // Only the organizer can pay "the rest"; anyone with the link can pay one share.
       const count = b.shares === 'rest' ? (split.organizer_id === uid ? null : -1) : 1;
       if (count === -1) return fail(403, 'not_organizer', 'Only the organizer can pay the rest');
-      const { data, error } = await db.rpc('reserve_split_share', { p_token: b.splitToken, p_guest: uid, p_count: count, p_provider: provider.name });
+      const { data, error } = await db.rpc('reserve_split_share', { p_token: b.splitToken, p_guest: uid, p_count: count, p_provider: provider!.name });
       if (error) return fail(409, error.message.includes('no_shares_left') ? 'no_shares_left' : 'split_closed', error.message);
       payment = data as Record<string, unknown>;
       description = 'Group booking share';
@@ -116,6 +127,18 @@ export default {
 
       const target = b.rideId ? { ride_id: b.rideId } : b.passId ? { pass_id: b.passId } : b.donationId ? { donation_id: b.donationId } : b.bundleId ? { bundle_id: b.bundleId } : { booking_id: b.bookingId };
       const [col, val] = Object.entries(target)[0];
+      if (zelle) {
+        // One pending Zelle payment per item: asking again shows the same code.
+        const { data: waiting } = await db.from('payments').select('id, amount_usd').eq(col, val).eq('guest_id', uid).eq('provider', 'zelle').eq('status', 'pending').maybeSingle();
+        let id = waiting && Number(waiting.amount_usd) === amount ? String(waiting.id) : null;
+        if (!id) {
+          if (waiting) await db.rpc('mark_payment_failed', { p_payment_id: waiting.id }); // price changed: old code no longer valid
+          const { data, error } = await db.from('payments').insert({ guest_id: uid, ...target, amount_usd: amount, provider: 'zelle', covers_ride_ids: coversRides }).select('id').single();
+          if (error) return fail(500, 'insert_failed', error.message);
+          id = String(data.id);
+        }
+        return json({ paymentId: id, amountUsd: amount, zelle: { to: ZELLE.recipient, code: zelleMemo(id) } });
+      }
       const { data: open } = await db
         .from('payments')
         .select('*')
@@ -129,7 +152,7 @@ export default {
       if (open && Number(open.amount_usd) === amount && String(open.covers_ride_ids ?? []) === String(coversRides) && open.checkout_url && new Date(String(open.checkout_expires_at)) > new Date()) {
         return json({ paymentId: open.id, amountUsd: amount, checkoutUrl: open.checkout_url });
       }
-      const { data, error } = await db.from('payments').insert({ guest_id: uid, ...target, amount_usd: amount, provider: provider.name, covers_ride_ids: coversRides }).select().single();
+      const { data, error } = await db.from('payments').insert({ guest_id: uid, ...target, amount_usd: amount, provider: provider!.name, covers_ride_ids: coversRides }).select().single();
       if (error) return fail(500, 'insert_failed', error.message);
       payment = data;
     }
@@ -143,7 +166,7 @@ export default {
     const back = `payment=${payment!.id}&back=${encodeURIComponent(returnPath)}${appUrl ? `&app=${encodeURIComponent(appUrl)}` : ''}`;
     const { data: user } = await db.auth.admin.getUserById(uid);
     try {
-      const session = await provider.createCheckout({
+      const session = await provider!.createCheckout({
         paymentId: String(payment!.id),
         amountCents: toCents(Number(payment!.amount_usd)),
         currency: 'usd',

@@ -24,7 +24,7 @@ import { saveTicket, type SavedTicket } from '@/lib/tickets';
 import type { Booking, Ride } from '@/types';
 
 export default function Confirmation() {
-  const { kind, id, bundle } = useLocalSearchParams<{ kind: 'ride' | 'booking' | 'pass'; id: string; bundle?: string }>();
+  const { kind, id, bundle, zelle } = useLocalSearchParams<{ kind: 'ride' | 'booking' | 'pass'; id: string; bundle?: string; zelle?: string }>();
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const [ride, setRide] = useState<Ride | undefined>();
@@ -92,7 +92,9 @@ export default function Confirmation() {
 
   const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
   const title = waiting
-    ? t('confirmingPay')
+    ? zelle
+      ? t('zelleWaitH')
+      : t('confirmingPay')
     : kind === 'ride'
       ? t('reserved')
       : kind === 'pass'
@@ -168,7 +170,7 @@ export default function Confirmation() {
           </Card>
         )}
 
-        {waiting && <Note center>{t('confirmingPaySub')}</Note>}
+        {waiting && <Note center>{zelle ? t('zelleWait') : t('confirmingPaySub')}</Note>}
         {bookingShip && <AllAboardBar />}
         {ticket && <TicketCard ticket={{ ...ticket, savedAt: new Date().toISOString() }} />}
         {split && booking?.status !== 'paid' && <SplitCard token={split.token} organizer onChange={load} />}

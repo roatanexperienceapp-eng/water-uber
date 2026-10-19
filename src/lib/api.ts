@@ -388,6 +388,22 @@ export async function startPayment(target: PayTarget, returnPath = '/trips'): Pr
   return invoke('create-payment', { ...target, returnPath, appReturnUrl: Platform.OS === 'web' ? undefined : Linking.createURL('paid') });
 }
 
+export type ZelleTarget = { bookingId: string } | { passId: string } | { bundleId: string };
+
+/**
+ * Pay by Zelle instead of card: the server creates a pending payment and returns the email to send to
+ * and the memo code. Nothing is confirmed until the team checks the bank (confirm_zelle).
+ * Demo mode: shows the instructions and leaves the item waiting.
+ */
+export async function startZelle(target: ZelleTarget, demoAmountUsd: number): Promise<{ paymentId: string; amountUsd: number; zelle: { to: string; code: string } }> {
+  if (!supabase) {
+    const { ZELLE, zelleMemo } = await import('../../supabase/functions/_shared/business.ts');
+    const id = Object.values(target)[0];
+    return { paymentId: `DEMO-${id}`, amountUsd: demoAmountUsd, zelle: { to: ZELLE.recipient, code: zelleMemo(id) } };
+  }
+  return invoke('create-payment', { ...target, method: 'zelle' });
+}
+
 /** The server's view of a payment (set only by the processor's signed webhook). */
 export async function paymentStatus(paymentId: string): Promise<'pending' | 'succeeded' | 'failed' | 'refunded' | null> {
   if (!supabase) return 'succeeded';

@@ -6,6 +6,7 @@ import { CRUISE_SETTINGS } from '../../../supabase/functions/_shared/cruise.ts';
 import { MenuRow, SubScreen } from '@/components/AccountKit';
 import { Card, Note } from '@/components/ui';
 import { WEB_URL } from '@/config';
+import { BUSINESS } from '../../../supabase/functions/_shared/business.ts';
 import { type, useTheme } from '@/theme';
 
 /** Legal: the full documents live on the website (also required for the App Store listing). */
@@ -17,6 +18,7 @@ export default function LegalScreen() {
     <SubScreen title={t('legalH')}>
       <MenuRow icon="document-text-outline" title={t('termsH')} onPress={() => open('/terms')} />
       <MenuRow icon="lock-closed-outline" title={t('privacyH')} onPress={() => open('/privacy')} />
+      <MenuRow icon="mail-outline" title={t('legalContact')} sub={BUSINESS.email} onPress={() => Linking.openURL(`mailto:${BUSINESS.email}`)} />
       <MenuRow icon="heart-outline" title={t('giveCardH')} sub={t('giveMenuSub')} onPress={() => router.push('/give')} />
 
       <Text style={[type.h2, { color: c.ink }]}>{t('refundsH')}</Text>

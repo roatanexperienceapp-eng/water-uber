@@ -5,6 +5,7 @@ import { fail, json, readBody } from '../_shared/http.ts';
 import { BUNDLE_SETTINGS } from '../_shared/bundle.ts';
 import { FEATURE_SETTINGS } from '../_shared/features.ts';
 import { TOUR_SETTINGS } from '../_shared/tours.ts';
+import { BUSINESS, ZELLE } from '../_shared/business.ts';
 
 interface Turn {
   role: 'user' | 'assistant';
@@ -78,6 +79,10 @@ async function ourFacts(db: any): Promise<string> {
     `- Per-boat charters take up to ${TOUR_SETTINGS.seatsPerBoat} people per boat; bigger groups need more boats.`,
     `Week pass: unlimited West End-West Bay water taxi rides, $${p.perPersonPerWeek} per person per week, groups of ${p.minGroup}-${p.maxGroup}; two weeks costs double.`,
     `Packages: a week pass plus one of our tours is ${d[1]}% off everything; pass + a snorkel tour + a fishing tour is ${d[2]}% off. Build one on the Passes page.`,
+    `Contact us: call ${BUSINESS.phoneDisplay}${BUSINESS.whatsapp ? ' (also WhatsApp)' : ''}, email ${BUSINESS.email}, or Account > Help in the app. Emergencies: call 911 first.`,
+    ...(ZELLE.enabled
+      ? [`Paying: card, Apple Pay or Google Pay in the app. Guests with a US bank can also pay passes, packages and tours booked at least ${ZELLE.minLeadHours} hours ahead by Zelle to ${ZELLE.recipient}, using the code the app shows in the memo; our team confirms Zelle by hand, so it is not instant. Water taxi rides are card only.`]
+      : []),
   ];
   const names = ((crew ?? []) as { display_name: string; certified: boolean }[]);
   if (names.length) {

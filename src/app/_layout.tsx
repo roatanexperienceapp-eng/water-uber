@@ -19,6 +19,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="portal/[key]" />
         <Stack.Screen name="checkout" />
+        <Stack.Screen name="zelle" />
         <Stack.Screen name="confirmation" options={{ gestureEnabled: false }} />
         <Stack.Screen name="assistant" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pass" />

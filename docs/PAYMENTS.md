@@ -98,6 +98,36 @@ select operator_name, sum(gross_cents)/100.0 gross, sum(platform_fee_cents)/100.
 ```
 Commission per operator: `update operators set commission_pct = 15 where name = '...';` (default 15%).
 
+## Zelle (manual)
+
+Guests with a US bank can pay **passes, packages and tours booked at least 6 hours ahead** by Zelle to
+`roatanexperienceapp@gmail.com`. Water taxi rides and group splits are card only (rides are needed
+right away; nobody is watching the bank at 11 pm). Settings: `ZELLE` in `_shared/business.ts`.
+
+How it works:
+1. The guest taps **Pay with Zelle**. The pass/booking is created and held, and the server creates a
+   pending payment with `provider = 'zelle'`. The app shows the amount, the email and a memo code like `RWT-1A2B3C4D`.
+2. The guest sends the money from their bank and taps "I've sent it". Nothing is confirmed yet.
+3. Someone on the team checks the bank (8 am–8 pm, at least every 2 hours) and confirms in the SQL editor:
+
+```sql
+-- What is waiting
+select * from zelle_pending();
+-- After seeing the transfer in the bank (code from the memo, amount received, bank's confirmation number)
+select confirm_zelle('RWT-1A2B3C4D', 95.00, 'BOA 123456789');
+```
+
+`confirm_zelle` refuses a short amount, an unknown code, or a missing bank reference, and confirms the
+pass/booking exactly like a card payment does. A transfer with no code: match it by amount and time in
+`zelle_pending()`, then confirm with that code.
+
+Things to know before switching it on:
+- **Zelle has no buyer protection and no refunds.** A refund means sending a Zelle back by hand.
+- Use a **business** Zelle (through a business bank account). Banks can limit or close personal Zelle
+  accounts used to take business payments.
+- Most cruise guests from Canada, Europe and elsewhere cannot use Zelle. Card stays the main way to pay.
+- Never confirm from a screenshot. Only confirm money you can see in the bank account.
+
 ## Not automated yet
 
 - **Paying operators and captains.** The ledger shows what each is owed; transfers are manual for now.

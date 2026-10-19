@@ -5,6 +5,7 @@ import { Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-nat
 import { MenuRow, SubScreen } from '@/components/AccountKit';
 import { Button, Card, Note } from '@/components/ui';
 import { sendSupportRequest, type SupportTopic } from '@/lib/account';
+import { BUSINESS } from '../../../supabase/functions/_shared/business.ts';
 import { radius, space, type, useTheme } from '@/theme';
 
 const TOPICS: SupportTopic[] = ['ride', 'tour', 'payment', 'lost', 'safety', 'other'];
@@ -45,6 +46,13 @@ export default function HelpScreen() {
 
       <MenuRow icon="sparkles-outline" title={t('ask')} sub={t('askIslaSub')} onPress={() => router.push('/assistant')} />
       <MenuRow icon="receipt-outline" title={t('helpTrip')} sub={t('helpTripSub')} onPress={() => router.navigate('/trips')} />
+
+      <Text style={[type.h2, { color: c.ink }]}>{t('contactDirectH')}</Text>
+      <MenuRow icon="call-outline" title={t('callUs')} sub={BUSINESS.phoneDisplay} onPress={() => Linking.openURL(`tel:${BUSINESS.phoneE164}`)} />
+      {BUSINESS.whatsapp && (
+        <MenuRow icon="logo-whatsapp" title="WhatsApp" sub={BUSINESS.phoneDisplay} onPress={() => Linking.openURL(`https://wa.me/${BUSINESS.phoneE164.replace(/\D/g, '')}`)} />
+      )}
+      <MenuRow icon="mail-outline" title={t('emailUs')} sub={BUSINESS.email} onPress={() => Linking.openURL(`mailto:${BUSINESS.email}`)} />
 
       <Text style={[type.h2, { color: c.ink }]}>{t('contactTeam')}</Text>
       {sent ? (

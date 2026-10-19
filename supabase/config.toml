@@ -235,14 +235,16 @@ otp_length = 6
 otp_expiry = 3600
 
 # Use a production-ready SMTP server
+# Our sign-in emails go out from the business Gmail (docs/CONTACT.md). On the live project set the same
+# values in the Supabase dashboard: Authentication > Emails > SMTP settings. Left off for local dev.
 # [auth.email.smtp]
 # enabled = true
-# host = "smtp.sendgrid.net"
+# host = "smtp.gmail.com"
 # port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# user = "roatanexperienceapp@gmail.com"
+# pass = "env(SMTP_PASS)"   # a Gmail app password, never the normal password
+# admin_email = "roatanexperienceapp@gmail.com"
+# sender_name = "Roatán Water Taxi"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]

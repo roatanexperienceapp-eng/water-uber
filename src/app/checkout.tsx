@@ -24,6 +24,8 @@ import { usd } from '@/lib/format';
 import { passName } from '@/lib/passName';
 import { meetingText } from '@/lib/meeting';
 import { pay, type PayOutcome } from '@/lib/payments';
+import { startZelle, type ZelleTarget } from '@/lib/api';
+import { ZELLE } from '../../supabase/functions/_shared/business.ts';
 import { buyPass, createRepeatRide, currentPass, savedPlaces, type GuestPass } from '@/lib/stay';
 import { createPackage, packageTourOptions, quotePackage, type PickedTour } from '@/lib/bundles';
 import { hhmm, hourLabel, ymd } from '@/lib/stayUi';
@@ -273,7 +275,9 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const eachUsd = activityTotal ? Math.ceil((activityTotal * 100) / shareCount) / 100 : 0;
   const payNow = split ? eachUsd : (activityTotal ?? 0) + taxiTotal;
 
-  async function confirm() {
+  const zelleOk = ZELLE.enabled && instant && !split && !!start && start.getTime() - now.getTime() >= ZELLE.minLeadHours * 3_600_000;
+
+  async function confirm(method: 'card' | 'zelle' = 'card') {
     if (tooSoon || late || cruiseBlocked) return;
     setBusy(true);
     setErr('');
@@ -301,6 +305,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
         return afterPay(outcome, t, setErr, target);
       }
       if (booking.status !== 'awaiting_payment') return router.replace(target); // request: price comes later
+      if (method === 'zelle') return await goZelle({ bookingId: booking.id }, payNow, { kind: 'booking', id: booking.id });
       // One checkout pays the activity and its taxi rides together.
       const { outcome } = await pay({ bookingId: booking.id }, confirmPath('booking', booking.id));
       afterPay(outcome, t, setErr, target);
@@ -472,8 +477,9 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
         trailing={instant ? usd(payNow) : undefined}
         loading={busy}
         disabled={tooSoon || late || cruiseBlocked}
-        onPress={confirm}
+        onPress={() => confirm()}
       />
+      {zelleOk && <ZelleButton disabled={busy || tooSoon || late || cruiseBlocked} onPress={() => confirm('zelle')} />}
     </>
   );
 }
@@ -484,11 +490,12 @@ function PassCheckout({ passId, busy, setBusy, setErr }: { passId: PassId } & Fl
   const c = useTheme();
   const def = passDefinition(passId);
 
-  async function confirm() {
+  async function confirm(method: 'card' | 'zelle' = 'card') {
     setBusy(true);
     setErr('');
     try {
       const { id } = await buyPass(passId);
+      if (method === 'zelle') return await goZelle({ passId: id }, def.priceUsd, { kind: 'pass', id });
       const { outcome } = await pay({ passId: id }, confirmPath('pass', id));
       afterPay(outcome, t, setErr, { pathname: '/confirmation', params: { kind: 'pass', id } });
     } catch (e) {
@@ -514,7 +521,8 @@ function PassCheckout({ passId, busy, setBusy, setErr }: { passId: PassId } & Fl
         <Text style={[type.h2, { color: c.ink }]}>{t('total')}</Text>
         <Text style={[type.h2, { color: c.ink }]}>{usd(def.priceUsd)}</Text>
       </View>
-      <Button label={t('payBtn')} trailing={usd(def.priceUsd)} loading={busy} onPress={confirm} />
+      <Button label={t('payBtn')} trailing={usd(def.priceUsd)} loading={busy} onPress={() => confirm()} />
+      {ZELLE.enabled && <ZelleButton disabled={busy} onPress={() => confirm('zelle')} />}
     </>
   );
 }
@@ -524,6 +532,7 @@ function PassCheckout({ passId, busy, setBusy, setErr }: { passId: PassId } & Fl
 function BundleCheckout({ passId, toursJson, busy, setBusy, setErr }: { passId: PassId; toursJson: string } & Flow) {
   const { t, i18n } = useTranslation();
   const c = useTheme();
+  const now = useNow();
   let tours: PickedTour[] = [];
   try {
     tours = JSON.parse(toursJson) as PickedTour[];
@@ -535,11 +544,15 @@ function BundleCheckout({ passId, toursJson, busy, setBusy, setErr }: { passId: 
   const opts = packageTourOptions();
   if (!quote) return <Note>{t('payFailed')}</Note>;
 
-  async function confirm() {
+  const firstTour = Math.min(...tours.map((tr) => roatanInstant(tr.date, tr.time).getTime()));
+  const zelleOk = ZELLE.enabled && (tours.length === 0 || firstTour - now.getTime() >= ZELLE.minLeadHours * 3_600_000);
+
+  async function confirm(method: 'card' | 'zelle' = 'card') {
     setBusy(true);
     setErr('');
     try {
       const { bundleId, passRowId } = await createPackage(passId, tours);
+      if (method === 'zelle') return await goZelle({ bundleId }, quote!.totalCents / 100, { kind: 'pass', id: passRowId, bundle: '1' });
       const { outcome } = await pay({ bundleId }, `/confirmation?kind=pass&id=${encodeURIComponent(passRowId)}&bundle=1`);
       afterPay(outcome, t, setErr, { pathname: '/confirmation', params: { kind: 'pass', id: passRowId, bundle: '1' } });
     } catch (e) {
@@ -580,8 +593,25 @@ function BundleCheckout({ passId, toursJson, busy, setBusy, setErr }: { passId: 
         </View>
       </View>
       <Note>{t('pkgOnePayment')}</Note>
-      <Button label={t('payBtn')} trailing={usd(quote.totalCents / 100)} loading={busy} onPress={confirm} />
+      <Button label={t('payBtn')} trailing={usd(quote.totalCents / 100)} loading={busy} onPress={() => confirm()} />
+      {zelleOk && <ZelleButton disabled={busy} onPress={() => confirm('zelle')} />}
     </>
+  );
+}
+
+/** Zelle: the item is already created and held; show the transfer instructions. */
+async function goZelle(target: ZelleTarget, amountUsd: number, confirm: Record<string, string>) {
+  const z = await startZelle(target, amountUsd);
+  router.push({ pathname: '/zelle', params: { ...confirm, amount: String(z.amountUsd), to: z.zelle.to, code: z.zelle.code } });
+}
+
+function ZelleButton({ disabled, onPress }: { disabled: boolean; onPress: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <View style={{ gap: 4 }}>
+      <Button variant="tile" label={t('payZelle')} disabled={disabled} onPress={onPress} />
+      <Note center>{t('payZelleSub')}</Note>
+    </View>
   );
 }
 
