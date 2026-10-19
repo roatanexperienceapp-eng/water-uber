@@ -616,5 +616,18 @@
  "area_eastEnd": "东端",
  "flatZoneTag": "统一 $5",
  "perMileTag": "每英里 $5",
- "zoneNote": "Sandy Bay 固定票价，最少按 3 人计。"
+ "zoneNote": "Sandy Bay 固定票价，最少按 3 人计。",
+ "fxTitle": "汇率",
+ "fxSub": "可换多少洪都拉斯伦皮拉（L）。点选您的货币。",
+ "fxConvert": "换算",
+ "fxNote": "{d} 的市场中间价，每日更新。岛上银行、商店和兑换点给的会略低。本应用的付款以美元结算。",
+ "fxOffline": "当前无网络：显示 {d} 的汇率。",
+ "fxError": "无法获取今日汇率。请检查网络后点击重试。",
+ "cur_USD": "美元",
+ "cur_CAD": "加元",
+ "cur_EUR": "欧元",
+ "cur_GBP": "英镑",
+ "cur_MXN": "墨西哥比索",
+ "cur_GTQ": "危地马拉格查尔",
+ "cur_AUD": "澳元"
 }

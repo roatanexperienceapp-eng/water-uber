@@ -616,5 +616,18 @@
  "area_eastEnd": "East End",
  "flatZoneTag": "5 $ fisso",
  "perMileTag": "5 $ / miglio",
- "zoneNote": "Tariffa fissa per Sandy Bay, minimo 3 persone."
+ "zoneNote": "Tariffa fissa per Sandy Bay, minimo 3 persone.",
+ "fxTitle": "Tassi di cambio",
+ "fxSub": "Quanti lempira (L) ottieni. Tocca la tua valuta.",
+ "fxConvert": "Converti",
+ "fxNote": "Tasso medio di mercato del {d}, aggiornato ogni giorno. Banche, negozi e cambiavalute sull’isola danno un po’ meno. I pagamenti nell’app sono in dollari USA.",
+ "fxOffline": "Nessuna connessione: tassi del {d}.",
+ "fxError": "Impossibile ottenere i tassi. Controlla la connessione e tocca per riprovare.",
+ "cur_USD": "Dollaro USA",
+ "cur_CAD": "Dollaro canadese",
+ "cur_EUR": "Euro",
+ "cur_GBP": "Sterlina britannica",
+ "cur_MXN": "Peso messicano",
+ "cur_GTQ": "Quetzal guatemalteco",
+ "cur_AUD": "Dollaro australiano"
 }

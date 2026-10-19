@@ -13,6 +13,7 @@ import {
 } from '../../../supabase/functions/_shared/features.ts';
 import LiveMap from '@/components/LiveMap';
 import { LanguageButton } from '@/components/LanguageButton';
+import { CurrencyButton } from '@/components/CurrencyButton';
 import { DockPicker } from '@/components/DockPicker';
 import { ShipButton } from '@/components/ShipButton';
 import { Button, Note, Segmented, Stepper } from '@/components/ui';
@@ -194,9 +195,12 @@ export default function RideScreen() {
             <View style={[styles.logo, { backgroundColor: c.flame }]} />
             <Text style={[type.h2, { color: c.ink }]}>{BRAND_NAME}</Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: space(2) }}>
-            <ShipButton />
-            <LanguageButton />
+          <View style={{ alignItems: 'flex-end', gap: space(1) }}>
+            <View style={{ flexDirection: 'row', gap: space(2) }}>
+              <ShipButton />
+              <LanguageButton />
+            </View>
+            <CurrencyButton />
           </View>
         </View>
         <Text style={[type.hero, { color: c.ink, paddingHorizontal: space(4), marginBottom: space(3) }]}>{t('greet')}</Text>

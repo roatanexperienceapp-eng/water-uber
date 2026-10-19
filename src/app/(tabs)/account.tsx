@@ -7,6 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { MenuRow, Tile } from '@/components/AccountKit';
+import { CurrencyButton } from '@/components/CurrencyButton';
 import { LanguageButton } from '@/components/LanguageButton';
 import { DEMO_MODE } from '@/config';
 import { getProfile, hasFlag, type Profile } from '@/lib/account';
@@ -70,8 +71,9 @@ export default function Account() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
       <ScrollView contentContainerStyle={{ padding: space(4), paddingBottom: space(12) }}>
-        <View style={styles.langRow}>
+        <View style={[styles.langRow, { flexDirection: 'column', alignItems: 'flex-end', gap: space(1) }]}>
           <LanguageButton />
+          <CurrencyButton />
         </View>
 
         {/* Header: name, status chip, avatar */}

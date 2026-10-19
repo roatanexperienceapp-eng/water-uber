@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ListingRow } from '@/components/ListingRow';
 import { AllAboardBar } from '@/components/AllAboardBar';
 import { CrowdMeter } from '@/components/CrowdMeter';
+import { CurrencyButton } from '@/components/CurrencyButton';
 import { LanguageButton } from '@/components/LanguageButton';
 import { ShipButton } from '@/components/ShipButton';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
@@ -34,9 +35,12 @@ export default function ExploreScreen() {
     <View style={{ gap: space(4), paddingBottom: space(2) }}>
       <View style={styles.titleRow}>
         <Text style={[type.h1, { color: c.ink, flexShrink: 1 }]}>{t('exploreH')}</Text>
-        <View style={styles.headBtns}>
-          <ShipButton />
-          <LanguageButton />
+        <View style={{ alignItems: 'flex-end', gap: space(1) }}>
+          <View style={styles.headBtns}>
+            <ShipButton />
+            <LanguageButton />
+          </View>
+          <CurrencyButton />
         </View>
       </View>
       <AllAboardBar />
