@@ -25,8 +25,9 @@ export interface FxRates {
   publishedAt: string;
   /** When this phone fetched them (ISO). */
   fetchedAt: string;
-  source: 'exchangerate-api' | 'currency-api';
+  source: 'exchangerate-api' | 'currency-api' | 'built-in';
 }
+
 
 const CACHE_KEY = 'fx.rates';
 const PICK_KEY = 'fx.mine';
@@ -49,6 +50,17 @@ export function toHnlPer(perUsd: Record<string, number>): Record<CurrencyCode, n
   }
   return out;
 }
+
+/**
+ * Last-resort rates shipped inside the app (ExchangeRate-API, 17 Oct 2026), so the converter works on the
+ * very first open with no signal. Shown with their date; replaced as soon as the phone gets online.
+ */
+const BUILT_IN: FxRates = {
+  hnlPer: toHnlPer({ HNL: 26.872312, CAD: 1.414714, EUR: 0.889614, GBP: 0.750845, MXN: 18.465451, GTQ: 7.641331, AUD: 1.439806 })!,
+  publishedAt: '2026-10-17T00:02:31Z',
+  fetchedAt: '1970-01-01T00:00:00Z',
+  source: 'built-in',
+};
 
 async function getJSON(url: string): Promise<unknown> {
   const ctrl = new AbortController();
@@ -80,8 +92,8 @@ export async function fetchRates(): Promise<FxRates> {
 
 const isStale = (r: FxRates | null) => !r || Date.now() - Date.parse(r.fetchedAt) > REFRESH_MS;
 
-export function useFx(): { rates: FxRates | null; loading: boolean; failed: boolean; refresh: () => void } {
-  const [rates, setRates] = useState<FxRates | null>(() => readJSON<FxRates | null>(CACHE_KEY, null));
+export function useFx(): { rates: FxRates; loading: boolean; failed: boolean; refresh: () => void } {
+  const [rates, setRates] = useState<FxRates>(() => readJSON<FxRates | null>(CACHE_KEY, null) ?? BUILT_IN);
   const [loading, setLoading] = useState(() => isStale(readJSON<FxRates | null>(CACHE_KEY, null)));
   const [failed, setFailed] = useState(false);
   // Only sets state once the network answers (never synchronously inside the effect).

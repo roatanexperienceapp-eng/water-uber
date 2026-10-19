@@ -9,6 +9,7 @@ export default function ShipLink() {
   useEffect(() => {
     shipCall(id)
       .then((call) => call && setMyShip(call))
+      .catch(() => {})
       .finally(() => setDone(true));
   }, [id]);
   return done ? <Redirect href="/explore" /> : null;

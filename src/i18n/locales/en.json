@@ -621,7 +621,7 @@
  "fxSub": "How many Honduran lempiras (L) you get. Tap your currency.",
  "fxConvert": "Convert",
  "fxNote": "Mid-market rate from {d}, updated daily. Banks, shops and exchange counters on the island give a little less. Payments in this app are charged in US dollars.",
- "fxOffline": "No connection right now: showing the rates from {d}.",
+ "fxOffline": "Couldn’t reach the internet: showing the rates from {d}. Today’s rate may be slightly different.",
  "fxError": "Couldn’t get today’s rates. Check your connection and tap to try again.",
  "cur_USD": "US dollar",
  "cur_CAD": "Canadian dollar",
@@ -629,5 +629,8 @@
  "cur_GBP": "British pound",
  "cur_MXN": "Mexican peso",
  "cur_GTQ": "Guatemalan quetzal",
- "cur_AUD": "Australian dollar"
+ "cur_AUD": "Australian dollar",
+ "fxSwap": "Swap direction",
+ "fxRetry": "Try again",
+ "close": "Close"
 }

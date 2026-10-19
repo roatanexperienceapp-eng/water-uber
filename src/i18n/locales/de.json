@@ -621,7 +621,7 @@
  "fxSub": "Wie viele Lempira (L) Sie bekommen. Tippen Sie auf Ihre Währung.",
  "fxConvert": "Umrechnen",
  "fxNote": "Mittelkurs vom {d}, täglich aktualisiert. Banken, Läden und Wechselstuben auf der Insel geben etwas weniger. Zahlungen in der App laufen in US-Dollar.",
- "fxOffline": "Keine Verbindung: Kurse vom {d}.",
+ "fxOffline": "Kein Internet: Kurse vom {d}. Der heutige Kurs kann leicht abweichen.",
  "fxError": "Kurse konnten nicht geladen werden. Verbindung prüfen und tippen, um es erneut zu versuchen.",
  "cur_USD": "US-Dollar",
  "cur_CAD": "Kanadischer Dollar",
@@ -629,5 +629,8 @@
  "cur_GBP": "Britisches Pfund",
  "cur_MXN": "Mexikanischer Peso",
  "cur_GTQ": "Guatemaltekischer Quetzal",
- "cur_AUD": "Australischer Dollar"
+ "cur_AUD": "Australischer Dollar",
+ "fxSwap": "Richtung tauschen",
+ "fxRetry": "Erneut versuchen",
+ "close": "Schließen"
 }

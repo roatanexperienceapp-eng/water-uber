@@ -13,6 +13,7 @@ export default function ListingLink() {
     if (!ship) return;
     shipCall(ship)
       .then((call) => call && setMyShip(call))
+      .catch(() => {})
       .finally(() => setReady(true));
   }, [ship]);
   if (!ready) return null;

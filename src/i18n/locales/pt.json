@@ -621,7 +621,7 @@
  "fxSub": "Quantos lempiras (L) você recebe. Toque na sua moeda.",
  "fxConvert": "Converter",
  "fxNote": "Taxa média de mercado de {d}, atualizada diariamente. Bancos, lojas e casas de câmbio na ilha dão um pouco menos. Os pagamentos no app são cobrados em dólares.",
- "fxOffline": "Sem conexão: mostrando as taxas de {d}.",
+ "fxOffline": "Sem internet: mostrando as taxas de {d}. A taxa de hoje pode ser um pouco diferente.",
  "fxError": "Não foi possível obter as taxas. Verifique a conexão e toque para tentar de novo.",
  "cur_USD": "Dólar americano",
  "cur_CAD": "Dólar canadense",
@@ -629,5 +629,8 @@
  "cur_GBP": "Libra esterlina",
  "cur_MXN": "Peso mexicano",
  "cur_GTQ": "Quetzal guatemalteco",
- "cur_AUD": "Dólar australiano"
+ "cur_AUD": "Dólar australiano",
+ "fxSwap": "Inverter",
+ "fxRetry": "Tentar de novo",
+ "close": "Fechar"
 }

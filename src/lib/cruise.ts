@@ -74,8 +74,10 @@ export async function shipCalls(fromDate: string, days = 3): Promise<ShipCall[]>
 export async function shipCall(id: string): Promise<ShipCall | null> {
   if (!supabase) {
     const date = id.split('-').slice(1, 4).join('-');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null; // bad or old QR link
     return demoCalls(date, 1).find((c) => c.id === id) ?? null;
   }
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null; // not a ship call id: don't ask the database
   const { data } = await supabase.from('ship_calls').select('*').eq('id', id).maybeSingle();
   return data ? toCall(data) : null;
 }
