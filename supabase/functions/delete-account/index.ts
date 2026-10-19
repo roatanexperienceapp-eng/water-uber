@@ -12,6 +12,10 @@ export default {
     if (error) return fail(500, 'erase_failed', error.message);
     if (data === 'has_upcoming') return fail(409, 'has_upcoming', 'Cancel or finish your upcoming trips first');
     // Soft delete: the login (email) is removed and can't sign in again; the anonymous id keeps records valid.
+    // Remove the guest's community photos and videos too (best effort; the posts are already deleted).
+    const bucket = ctx.supabaseAdmin.storage.from('community');
+    const { data: files } = await bucket.list(uid, { limit: 1000 });
+    if (files?.length) await bucket.remove(files.map((f: { name: string }) => `${uid}/${f.name}`));
     const { error: derr } = await ctx.supabaseAdmin.auth.admin.deleteUser(uid, true);
     if (derr) return fail(500, 'delete_failed', derr.message);
     return json({ deleted: true });

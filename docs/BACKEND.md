@@ -170,7 +170,7 @@ select b.id, l.name, b.trip_date, b.trip_time, b.quantity, b.created_at
 
 ```bash
 npm i -D @electric-sql/pglite   # once
-npm run test:db                 # 197 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account, packages, captains)
+npm run test:db                 # 234 database checks in an embedded Postgres (security, week-stay, payments, cruise, inbox, giving, account, packages, captains, community)
 npm run test:server             # 24 pricing, feature, payment and cruise-rule checks (needs Deno: https://deno.com)
 npm run typecheck
 ```

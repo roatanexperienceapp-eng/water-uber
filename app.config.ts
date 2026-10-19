@@ -58,6 +58,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-localization',
     'expo-secure-store',
     'expo-sqlite',
+    'expo-video',
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Lets you add a photo to a post, or identify a fish from a photo you took.',
+        cameraPermission: 'Lets you take a photo of a fish to identify it, or to share a sighting.',
+        microphonePermission: false,
+      },
+    ],
     [
       'expo-location',
       IS_CAPTAIN

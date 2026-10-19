@@ -185,8 +185,8 @@ const styles = StyleSheet.create({
   tileEmoji: { fontSize: 48, lineHeight: 58 },
   tileLabel: { fontSize: 16, fontWeight: '600', textAlign: 'center', letterSpacing: -0.2 },
   give: { borderRadius: radius.lg, overflow: 'hidden' },
-  giveImg: { width: '100%', aspectRatio: 1000 / 656 },
-  giveBar: { flexDirection: 'row', alignItems: 'center', gap: space(3), padding: space(4) },
+  giveImg: { width: '100%', height: 150 }, // half the old poster height; fixed so web and phones match
+  giveBar: { flexDirection: 'row', alignItems: 'center', gap: space(3), paddingHorizontal: space(4), paddingVertical: space(3) },
   giveBtn: { borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
 });
 

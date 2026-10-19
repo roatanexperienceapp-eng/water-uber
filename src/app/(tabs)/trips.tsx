@@ -89,6 +89,23 @@ export default function Trips() {
       <ScrollView contentContainerStyle={{ padding: space(4), gap: space(4), paddingBottom: space(12) }} refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}>
         <Text style={[type.h1, { color: c.ink }]}>{t('trips_title')}</Text>
 
+        {/* Three small portals: travel talk, marine life, feedback */}
+        <View style={styles.portals}>
+          {([
+            { path: '/community', icon: 'chatbubbles', bg: '#1D4ED8', label: t('tileTalk'), sub: t('tileTalkSub') },
+            { path: '/marine', icon: 'fish', bg: '#0E7490', label: t('tileMarine'), sub: t('tileMarineSub') },
+            { path: '/feedback', icon: 'star', bg: '#B45309', label: t('tileFeedback'), sub: t('tileFeedbackSub') },
+          ] as const).map((x) => (
+            <Pressable key={x.path} accessibilityRole="button" accessibilityLabel={x.label} onPress={() => router.push(x.path)} style={({ pressed }) => [styles.portal, { backgroundColor: c.tile, opacity: pressed ? 0.7 : 1 }]}>
+              <View style={[styles.portalIcon, { backgroundColor: x.bg }]}>
+                <Ionicons name={x.icon} size={18} color="#fff" />
+              </View>
+              <Text style={[type.label, { color: c.ink, fontSize: 13 }]} numberOfLines={1}>{x.label}</Text>
+              <Text style={[type.small, { color: c.muted, fontSize: 11, lineHeight: 14 }]} numberOfLines={2}>{x.sub}</Text>
+            </Pressable>
+          ))}
+        </View>
+
         {offline && (
           <View style={[styles.promo, { backgroundColor: '#FFF4E5' }]}>
             <Ionicons name="cloud-offline" size={20} color="#B45309" />
@@ -244,6 +261,9 @@ export default function Trips() {
 }
 
 const styles = StyleSheet.create({
+  portals: { flexDirection: 'row', gap: space(2) },
+  portal: { flex: 1, borderRadius: radius.lg, padding: space(3), gap: 4, minHeight: 104 },
+  portalIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 2 },
   item: { flexDirection: 'row', alignItems: 'center', gap: space(3), paddingVertical: space(3), borderBottomWidth: 1 },
   small: { borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 7 },
   ticket: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.md, padding: space(4) },

@@ -28,6 +28,9 @@ export default function RootLayout() {
         <Stack.Screen name="inbox-compose" />
         <Stack.Screen name="give" />
         <Stack.Screen name="captains" />
+        <Stack.Screen name="community" />
+        <Stack.Screen name="marine" />
+        <Stack.Screen name="feedback" />
         <Stack.Screen name="me/profile" />
         <Stack.Screen name="me/settings" />
         <Stack.Screen name="me/places" />

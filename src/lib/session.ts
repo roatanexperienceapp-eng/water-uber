@@ -12,3 +12,11 @@ export async function ensureSession(): Promise<void> {
   const { error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
 }
+
+/** Signed-in (or anonymous) user id; signs in anonymously first if needed. Live mode only. */
+export async function currentUser(): Promise<{ user: { id: string } }> {
+  await ensureSession();
+  const { data } = await supabase!.auth.getSession();
+  if (!data.session) throw new Error('no_session');
+  return { user: { id: data.session.user.id } };
+}
