@@ -367,7 +367,7 @@ export default function RideScreen() {
           {!flat && (
             <View style={[styles.mileNote, { backgroundColor: c.tile }]}>
               <Text style={[type.small, { color: c.ink }]}>
-                {t('mileNote')} {quote.breakdown}
+                {quote.rule === 'zone' ? t('zoneNote') : t('mileNote')} {quote.breakdown}
               </Text>
             </View>
           )}

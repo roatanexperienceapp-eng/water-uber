@@ -615,5 +615,6 @@
  "area_french": "French Harbour",
  "area_eastEnd": "东端",
  "flatZoneTag": "统一 $5",
- "perMileTag": "每英里 $5"
+ "perMileTag": "每英里 $5",
+ "zoneNote": "Sandy Bay 固定票价，最少按 3 人计。"
 }

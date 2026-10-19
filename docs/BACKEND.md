@@ -91,7 +91,8 @@ Ride pass prices (owner prices): **$35 per person per week, any group from 2 to 
 `supabase/functions/_shared/features.ts`.
 
 **Piers** (`supabase/functions/_shared/geo.ts` → `DOCKS`): 28 piers grouped West End, West Bay, Sandy Bay, Coxen Hole,
-French Harbour and East End. All 21 West End + West Bay piers are in the **$5 flat zone**; the rest are $5 per rider per
+French Harbour and East End. All 21 West End + West Bay piers are in the **$5 flat zone**. Sandy Bay has fixed fares (`PRICING.zoneFares`):
+West Bay ↔ Sandy Bay **$15 pp**, West End ↔ Sandy Bay **$10 pp**, both with a **3-person minimum**. Everything else is $5 per rider per
 mile along sea lanes that never cross land (`geo.test.ts` checks this). Piers marked `approx: true` were placed from the
 coastline map by name — stand on each one with a phone, read the GPS, and replace `lon`/`lat` before launch (fares to
 Sandy Bay, Pristine Bay and Palmetto Bay depend on it). Then run `node scripts/generate-seed.mjs`.

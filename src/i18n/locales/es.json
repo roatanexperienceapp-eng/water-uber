@@ -615,5 +615,6 @@
  "area_french": "French Harbour",
  "area_eastEnd": "East End",
  "flatZoneTag": "$5 fijo",
- "perMileTag": "$5 / milla"
+ "perMileTag": "$5 / milla",
+ "zoneNote": "Tarifa fija a Sandy Bay, mínimo 3 personas."
 }

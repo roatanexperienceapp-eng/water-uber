@@ -615,5 +615,6 @@
  "area_french": "French Harbour",
  "area_eastEnd": "East End",
  "flatZoneTag": "$5 flat",
- "perMileTag": "$5 / mile"
+ "perMileTag": "$5 / mile",
+ "zoneNote": "Sandy Bay fixed fare, 3-person minimum."
 }

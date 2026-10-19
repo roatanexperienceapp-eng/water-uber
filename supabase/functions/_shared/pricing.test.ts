@@ -23,8 +23,19 @@ Deno.test('scheduled pickups are private and add a $5 reservation fee', () => {
   assertEquals(s.reservationFee, 5);
 });
 
-Deno.test('outside the zone: $5 per rider per mile, rounded to whole dollars', () => {
-  const r = q('we', 'sandyD', 2);
+Deno.test('Sandy Bay: West Bay $15 pp, West End $10 pp, 3-person minimum, both directions', () => {
+  assertEquals(q('inf', 'sandyD', 1).total, 45); // 1 rider pays the 3-person minimum
+  assertEquals(q('sandyD', 'fos', 3).total, 45);
+  assertEquals(q('ban', 'tranquil', 5).total, 75);
+  assertEquals(q('we', 'sandyD', 2).total, 30);
+  assertEquals(q('blueBahia', 'lasRocas', 4).total, 40);
+  assertEquals(q('we', 'sandyD', 1).rule, 'zone');
+  assert(q('we', 'sandyD', 1).breakdown.includes('3-person minimum'));
+  assertEquals(q('we', 'sandyD', 2, 'shared', 'scheduled').total, 35); // + $5 reservation
+});
+
+Deno.test('outside the zones: $5 per rider per mile, rounded to whole dollars', () => {
+  const r = q('we', 'coxenD', 2);
   assertEquals(r.rule, 'distance');
   assertEquals(r.total, Math.round(5 * 2 * r.miles));
   assert(r.breakdown.endsWith(`= $${r.total}`));
