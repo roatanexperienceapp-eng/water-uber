@@ -1,6 +1,6 @@
 // Rules for the 7 week-stay features. Pure TypeScript, shared by the app (to show quotes and suggestions)
 // and by the server (which enforces them). Every business number lives in FEATURE_SETTINGS — change it here only.
-import { FLAT_ZONE } from './geo.ts';
+import { DOCKS, FLAT_ZONE } from './geo.ts';
 import { PRICING } from './pricing.ts';
 
 export interface PassDef {
@@ -259,9 +259,7 @@ export interface SeaReport {
 }
 
 /** Which stretch of coast a dock's route mostly runs along. */
-export const DOCK_AREA: Record<string, SeaArea> = {
-  hmb: 'west', we: 'west', inf: 'west', ban: 'west', fos: 'west', sandyD: 'north', coxenD: 'south', portD: 'south',
-};
+export const DOCK_AREA: Record<string, SeaArea> = Object.fromEntries(DOCKS.map((d) => [d.id, d.sea]));
 
 const REPORT_TTL_MS = 3 * 3600_000;
 

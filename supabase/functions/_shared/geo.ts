@@ -1,64 +1,276 @@
 // Shared by the mobile app and Supabase edge functions. Pure TypeScript: no React Native or Deno imports.
-// Coordinates are [longitude, latitude] (WGS84). Docks were snapped to an OpenStreetMap-derived coastline;
-// confirm each one on the water before launch.
+// Coordinates are [longitude, latitude] (WGS84). Docks were snapped to an OpenStreetMap-derived coastline.
+// Docks marked approx: true were placed from the map by name: confirm each with a GPS reading on the pier before launch.
 
 export type LngLat = [number, number];
+
+export type DockArea = 'West End' | 'West Bay' | 'Sandy Bay' | 'Coxen Hole' | 'French Harbour' | 'East End';
 
 export interface Dock {
   id: string;
   name: string;
   lon: number;
   lat: number;
+  /** Neighbourhood, used to group the dock picker. */
+  area: DockArea;
+  /** Which stretch of sea the dock's routes run along (sea-condition reports). */
+  sea: 'west' | 'north' | 'south';
+  /** Placed from the coastline map, not yet confirmed with a GPS reading on the pier. Fares outside the flat zone depend on it. */
+  approx: boolean;
 }
 
 export const DOCKS: Dock[] = [
   {
+    "id": "lasRocas",
+    "name": "Las Rocas pier",
+    "lon": -86.59009,
+    "lat": 16.3135,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "xbal",
+    "name": "Xbalanque pier",
+    "lon": -86.59026,
+    "lat": 16.312,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
     "id": "hmb",
-    "name": "Half Moon Bay",
+    "name": "Half Moon Bay pier",
     "lon": -86.59533,
-    "lat": 16.30999
+    "lat": 16.30999,
+    "approx": false,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "coco",
+    "name": "Coconut Tree pier",
+    "lon": -86.5961,
+    "lat": 16.3085,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "beachHouse",
+    "name": "Beach House pier",
+    "lon": -86.59609,
+    "lat": 16.3075,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "woodys",
+    "name": "Woody's pier",
+    "lon": -86.59609,
+    "lat": 16.3066,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "cafePalo",
+    "name": "Café de Palo pier",
+    "lon": -86.59608,
+    "lat": 16.3058,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "harrys",
+    "name": "Happy Harry's pier",
+    "lon": -86.59608,
+    "lat": 16.305,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "blueEl",
+    "name": "Blue Elephant pier",
+    "lon": -86.59607,
+    "lat": 16.3042,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
   },
   {
     "id": "we",
-    "name": "West End dock (Splash Inn)",
+    "name": "Water taxi pier (Splash Inn)",
     "lon": -86.59602,
-    "lat": 16.3033
+    "lat": 16.3033,
+    "approx": false,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "ibagari",
+    "name": "Ibagari pier",
+    "lon": -86.59606,
+    "lat": 16.3022,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "tesoro",
+    "name": "Caribbean Tesoro pier",
+    "lon": -86.59606,
+    "lat": 16.3011,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "turtle",
+    "name": "Turtle Beach pier",
+    "lon": -86.59605,
+    "lat": 16.3,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "luna",
+    "name": "Luna Beach pier",
+    "lon": -86.59604,
+    "lat": 16.299,
+    "approx": true,
+    "area": "West End",
+    "sea": "west"
+  },
+  {
+    "id": "paradise",
+    "name": "Paradise Beach",
+    "lon": -86.59676,
+    "lat": 16.2885,
+    "approx": true,
+    "area": "West Bay",
+    "sea": "west"
+  },
+  {
+    "id": "henry",
+    "name": "Henry Morgan beach",
+    "lon": -86.5973,
+    "lat": 16.2866,
+    "approx": true,
+    "area": "West Bay",
+    "sea": "west"
   },
   {
     "id": "inf",
-    "name": "West Bay · Infinity Bay",
+    "name": "Infinity Bay pier",
     "lon": -86.59788,
-    "lat": 16.28445
+    "lat": 16.28445,
+    "approx": false,
+    "area": "West Bay",
+    "sea": "west"
+  },
+  {
+    "id": "arg",
+    "name": "Argentinian Grill beach",
+    "lon": -86.59855,
+    "lat": 16.2822,
+    "approx": true,
+    "area": "West Bay",
+    "sea": "west"
   },
   {
     "id": "ban",
-    "name": "West Bay · Bananarama",
+    "name": "Bananarama beach",
     "lon": -86.59915,
-    "lat": 16.27996
+    "lat": 16.27996,
+    "approx": false,
+    "area": "West Bay",
+    "sea": "west"
+  },
+  {
+    "id": "beacher",
+    "name": "Beacher",
+    "lon": -86.59987,
+    "lat": 16.2775,
+    "approx": true,
+    "area": "West Bay",
+    "sea": "west"
   },
   {
     "id": "fos",
-    "name": "West Bay · south end",
+    "name": "Foster's pier",
     "lon": -86.60049,
-    "lat": 16.27523
+    "lat": 16.27523,
+    "approx": false,
+    "area": "West Bay",
+    "sea": "west"
+  },
+  {
+    "id": "tranquil",
+    "name": "Tranquil Seas pier",
+    "lon": -86.578,
+    "lat": 16.32438,
+    "approx": true,
+    "area": "Sandy Bay",
+    "sea": "north"
+  },
+  {
+    "id": "blueBahia",
+    "name": "Blue Bahia pier",
+    "lon": -86.5725,
+    "lat": 16.32866,
+    "approx": true,
+    "area": "Sandy Bay",
+    "sea": "north"
   },
   {
     "id": "sandyD",
-    "name": "Sandy Bay · Anthony's Key",
+    "name": "Anthony's Key pier",
     "lon": -86.56592,
-    "lat": 16.334
+    "lat": 16.334,
+    "approx": false,
+    "area": "Sandy Bay",
+    "sea": "north"
   },
   {
     "id": "coxenD",
     "name": "Coxen Hole · town dock",
     "lon": -86.53721,
-    "lat": 16.31439
+    "lat": 16.31439,
+    "approx": false,
+    "area": "Coxen Hole",
+    "sea": "south"
   },
   {
     "id": "portD",
     "name": "Isla Tropicale cruise port",
     "lon": -86.50005,
-    "lat": 16.32635
+    "lat": 16.32635,
+    "approx": false,
+    "area": "Coxen Hole",
+    "sea": "south"
+  },
+  {
+    "id": "pristine",
+    "name": "Pristine Bay pier",
+    "lon": -86.425,
+    "lat": 16.35834,
+    "approx": true,
+    "area": "French Harbour",
+    "sea": "south"
+  },
+  {
+    "id": "palmetto",
+    "name": "Palmetto Bay pier",
+    "lon": -86.38,
+    "lat": 16.41142,
+    "approx": true,
+    "area": "East End",
+    "sea": "north"
   }
 ];
 
@@ -131,14 +343,42 @@ export const WAYPOINTS: Record<string, LngLat> = {
   "portOff": [
     -86.502,
     16.316
+  ],
+  "nE1": [
+    -86.53,
+    16.3635
+  ],
+  "nE2": [
+    -86.47,
+    16.3859
+  ],
+  "nE3": [
+    -86.41,
+    16.4075
+  ],
+  "nE4": [
+    -86.38,
+    16.4227
+  ],
+  "sE1": [
+    -86.47,
+    16.3337
+  ],
+  "sE2": [
+    -86.43,
+    16.3499
+  ],
+  "sE0": [
+    -86.49,
+    16.3127
   ]
 };
 
 /** Undirected sea-lane graph between docks and waypoints. Every edge was checked to stay off land. */
-export const SEA_EDGES: [string, string][] = [["we", "weOff"], ["hmb", "weOff"], ["inf", "wbOff"], ["ban", "wbOff"], ["fos", "wbOff"], ["weOff", "wbOff"], ["weOff", "nwOff"], ["hmb", "nwOff"], ["nwOff", "nwOff2"], ["nwOff2", "blue"], ["blue", "sandy"], ["sandy", "sandyD"], ["fos", "tip"], ["ban", "tip"], ["tip", "sOff"], ["sOff", "sOff2"], ["sOff2", "south"], ["south", "coxen"], ["coxen", "coxenD"], ["coxen", "eastOff"], ["inf", "ban"], ["ban", "fos"], ["eastOff", "portOff"], ["portOff", "portD"]];
+export const SEA_EDGES: [string, string][] = [["we", "weOff"], ["hmb", "weOff"], ["inf", "wbOff"], ["ban", "wbOff"], ["fos", "wbOff"], ["weOff", "wbOff"], ["weOff", "nwOff"], ["hmb", "nwOff"], ["nwOff", "nwOff2"], ["nwOff2", "blue"], ["blue", "sandy"], ["sandy", "sandyD"], ["fos", "tip"], ["ban", "tip"], ["tip", "sOff"], ["sOff", "sOff2"], ["sOff2", "south"], ["south", "coxen"], ["coxen", "coxenD"], ["coxen", "eastOff"], ["inf", "ban"], ["ban", "fos"], ["eastOff", "portOff"], ["portOff", "portD"], ["lasRocas", "xbal"], ["hmb", "coco"], ["coco", "beachHouse"], ["beachHouse", "woodys"], ["woodys", "cafePalo"], ["cafePalo", "harrys"], ["harrys", "blueEl"], ["blueEl", "we"], ["we", "ibagari"], ["ibagari", "tesoro"], ["tesoro", "turtle"], ["turtle", "luna"], ["paradise", "henry"], ["henry", "inf"], ["inf", "arg"], ["arg", "ban"], ["ban", "beacher"], ["beacher", "fos"], ["luna", "weOff"], ["luna", "wbOff"], ["paradise", "wbOff"], ["lasRocas", "nwOff"], ["xbal", "nwOff"], ["tranquil", "blueBahia"], ["blueBahia", "sandy"], ["blueBahia", "sandyD"], ["sandy", "nE1"], ["nE1", "nE2"], ["nE2", "nE3"], ["nE3", "nE4"], ["nE4", "palmetto"], ["sE1", "sE2"], ["sE2", "pristine"], ["tranquil", "nwOff2"], ["tranquil", "sandy"], ["portOff", "sE0"], ["sE0", "sE1"]];
 
 /** Docks inside the flat-fare zone (West End ↔ West Bay). */
-export const FLAT_ZONE: readonly string[] = ["hmb", "we", "inf", "ban", "fos"];
+export const FLAT_ZONE: readonly string[] = ["lasRocas", "xbal", "hmb", "coco", "beachHouse", "woodys", "cafePalo", "harrys", "blueEl", "we", "ibagari", "tesoro", "turtle", "luna", "paradise", "henry", "inf", "arg", "ban", "beacher", "fos"];
 
 export const KM_PER_MILE = 1.609344;
 

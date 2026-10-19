@@ -606,5 +606,14 @@
  "helmPick": "Qui est à la barre aujourd’hui ?",
  "helmChange": "Changer de capitaine",
  "helmUnverified": "Vous ne pouvez pas prendre de courses payées tant que le bureau n’a pas vérifié votre permis.",
- "helmUnlinked": "Votre compte n’est pas encore lié à un capitaine. Demandez au bureau de le lier et de vérifier votre permis."
+ "helmUnlinked": "Votre compte n’est pas encore lié à un capitaine. Demandez au bureau de le lier et de vérifier votre permis.",
+ "searchDock": "Chercher un ponton",
+ "area_westEnd": "West End",
+ "area_westBay": "West Bay",
+ "area_sandyBay": "Sandy Bay",
+ "area_coxen": "Coxen Hole et port de croisière",
+ "area_french": "French Harbour",
+ "area_eastEnd": "East End",
+ "flatZoneTag": "5 $ fixe",
+ "perMileTag": "5 $ / mille"
 }

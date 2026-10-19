@@ -5,13 +5,14 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DOCKS } from '../../supabase/functions/_shared/geo.ts';
+import { DOCKS, FLAT_ZONE } from '../../supabase/functions/_shared/geo.ts';
 import { PRICING, quoteFare, type RideMode, type RideTiming } from '../../supabase/functions/_shared/pricing.ts';
 import {
   ACTIVITY_HOURS, dockForArea, FEATURE_SETTINGS, nightMode, passBreakEvenRides, passCovers, passDefinition, pickupForActivity,
   type PassId,
 } from '../../supabase/functions/_shared/features.ts';
 import { AllAboardBar } from '@/components/AllAboardBar';
+import { DockPicker } from '@/components/DockPicker';
 import { Button, Card, Note, Stepper } from '@/components/ui';
 import { DEMO_MODE } from '@/config';
 import { LISTINGS } from '@/data/catalogue';
@@ -52,7 +53,7 @@ type Params = {
 };
 
 const ACTIVITY_TIMES = ['08:00', '09:00', '10:00', '13:00', '14:00', '18:00'];
-const FLAT_DOCKS = ['we', 'inf', 'hmb', 'ban', 'fos'];
+const FLAT_DOCKS = FLAT_ZONE;
 
 export default function Checkout() {
   const p = useLocalSearchParams<Params>();
@@ -217,6 +218,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const [shares, setShares] = useState(2);
   // Most week-stay rentals are in West Bay; a saved "My rental" place overrides this.
   const [home, setHome] = useState('inf');
+  const [homePicker, setHomePicker] = useState(false);
   const [pass, setPass] = useState<GuestPass | null>(null);
 
   useEffect(() => {
@@ -422,13 +424,12 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
           {withTaxi && (
             <>
               <Text style={[type.label, { color: c.muted }]}>{t('from_')}</Text>
-              <View style={styles.wrap}>
-                {FLAT_DOCKS.map((d) => (
-                  <Pressable key={d} onPress={() => setHome(d)} style={[styles.pill, { backgroundColor: d === home ? c.ink : c.bg }]}>
-                    <Text style={[type.label, { fontSize: 13, color: d === home ? c.onInk : c.ink }]}>{dockName(d)}</Text>
-                  </Pressable>
-                ))}
-              </View>
+              <Pressable accessibilityRole="button" onPress={() => setHomePicker(true)} style={[styles.row, { backgroundColor: c.bg }]}>
+                <Ionicons name="boat-outline" size={18} color={c.ink} />
+                <Text style={[type.bodyStrong, { color: c.ink, flex: 1 }]}>{dockName(home)}</Text>
+                <Ionicons name="chevron-down" size={18} color={c.muted} />
+              </Pressable>
+              <DockPicker visible={homePicker} selected={home} only={FLAT_DOCKS} onPick={(d) => { setHome(d); setHomePicker(false); }} onClose={() => setHomePicker(false)} />
               {taxiOn && pickupAt && backAt ? (
                 <>
                   <Note>• {t('taxiThere').replace('{t}', islandClock(pickupAt, i18n.language)).replace('{dock}', dockName(home))}</Note>

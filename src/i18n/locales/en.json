@@ -606,5 +606,14 @@
  "helmPick": "Who’s at the helm today?",
  "helmChange": "Change captain",
  "helmUnverified": "You can’t take paying rides until the office checks your licence.",
- "helmUnlinked": "Your account isn’t linked to a captain yet. Ask the office to link it and check your licence."
+ "helmUnlinked": "Your account isn’t linked to a captain yet. Ask the office to link it and check your licence.",
+ "searchDock": "Search piers",
+ "area_westEnd": "West End",
+ "area_westBay": "West Bay",
+ "area_sandyBay": "Sandy Bay",
+ "area_coxen": "Coxen Hole & cruise port",
+ "area_french": "French Harbour",
+ "area_eastEnd": "East End",
+ "flatZoneTag": "$5 flat",
+ "perMileTag": "$5 / mile"
 }

@@ -5,14 +5,34 @@
 insert into public.operators (id, name, whatsapp, is_partner, commission_pct) values ('00000000-0000-0000-0000-000000000001', 'Owner tours & rentals', null, true, 100) on conflict (id) do update set commission_pct = 100;
 
 insert into public.docks (id, name, lon, lat, in_flat_zone) values
-  ('hmb', 'Half Moon Bay', -86.59533, 16.30999, true),
-  ('we', 'West End dock (Splash Inn)', -86.59602, 16.3033, true),
-  ('inf', 'West Bay · Infinity Bay', -86.59788, 16.28445, true),
-  ('ban', 'West Bay · Bananarama', -86.59915, 16.27996, true),
-  ('fos', 'West Bay · south end', -86.60049, 16.27523, true),
-  ('sandyD', 'Sandy Bay · Anthony''s Key', -86.56592, 16.334, false),
+  ('lasRocas', 'Las Rocas pier', -86.59009, 16.3135, true),
+  ('xbal', 'Xbalanque pier', -86.59026, 16.312, true),
+  ('hmb', 'Half Moon Bay pier', -86.59533, 16.30999, true),
+  ('coco', 'Coconut Tree pier', -86.5961, 16.3085, true),
+  ('beachHouse', 'Beach House pier', -86.59609, 16.3075, true),
+  ('woodys', 'Woody''s pier', -86.59609, 16.3066, true),
+  ('cafePalo', 'Café de Palo pier', -86.59608, 16.3058, true),
+  ('harrys', 'Happy Harry''s pier', -86.59608, 16.305, true),
+  ('blueEl', 'Blue Elephant pier', -86.59607, 16.3042, true),
+  ('we', 'Water taxi pier (Splash Inn)', -86.59602, 16.3033, true),
+  ('ibagari', 'Ibagari pier', -86.59606, 16.3022, true),
+  ('tesoro', 'Caribbean Tesoro pier', -86.59606, 16.3011, true),
+  ('turtle', 'Turtle Beach pier', -86.59605, 16.3, true),
+  ('luna', 'Luna Beach pier', -86.59604, 16.299, true),
+  ('paradise', 'Paradise Beach', -86.59676, 16.2885, true),
+  ('henry', 'Henry Morgan beach', -86.5973, 16.2866, true),
+  ('inf', 'Infinity Bay pier', -86.59788, 16.28445, true),
+  ('arg', 'Argentinian Grill beach', -86.59855, 16.2822, true),
+  ('ban', 'Bananarama beach', -86.59915, 16.27996, true),
+  ('beacher', 'Beacher', -86.59987, 16.2775, true),
+  ('fos', 'Foster''s pier', -86.60049, 16.27523, true),
+  ('tranquil', 'Tranquil Seas pier', -86.578, 16.32438, false),
+  ('blueBahia', 'Blue Bahia pier', -86.5725, 16.32866, false),
+  ('sandyD', 'Anthony''s Key pier', -86.56592, 16.334, false),
   ('coxenD', 'Coxen Hole · town dock', -86.53721, 16.31439, false),
-  ('portD', 'Isla Tropicale cruise port', -86.50005, 16.32635, false)
+  ('portD', 'Isla Tropicale cruise port', -86.50005, 16.32635, false),
+  ('pristine', 'Pristine Bay pier', -86.425, 16.35834, false),
+  ('palmetto', 'Palmetto Bay pier', -86.38, 16.41142, false)
 on conflict (id) do update set name = excluded.name, lon = excluded.lon, lat = excluded.lat, in_flat_zone = excluded.in_flat_zone;
 
 insert into public.portals (key, icon, names, kind, sort) values

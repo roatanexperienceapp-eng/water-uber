@@ -606,5 +606,14 @@
  "helmPick": "Chi è al timone oggi?",
  "helmChange": "Cambia capitano",
  "helmUnverified": "Non puoi accettare corse pagate finché l’ufficio non verifica la tua licenza.",
- "helmUnlinked": "Il tuo account non è ancora collegato a un capitano. Chiedi all’ufficio di collegarlo e verificare la licenza."
+ "helmUnlinked": "Il tuo account non è ancora collegato a un capitano. Chiedi all’ufficio di collegarlo e verificare la licenza.",
+ "searchDock": "Cerca pontile",
+ "area_westEnd": "West End",
+ "area_westBay": "West Bay",
+ "area_sandyBay": "Sandy Bay",
+ "area_coxen": "Coxen Hole e porto crociere",
+ "area_french": "French Harbour",
+ "area_eastEnd": "East End",
+ "flatZoneTag": "5 $ fisso",
+ "perMileTag": "5 $ / miglio"
 }

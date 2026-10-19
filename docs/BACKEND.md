@@ -90,6 +90,12 @@ Ride pass prices (owner prices): **$35 per person per week, any group from 2 to 
 (2 people $70 / $140 … 3 people $105 / $210 … 12 people $420 / $840). Change `passPricing` and `passes` in
 `supabase/functions/_shared/features.ts`.
 
+**Piers** (`supabase/functions/_shared/geo.ts` → `DOCKS`): 28 piers grouped West End, West Bay, Sandy Bay, Coxen Hole,
+French Harbour and East End. All 21 West End + West Bay piers are in the **$5 flat zone**; the rest are $5 per rider per
+mile along sea lanes that never cross land (`geo.test.ts` checks this). Piers marked `approx: true` were placed from the
+coastline map by name — stand on each one with a phone, read the GPS, and replace `lon`/`lat` before launch (fares to
+Sandy Bay, Pristine Bay and Palmetto Bay depend on it). Then run `node scripts/generate-seed.mjs`.
+
 **Your tours** (`src/data/catalogue.ts`, then `node scripts/generate-seed.mjs`):
 - Snorkel: Shipwreck $95 pp · Pigeon Key nurse shark swim $190 pp · Blue Channel $30 pp · Dolphin show $45 pp · Cayos Cochinos (full day) $190 pp
 - Fishing: Bottom fishing $60 pp · Deep sea trolling, half day, $350 per boat (up to 6 people per boat → 8 people pay for 2 boats; `TOUR_SETTINGS.seatsPerBoat` in `supabase/functions/_shared/tours.ts`)

@@ -47,7 +47,7 @@ await db.exec(readFileSync(path.join(root, 'seed.sql'), 'utf8'));
 const count = async (sql) => Number((await db.query(sql)).rows[0].n);
 ok((await count('select count(*) n from listings')) === 161, 'seed: 161 listings');
 ok((await count('select count(*) n from portals')) === 14, 'seed: 14 portals');
-ok((await count("select count(*) n from docks where in_flat_zone")) === 5, 'seed: 5 flat-zone docks');
+ok((await count("select count(*) n from docks where in_flat_zone")) === 21, 'seed: 21 flat-zone docks');
 
 // ---- People ----
 const GUEST_A = '11111111-1111-1111-1111-111111111111';

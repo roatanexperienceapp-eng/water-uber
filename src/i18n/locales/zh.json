@@ -606,5 +606,14 @@
  "helmPick": "今天谁当班？",
  "helmChange": "更换船长",
  "helmUnverified": "在办公室核实您的执照之前，您不能接付费订单。",
- "helmUnlinked": "您的账户尚未关联船长身份。请联系办公室关联账户并核实执照。"
+ "helmUnlinked": "您的账户尚未关联船长身份。请联系办公室关联账户并核实执照。",
+ "searchDock": "搜索码头",
+ "area_westEnd": "West End 西区",
+ "area_westBay": "West Bay 西湾",
+ "area_sandyBay": "Sandy Bay 沙湾",
+ "area_coxen": "Coxen Hole 与邮轮港",
+ "area_french": "French Harbour",
+ "area_eastEnd": "东端",
+ "flatZoneTag": "统一 $5",
+ "perMileTag": "每英里 $5"
 }

@@ -606,5 +606,14 @@
  "helmPick": "Quem está no leme hoje?",
  "helmChange": "Trocar capitão",
  "helmUnverified": "Você não pode aceitar corridas pagas até o escritório verificar sua licença.",
- "helmUnlinked": "Sua conta ainda não está vinculada a um capitão. Peça ao escritório para vinculá-la e verificar sua licença."
+ "helmUnlinked": "Sua conta ainda não está vinculada a um capitão. Peça ao escritório para vinculá-la e verificar sua licença.",
+ "searchDock": "Buscar píer",
+ "area_westEnd": "West End",
+ "area_westBay": "West Bay",
+ "area_sandyBay": "Sandy Bay",
+ "area_coxen": "Coxen Hole e porto de cruzeiros",
+ "area_french": "French Harbour",
+ "area_eastEnd": "East End",
+ "flatZoneTag": "$5 fixo",
+ "perMileTag": "$5 / milha"
 }

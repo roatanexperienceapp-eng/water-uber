@@ -13,6 +13,7 @@ import {
 } from '../../../supabase/functions/_shared/features.ts';
 import LiveMap from '@/components/LiveMap';
 import { LanguageButton } from '@/components/LanguageButton';
+import { DockPicker } from '@/components/DockPicker';
 import { ShipButton } from '@/components/ShipButton';
 import { Button, Note, Segmented, Stepper } from '@/components/ui';
 import { BRAND_NAME, DEMO_MODE, HOME_CENTER } from '@/config';
@@ -513,22 +514,7 @@ export default function RideScreen() {
         <Text style={[type.bodyStrong, { color: c.onInk }]}>{t('ask')}</Text>
       </Pressable>
 
-      <Modal visible={picker !== null} transparent animationType="fade" onRequestClose={() => setPicker(null)}>
-        <Pressable style={styles.scrim} onPress={() => setPicker(null)}>
-          <View style={[styles.sheet, { backgroundColor: c.bg }]}>
-            <Text style={[type.h2, { color: c.ink, marginBottom: space(2) }]}>{t('pickDock')}</Text>
-            {DOCKS.map((d) => {
-              const on = d.id === (picker === 'from' ? from : to);
-              return (
-                <Pressable key={d.id} onPress={() => chooseDock(d.id)} style={[styles.sheetItem, on && { backgroundColor: c.tile }]}>
-                  <Ionicons name="boat-outline" size={18} color={c.ink} />
-                  <Text style={[type.body, { color: c.ink, fontWeight: on ? '700' : '500' }]}>{d.name}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </Pressable>
-      </Modal>
+      <DockPicker visible={picker !== null} selected={picker === 'from' ? from : to} onPick={chooseDock} onClose={() => setPicker(null)} />
 
       <Modal visible={saving} transparent animationType="fade" onRequestClose={() => setSaving(false)}>
         <Pressable style={styles.scrim} onPress={() => setSaving(false)}>

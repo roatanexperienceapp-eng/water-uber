@@ -606,5 +606,14 @@
  "helmPick": "Wer steht heute am Steuer?",
  "helmChange": "Kapitän wechseln",
  "helmUnverified": "Sie können keine bezahlten Fahrten annehmen, bis das Büro Ihre Lizenz geprüft hat.",
- "helmUnlinked": "Ihr Konto ist noch keinem Kapitän zugeordnet. Bitten Sie das Büro, es zu verknüpfen und Ihre Lizenz zu prüfen."
+ "helmUnlinked": "Ihr Konto ist noch keinem Kapitän zugeordnet. Bitten Sie das Büro, es zu verknüpfen und Ihre Lizenz zu prüfen.",
+ "searchDock": "Steg suchen",
+ "area_westEnd": "West End",
+ "area_westBay": "West Bay",
+ "area_sandyBay": "Sandy Bay",
+ "area_coxen": "Coxen Hole & Kreuzfahrthafen",
+ "area_french": "French Harbour",
+ "area_eastEnd": "East End",
+ "flatZoneTag": "5 $ pauschal",
+ "perMileTag": "5 $ / Meile"
 }
