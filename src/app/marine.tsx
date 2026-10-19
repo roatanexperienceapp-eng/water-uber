@@ -6,6 +6,7 @@ import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'rea
 import type { MarineId } from '../../supabase/functions/_shared/marine.ts';
 import { SubScreen } from '@/components/AccountKit';
 import { Composer, JoinGate, PostCard } from '@/components/Community';
+import { MarineGuide } from '@/components/MarineGuide';
 import { Note, Segmented } from '@/components/ui';
 import { getMe, listPosts, type Me, type Post } from '@/lib/community';
 import { identify } from '@/lib/marine';
@@ -16,7 +17,7 @@ import { radius, space, type, useTheme } from '@/theme';
 export default function Marine() {
   const { t, i18n } = useTranslation();
   const c = useTheme();
-  const [tab, setTab] = useState<'scan' | 'wall'>('scan');
+  const [tab, setTab] = useState<'scan' | 'guide' | 'wall'>('scan');
   const [photo, setPhoto] = useState<PickedMedia | null>(null);
   const [result, setResult] = useState<(MarineId & { demo?: boolean }) | null>(null);
   const [busy, setBusy] = useState(false);
@@ -57,9 +58,11 @@ export default function Marine() {
 
   return (
     <SubScreen title={t('marineH')}>
-      <Segmented value={tab} onChange={setTab} options={[{ value: 'scan', label: `🔍 ${t('scanTab')}` }, { value: 'wall', label: `🐢 ${t('wallTab')}` }]} />
+      <Segmented value={tab} onChange={setTab} options={[{ value: 'scan', label: `🔍 ${t('scanTab')}` }, { value: 'guide', label: `📖 ${t('guideTab')}` }, { value: 'wall', label: `🐢 ${t('wallTab')}` }]} />
 
-      {tab === 'scan' ? (
+      {tab === 'guide' ? (
+        <MarineGuide onSaw={(name) => { setShare({ species: name, media: null, key: Date.now() }); setTab('wall'); }} />
+      ) : tab === 'scan' ? (
         <View style={{ gap: space(3) }}>
           <Note>{t('scanSub')}</Note>
           <View style={styles.row}>

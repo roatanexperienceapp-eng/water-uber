@@ -136,8 +136,10 @@ function ToolBtn({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMa
   );
 }
 
-function Chips({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
+function Chips({ label, options: base, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) {
   const c = useTheme();
+  // A value chosen elsewhere (scanner, guide) shows first even if it isn't a standard chip.
+  const options = value && !base.includes(value) ? [value, ...base] : base;
   return (
     <View style={{ gap: 6 }}>
       <Text style={[type.label, { color: c.muted, fontSize: 12 }]}>{label}</Text>
