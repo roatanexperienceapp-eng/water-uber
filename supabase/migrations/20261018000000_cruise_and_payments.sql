@@ -199,7 +199,8 @@ language sql security definer set search_path = public as $$
    where id = p_payment_id and status = 'succeeded' and refunded_at is null;
 $$;
 
-drop function public.mark_payment_succeeded(uuid, text);
+-- The old 2-argument version is renamed (not dropped) and has no grants; nothing calls it.
+alter function public.mark_payment_succeeded(uuid, text) rename to mark_payment_succeeded_v1;
 create function public.mark_payment_succeeded(p_payment_id uuid, p_provider_ref text, p_amount_cents int default null) returns text
 language plpgsql security definer set search_path = public as $$
 declare v_pay public.payments; v_s public.booking_splits; v_paid int; v_n int; v_r int;

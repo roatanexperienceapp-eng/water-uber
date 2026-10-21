@@ -63,7 +63,7 @@ export default {
 
     // ---- Work out what is being paid and how much (server-side only) ----
     let payment: Record<string, unknown> | null = null;
-    let description = 'Water Uber';
+    let description = 'Roatán Water Taxi';
     let returnPath = safePath(b.returnPath, '/trips');
     let coversRides: string[] = [];
 
