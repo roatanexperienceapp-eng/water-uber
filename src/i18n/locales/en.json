@@ -773,11 +773,11 @@
  "zelleHowH": "How to pay",
  "zelleStep1": "Open your bank's app and choose Zelle.",
  "zelleStep2": "Send the exact amount to the email above.",
- "zelleStep3": "Put the code in the memo so we can match it to you, then tap \"I've sent it\".",
- "zelleHeld": "Your booking is held. We check Zelle by hand, usually within 2 hours between 8 am and 8 pm Roatán time. It shows as confirmed in Trips once we've seen it.",
+ "zelleStep3": "Put the code in the memo. That's how your payment finds your booking automatically. Then tap \"I've sent it\".",
+ "zelleHeld": "Your booking is held. As soon as your bank's Zelle deposit reaches us it's confirmed automatically, usually within 10 minutes. It shows as confirmed in Trips.",
  "zelleUsOnly": "Zelle needs a US bank account. No US bank? Pay by card instead.",
  "zelleSent": "I've sent it",
  "zelleCard": "Pay by card instead",
  "zelleWaitH": "Waiting for your Zelle",
- "zelleWait": "We confirm Zelle by hand, usually within 2 hours (8 am–8 pm Roatán time). You can close this screen; your trip updates in Trips."
+ "zelleWait": "Your booking confirms automatically when your Zelle deposit arrives, usually within 10 minutes. Keep this screen open or check Trips."
 }

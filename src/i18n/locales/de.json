@@ -773,11 +773,11 @@
  "zelleHowH": "So bezahlst du",
  "zelleStep1": "Öffne deine Banking-App und wähle Zelle.",
  "zelleStep2": "Sende den genauen Betrag an die E-Mail oben.",
- "zelleStep3": "Gib den Code im Verwendungszweck an, damit wir dich zuordnen können, und tippe auf „Gesendet“.",
- "zelleHeld": "Deine Buchung ist reserviert. Wir prüfen Zelle von Hand, meist innerhalb von 2 Stunden zwischen 8 und 20 Uhr Roatán-Zeit. Danach steht sie unter Reisen als bestätigt.",
+ "zelleStep3": "Gib den Code im Verwendungszweck an – so wird deine Zahlung automatisch deiner Buchung zugeordnet. Tippe dann auf „Gesendet“.",
+ "zelleHeld": "Deine Buchung ist reserviert. Sobald deine Zelle-Zahlung bei uns eingeht, wird sie automatisch bestätigt, meist innerhalb von 10 Minuten. Danach steht sie unter Reisen als bestätigt.",
  "zelleUsOnly": "Zelle braucht ein US-Bankkonto. Keins? Dann bitte per Karte zahlen.",
  "zelleSent": "Gesendet",
  "zelleCard": "Lieber per Karte zahlen",
  "zelleWaitH": "Wir warten auf deine Zelle-Zahlung",
- "zelleWait": "Wir bestätigen Zelle von Hand, meist innerhalb von 2 Stunden (8–20 Uhr Roatán-Zeit). Du kannst diesen Bildschirm schließen; deine Reise aktualisiert sich unter Reisen."
+ "zelleWait": "Deine Buchung wird automatisch bestätigt, sobald die Zelle-Zahlung eingeht, meist innerhalb von 10 Minuten. Lass diesen Bildschirm offen oder schau unter Reisen."
 }

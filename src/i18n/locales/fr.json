@@ -773,11 +773,11 @@
  "zelleHowH": "Comment payer",
  "zelleStep1": "Ouvrez l'app de votre banque et choisissez Zelle.",
  "zelleStep2": "Envoyez le montant exact à l'e-mail ci-dessus.",
- "zelleStep3": "Mettez le code dans le mémo pour qu'on vous retrouve, puis touchez « C'est envoyé ».",
- "zelleHeld": "Votre réservation est bloquée. Nous vérifions Zelle à la main, en général sous 2 heures entre 8 h et 20 h (heure de Roatán). Elle apparaît confirmée dans Voyages dès que nous l'avons vue.",
+ "zelleStep3": "Indiquez le code dans le mémo : c'est ainsi que le paiement retrouve votre réservation automatiquement. Puis touchez « C'est envoyé ».",
+ "zelleHeld": "Votre réservation est bloquée. Dès que votre virement Zelle nous parvient, elle est confirmée automatiquement, en général en moins de 10 minutes. Elle apparaît confirmée dans Voyages.",
  "zelleUsOnly": "Zelle nécessite un compte bancaire américain. Sinon, payez par carte.",
  "zelleSent": "C'est envoyé",
  "zelleCard": "Payer par carte",
  "zelleWaitH": "En attente de votre Zelle",
- "zelleWait": "Nous confirmons Zelle à la main, en général sous 2 heures (8 h–20 h, heure de Roatán). Vous pouvez fermer cet écran ; votre voyage se met à jour dans Voyages."
+ "zelleWait": "Votre réservation se confirme toute seule à l'arrivée du virement Zelle, en général sous 10 minutes. Gardez cet écran ouvert ou consultez Voyages."
 }

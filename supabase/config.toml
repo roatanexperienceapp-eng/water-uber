@@ -457,3 +457,6 @@ verify_jwt = true
 
 [functions.identify-marine-life]
 verify_jwt = true
+
+[functions.zelle-email]
+verify_jwt = false

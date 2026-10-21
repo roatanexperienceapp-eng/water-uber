@@ -128,6 +128,27 @@ Things to know before switching it on:
 - Most cruise guests from Canada, Europe and elsewhere cannot use Zelle. Card stays the main way to pay.
 - Never confirm from a screenshot. Only confirm money you can see in the bank account.
 
+## Zelle: automatic (from the bank's deposit email)
+
+When the bank emails roatanexperienceapp@gmail.com that a Zelle deposit arrived, a small Google Apps Script
+inside that Gmail (`docs/zelle-gmail-script.gs`) sends the email to the `zelle-email` server function
+every 5 minutes. The booking is confirmed automatically only if ALL of these hold:
+1. Gmail verified the email really came from the bank (DMARC/DKIM, from Google's own header), and the bank's
+   domain is in the `ZELLE_SENDER_DOMAINS` secret. A forged "you got paid" email fails here.
+2. The email contains exactly one booking code (RWT-XXXXXXXX) and exactly one dollar amount.
+3. The code belongs to a pending Zelle payment and the amount is not short (`confirm_zelle`).
+Anything else gets the Gmail label "Zelle - check by hand" and stays pending for the manual steps above.
+The guest's confirmation screen and Trips turn to confirmed on their own.
+
+Setup:
+1. script.google.com → New project → paste `docs/zelle-gmail-script.gs` → Save.
+2. Run `setup` (allow Gmail access). Copy the secret from the log into Supabase → Edge Functions → Secrets
+   as `ZELLE_HOOK_SECRET`.
+3. Run `testLatest` and read the log: the "verifiedDomains" shown for your bank's Zelle emails is what goes
+   into the `ZELLE_SENDER_DOMAINS` secret (comma-separated, e.g. `ealerts.bankofamerica.com`).
+4. Run `startEvery5Minutes`.
+Requires that the bank's email includes the memo. If it doesn't, every email gets "check by hand".
+
 ## Not automated yet
 
 - **Paying operators and captains.** The ledger shows what each is owed; transfers are manual for now.

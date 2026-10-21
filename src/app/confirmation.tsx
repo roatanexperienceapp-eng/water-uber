@@ -60,10 +60,14 @@ export default function Confirmation() {
   const waiting = (kind === 'ride' && ride?.status === 'awaiting_payment') || (kind === 'pass' && pass?.status === 'awaiting_payment') || (kind === 'booking' && booking?.status === 'awaiting_payment' && !split);
   useEffect(() => {
     if (!waiting) return;
+    // Card: the processor answers within seconds. Zelle: the bank email is checked every 5 minutes,
+    // so keep looking (gently) for up to 3 hours while this screen is open.
+    const every = zelle ? 20_000 : 3000;
+    const max = zelle ? 540 : 20;
     let n = 0;
-    const id2 = setInterval(() => (++n > 20 ? clearInterval(id2) : load()), 3000);
+    const id2 = setInterval(() => (++n > max ? clearInterval(id2) : load()), every);
     return () => clearInterval(id2);
-  }, [waiting, load]);
+  }, [waiting, load, zelle]);
 
   // Save the ticket on the phone so it opens offline.
   const listing = booking ? LISTINGS.find((l) => l.id === booking.listingId) : undefined;
