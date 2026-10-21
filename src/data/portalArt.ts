@@ -6,6 +6,7 @@ import type { ImageSourcePropType } from 'react-native';
  */
 export const PORTAL_ART: Partial<Record<string, ImageSourcePropType>> = {
   fish: require('../../assets/images/portals/fish.jpg'),
+  snork: require('../../assets/images/portals/snork.jpg'),
   dive: require('../../assets/images/portals/dive.jpg'),
   jet: require('../../assets/images/portals/jet.jpg'),
   para: require('../../assets/images/portals/para.jpg'),
