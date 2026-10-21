@@ -50,13 +50,14 @@ function startEvery5Minutes() {
 function checkZelleEmails() {
   var done = GmailApp.getUserLabelByName(DONE_LABEL) || GmailApp.createLabel(DONE_LABEL);
   var check = GmailApp.getUserLabelByName(CHECK_LABEL) || GmailApp.createLabel(CHECK_LABEL);
-  var threads = GmailApp.search('RWT newer_than:3d -label:"' + DONE_LABEL + '"', 0, 20);
+  var threads = GmailApp.search('zelle newer_than:3d -label:"' + DONE_LABEL + '"', 0, 20);
   threads.forEach(function (t) {
     var m = t.getMessages()[t.getMessageCount() - 1];
     var res = send_(m, false);
     if (res === null) return; // network or server problem: try again in 5 minutes
     t.addLabel(done);
-    if (!res.confirmed) t.addLabel(check);
+    // Only flag real bank emails for a person; ignore newsletters or other mail that mentions Zelle.
+    if (!res.confirmed && res.reason !== 'sender_not_verified') t.addLabel(check);
   });
 }
 
@@ -67,6 +68,7 @@ function send_(message, dryRun) {
     text: (message.getSubject() + '\n' + message.getPlainBody()).slice(0, 20000),
     verifiedDomains: verifiedDomains_(message),
     messageId: message.getId(),
+    receivedAt: message.getDate().toISOString(),
     dryRun: !!dryRun
   };
   try {

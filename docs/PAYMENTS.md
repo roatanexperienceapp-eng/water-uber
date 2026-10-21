@@ -137,6 +137,9 @@ every 5 minutes. The booking is confirmed automatically only if ALL of these hol
    domain is in the `ZELLE_SENDER_DOMAINS` secret. A forged "you got paid" email fails here.
 2. The email contains exactly one booking code (RWT-XXXXXXXX) and exactly one dollar amount.
 3. The code belongs to a pending Zelle payment and the amount is not short (`confirm_zelle`).
+Backup when the guest forgot the code: the email must be money coming IN ("sent you", "deposited"...), contain
+exactly one amount, and exactly ONE pending Zelle booking with that exact amount must have been made in the hour
+before the email arrived. Two bookings with the same amount → nothing confirmed. (`confirm_zelle_by_amount`)
 Anything else gets the Gmail label "Zelle - check by hand" and stays pending for the manual steps above.
 The guest's confirmation screen and Trips turn to confirmed on their own.
 

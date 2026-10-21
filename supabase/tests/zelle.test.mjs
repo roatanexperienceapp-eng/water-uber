@@ -75,5 +75,24 @@ const pass3 = await one(`insert into guest_passes (guest_id, pass_type, riders, 
 const card = await one("insert into payments (guest_id, pass_id, amount_usd, provider) values ($1,$2,70,'stripe') returning *", [G2, pass3.id]);
 await throws(() => db.query("select confirm_zelle(zelle_code($1), 70, 'X')", [card.id]), /no_pending_zelle_payment/, 'card payments cannot be confirmed as Zelle');
 
+
+// ---- Backup match by exact amount (no code in the memo) ----
+const G3 = '44444444-4444-4444-4444-444444444444';
+await db.query('insert into auth.users (id) values ($1)', [G3]);
+const mkPass = async (guest, price) => one(`insert into guest_passes (guest_id, pass_type, riders, price_usd, starts_at, expires_at, status) values ($1,'week',2,$2,now(),now()+interval '7 days','awaiting_payment') returning *`, [guest, price]);
+const pA = await mkPass(G3, 140); const payA = await one("insert into payments (guest_id, pass_id, amount_usd, provider) values ($1,$2,140,'zelle') returning *", [G3, pA.id]);
+await throws(() => as(G3, "select confirm_zelle_by_amount(140, 'E1', now())"), /not_allowed/, 'guests cannot use the amount match');
+await throws(() => db.query("select confirm_zelle_by_amount(139.99, 'E1', now())"), /no_match/, 'amount must match exactly');
+await throws(() => db.query("select confirm_zelle_by_amount(140, 'E1', now() - interval '1 hour')"), /no_match/, 'a deposit before the booking existed does not match');
+await throws(() => db.query("select confirm_zelle_by_amount(140, 'E1', now() + interval '7 hours')"), /no_match/, 'a deposit more than 6 hours later does not match');
+ok((await one("select confirm_zelle_by_amount(140, 'E1', now() + interval '10 minutes') r")).r === 'ok', 'one booking with that amount → confirmed');
+ok((await one('select status from guest_passes where id=$1', [pA.id])).status === 'active', 'the pass is active');
+await throws(() => db.query("select confirm_zelle_by_amount(140, 'E1', now())"), /no_match/, 'the same email cannot confirm a second booking');
+const pB = await mkPass(G3, 210); const pC = await mkPass(G2, 210);
+await db.query("insert into payments (guest_id, pass_id, amount_usd, provider) values ($1,$2,210,'zelle')", [G3, pB.id]);
+await db.query("insert into payments (guest_id, pass_id, amount_usd, provider) values ($1,$2,210,'zelle')", [G2, pC.id]);
+await throws(() => db.query("select confirm_zelle_by_amount(210, 'E2', now())"), /ambiguous/, 'two bookings with the same amount → nothing confirmed');
+ok((await one("select count(*)::int n from guest_passes where id in ($1,$2) and status='active'", [pB.id, pC.id])).n === 0, 'neither was confirmed');
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

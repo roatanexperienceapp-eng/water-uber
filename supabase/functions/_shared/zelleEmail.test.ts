@@ -1,5 +1,5 @@
 import { deepStrictEqual as eq, ok } from 'node:assert';
-import { parseZelleEmail, sameSecret, senderAllowed } from './zelleEmail.ts';
+import { isIncoming, parseZelleEmail, sameSecret, senderAllowed } from './zelleEmail.ts';
 
 Deno.test('reads code and amount from a typical deposit email', () => {
   const r = parseZelleEmail('Jane Smith sent you $1,010.00 with Zelle®.\nMemo: RWT-7C79C78D\nThe money has been deposited.');
@@ -21,8 +21,10 @@ Deno.test('USD written as text', () => {
   eq(parseZelleEmail('USD 70.00 RWT-ABCDEF12'), { ok: true, deposit: { code: 'RWT-ABCDEF12', amountUsd: 70 } });
 });
 
-Deno.test('no memo code means a person checks it', () => {
-  eq(parseZelleEmail('Jane sent you $70.00'), { ok: false, reason: 'no_code' });
+Deno.test('no memo code: the single amount is reported for the backup match', () => {
+  eq(parseZelleEmail('JANE MILLER sent you $190.00'), { ok: false, reason: 'no_code', amountUsd: 190 });
+  eq(parseZelleEmail('Jane sent you $70.00 and $5.00'), { ok: false, reason: 'no_code' });
+  eq(parseZelleEmail('Jane sent you money'), { ok: false, reason: 'no_code' });
 });
 
 Deno.test('two different codes or two different amounts are never guessed', () => {
@@ -32,8 +34,8 @@ Deno.test('two different codes or two different amounts are never guessed', () =
 });
 
 Deno.test('codes must be exactly 8 hex characters', () => {
-  eq(parseZelleEmail('$70.00 RWT-ABCDEF1'), { ok: false, reason: 'no_code' });
-  eq(parseZelleEmail('$70.00 RWT-ABCDEFGH'), { ok: false, reason: 'no_code' });
+  eq(parseZelleEmail('$70.00 RWT-ABCDEF1'), { ok: false, reason: 'no_code', amountUsd: 70 });
+  eq(parseZelleEmail('$70.00 RWT-ABCDEFGH'), { ok: false, reason: 'no_code', amountUsd: 70 });
 });
 
 Deno.test('only verified bank domains are trusted', () => {
@@ -50,4 +52,14 @@ Deno.test('secret comparison', () => {
   ok(!sameSecret('abc123', 'abc124'));
   ok(!sameSecret('', ''));
   ok(!sameSecret('abc', 'abcd'));
+});
+
+Deno.test('incoming vs outgoing Zelle emails', () => {
+  ok(isIncoming('JANE MILLER sent you $190.00'));
+  ok(isIncoming('You received $190.00 from Jane'));
+  ok(isIncoming('Your $190.00 has been deposited'));
+  ok(isIncoming('Juan te envió $190.00'));
+  ok(!isIncoming('You sent $190.00 to Jane Miller'));
+  ok(!isIncoming('Jane Miller requested $190.00 from you'));
+  ok(!isIncoming('Your Zelle limit has changed'));
 });

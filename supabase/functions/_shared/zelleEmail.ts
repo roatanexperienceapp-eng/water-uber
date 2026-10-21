@@ -11,7 +11,9 @@ export interface ZelleDeposit {
   amountUsd: number;
 }
 
-export type ParseResult = { ok: true; deposit: ZelleDeposit } | { ok: false; reason: 'no_code' | 'many_codes' | 'no_amount' | 'many_amounts' };
+export type ParseResult =
+  | { ok: true; deposit: ZelleDeposit }
+  | { ok: false; reason: 'no_code' | 'many_codes' | 'no_amount' | 'many_amounts'; amountUsd?: number };
 
 const CODE_RE = /\bRWT[-\s]?([0-9A-F]{8})\b/gi;
 // $1,010.00 · $95 · USD 95.00 · 95.00 USD
@@ -21,7 +23,6 @@ export function parseZelleEmail(text: string): ParseResult {
   const body = String(text ?? '').slice(0, 20000);
   const codes = new Set<string>();
   for (const m of body.matchAll(CODE_RE)) codes.add(`RWT-${m[1].toUpperCase()}`);
-  if (codes.size === 0) return { ok: false, reason: 'no_code' };
   if (codes.size > 1) return { ok: false, reason: 'many_codes' };
 
   const amounts = new Set<number>();
@@ -31,6 +32,8 @@ export function parseZelleEmail(text: string): ParseResult {
       if (Number.isFinite(n) && n > 0) amounts.add(Math.round(n * 100));
     }
   }
+  // No code: report the amount if there is exactly one, for the backup match by amount.
+  if (codes.size === 0) return amounts.size === 1 ? { ok: false, reason: 'no_code', amountUsd: [...amounts][0] / 100 } : { ok: false, reason: 'no_code' };
   if (amounts.size === 0) return { ok: false, reason: 'no_amount' };
   if (amounts.size > 1) return { ok: false, reason: 'many_amounts' };
 
@@ -53,4 +56,14 @@ export function sameSecret(a: string, b: string): boolean {
   let r = 0;
   for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return r === 0;
+}
+
+/**
+ * Money coming IN (not a payment you sent out). Only used for the backup match by amount, so that an
+ * email like "You sent $190 to ..." can never confirm a guest's booking.
+ */
+export function isIncoming(text: string): boolean {
+  const t = String(text ?? '').toLowerCase();
+  if (/\byou sent\b|\byou paid\b|\benviaste\b|\bpagaste\b|\brequest(ed)? (money|payment)\b|\bsolicit/.test(t)) return false;
+  return /sent you|you received|you've received|you have received|received \$|deposited|is on its way to you|te envi[oó]|recibiste|has recibido|depositad/.test(t);
 }
