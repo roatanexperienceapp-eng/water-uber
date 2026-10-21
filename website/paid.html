@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Payment · Roatán Water Taxi</title>
+<link rel="stylesheet" href="/legal.css">
+</head>
+<body>
+<div class="wrap" style="text-align:center; padding-top:80px">
+  <h1 id="h">Returning you to the app…</h1>
+  <p class="meta" id="p">If nothing happens, open the Roatán Water Taxi app. Your trip updates there on its own.</p>
+</div>
+<script>
+  // The payment page sends guests here. Hand them straight back to the app; the app asks our server
+  // whether the payment went through (this page proves nothing on its own).
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var app = q.get('app') || '';
+    var payment = (q.get('payment') || '').replace(/[^A-Za-z0-9-]/g, '');
+    var cancelled = q.get('cancelled') === '1';
+    if (cancelled) {
+      document.getElementById('h').textContent = 'Payment cancelled';
+      document.getElementById('p').textContent = 'You were not charged. Go back to the app to try again.';
+    }
+    if (/^(islandride|islandride-captain|exp|exps):\/\/[^\s]{0,200}$/.test(app)) {
+      location.replace(app + (app.indexOf('?') >= 0 ? '&' : '?') + 'payment=' + payment + (cancelled ? '&cancelled=1' : ''));
+    }
+  })();
+</script>
+</body>
+</html>

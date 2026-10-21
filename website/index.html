@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roatán Water Taxi — West End ↔ West Bay, $5 per person</title>
+<meta name="description" content="Roatán's water taxi app is launching soon: $5 per person between West End and West Bay, week passes, snorkel and fishing tours with local certified captains.">
+<meta property="og:title" content="Roatán Water Taxi — launching soon">
+<meta property="og:description" content="$5 West End ↔ West Bay. Book and pay in the app. Local captains. 10% of what we earn goes to Roatán kids.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23FF4A1C'/><text x='32' y='44' font-size='34' text-anchor='middle'>🚤</text></svg>">
+<style>
+  :root { --ink:#0b0b0c; --muted:#5f6368; --bg:#ffffff; --tile:#f3f3f3; --line:#e6e6e6; --flame:#FF4A1C; --sea:#0E7490; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink:#f5f5f5; --muted:#a5a8ad; --bg:#0b0b0c; --tile:#1a1b1d; --line:#2a2b2e; } }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; background:var(--bg); color:var(--ink); line-height:1.45; }
+  .wrap { max-width:1040px; margin:0 auto; padding:0 20px; }
+  header { display:flex; align-items:center; justify-content:space-between; padding:18px 0; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:19px; letter-spacing:-.3px; }
+  .logo { width:28px; height:28px; border-radius:8px; background:var(--flame); }
+  .lang { display:flex; gap:6px; }
+  .lang button { border:0; background:var(--tile); color:var(--ink); padding:8px 12px; border-radius:999px; font-weight:700; cursor:pointer; }
+  .lang button[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .hero { padding:48px 0 32px; display:grid; gap:28px; grid-template-columns: 1.2fr .8fr; align-items:center; }
+  .pill { display:inline-block; background:#FFF1EC; color:#B42318; font-weight:800; font-size:13px; padding:6px 12px; border-radius:999px; }
+  h1 { font-size:clamp(36px, 6vw, 60px); line-height:1.02; letter-spacing:-1.5px; margin:14px 0; }
+  .lead { font-size:19px; color:var(--muted); max-width:520px; }
+  .circles { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .circles .c { width:100%; aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:clamp(44px,8vw,72px); }
+  h2 { font-size:clamp(26px, 4vw, 34px); letter-spacing:-.8px; margin:0 0 6px; }
+  section { padding:36px 0; border-top:1px solid var(--line); }
+  .sub { color:var(--muted); margin-bottom:20px; }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { background:var(--tile); border-radius:18px; padding:20px; }
+  .big { font-size:34px; font-weight:800; letter-spacing:-1px; }
+  .card b { display:block; font-size:17px; margin-bottom:4px; }
+  .card small { color:var(--muted); font-size:14px; }
+  a.card { color:inherit; text-decoration:none; display:block; word-break:break-word; }
+  a.card:hover { outline:2px solid var(--flame); }
+  .flame { color:var(--flame); }
+  ul.tours { list-style:none; padding:0; display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); }
+  ul.tours li { display:flex; justify-content:space-between; gap:12px; background:var(--tile); border-radius:14px; padding:14px 16px; font-weight:600; }
+  ul.tours li span:last-child { color:var(--muted); font-weight:700; white-space:nowrap; }
+  .crew { display:flex; flex-wrap:wrap; gap:8px; }
+  .crew span { background:var(--tile); border-radius:999px; padding:8px 14px; font-weight:600; font-size:14px; }
+  .give { background:var(--ink); color:var(--bg); border-radius:22px; padding:26px; display:flex; gap:18px; align-items:center; }
+  .give .big { color:var(--flame); }
+  footer { padding:36px 0 48px; color:var(--muted); font-size:14px; border-top:1px solid var(--line); }
+  @media (max-width:760px) { .hero { grid-template-columns:1fr; padding-top:24px; } .circles { max-width:360px; } }
+  [data-l="es"] { display:none !important; } html[lang="es"] [data-l="en"] { display:none !important; } html[lang="es"] [data-l="es"] { display:revert !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="logo" aria-hidden="true"></div>Roatán Water Taxi</div>
+    <div class="lang" role="group" aria-label="Language">
+      <button id="b-en" aria-pressed="true" onclick="setLang('en')">EN</button>
+      <button id="b-es" aria-pressed="false" onclick="setLang('es')">ES</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div>
+      <span class="pill"><span data-l="en">Launching soon</span><span data-l="es">Muy pronto</span></span>
+      <h1><span data-l="en">Roatán’s water taxi, in your pocket.</span><span data-l="es">El taxi acuático de Roatán, en tu bolsillo.</span></h1>
+      <p class="lead"><span data-l="en">Book a boat from your phone, pay in the app, and see your local captain on the map. No cash, no waiting for the boat to fill.</span><span data-l="es">Pide tu lancha desde el teléfono, paga en la app y ve a tu capitán en el mapa. Sin efectivo y sin esperar a que se llene la lancha.</span></p>
+    </div>
+    <div class="circles" aria-hidden="true">
+      <div class="c" style="background:linear-gradient(160deg,#FF8A5B,#FF4A1C)">🚤</div><div class="c" style="background:linear-gradient(160deg,#5ED3E6,#0E7490)">🐢</div><div class="c" style="background:linear-gradient(160deg,#7FB3FF,#1D4ED8)">🤿</div><div class="c" style="background:linear-gradient(160deg,#FFD27A,#F59E0B)">🎣</div>
+    </div>
+  </div>
+
+  <section>
+    <h2><span data-l="en">Simple prices</span><span data-l="es">Precios claros</span></h2>
+    <p class="sub"><span data-l="en">Per person, in US dollars.</span><span data-l="es">Por persona, en dólares.</span></p>
+    <div class="grid">
+      <div class="card"><div class="big flame">$5</div><b>West End ↔ West Bay</b><small data-l="en">All 21 piers in West End and West Bay.</small><small data-l="es">Los 21 muelles de West End y West Bay.</small></div>
+      <div class="card"><div class="big">$10</div><b>West End ↔ Sandy Bay</b><small data-l="en">3-person minimum.</small><small data-l="es">Mínimo 3 personas.</small></div>
+      <div class="card"><div class="big">$15</div><b>West Bay ↔ Sandy Bay</b><small data-l="en">3-person minimum.</small><small data-l="es">Mínimo 3 personas.</small></div>
+      <div class="card"><div class="big">$35</div><b><span data-l="en">Week pass</span><span data-l="es">Pase semanal</span></b><small data-l="en">Per person, unlimited West End ↔ West Bay rides for 7 days. Groups of 2–12.</small><small data-l="es">Por persona, viajes ilimitados West End ↔ West Bay por 7 días. Grupos de 2 a 12.</small></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span data-l="en">Our snorkel & fishing tours</span><span data-l="es">Nuestros tours de snorkel y pesca</span></h2>
+    <p class="sub"><span data-l="en">Add any tour to a week pass and save 10% — or 15% with snorkel + fishing.</span><span data-l="es">Agrega un tour a tu pase semanal y ahorra 10%, o 15% con snorkel + pesca.</span></p>
+    <ul class="tours">
+      <li><span>Blue Channel snorkel</span><span>$30 pp</span></li>
+      <li><span>Dolphin show</span><span>$45 pp</span></li>
+      <li><span>Shipwreck snorkel tour</span><span>$95 pp</span></li>
+      <li><span>Pigeon Key nurse shark swim</span><span>$190 pp</span></li>
+      <li><span>Cayos Cochinos trip</span><span>$190 pp</span></li>
+      <li><span>Bottom fishing</span><span>$60 pp</span></li>
+      <li><span>Deep sea trolling · half day</span><span>$350 / boat</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span data-l="en">Local captains</span><span data-l="es">Capitanes locales</span></h2>
+    <p class="sub"><span data-l="en">Every ride and tour is run by one of our own captains.</span><span data-l="es">Cada viaje y tour lo hace uno de nuestros capitanes.</span></p>
+    <div class="crew"><span>Captain Fletcher</span><span>Captain Jordan</span><span>Captain Patrick</span><span>Captain Big John</span><span>Gordo</span><span>David</span><span>Justin</span><span>Captain Quinn</span><span>Captain Darcy</span><span>Captain Carter</span></div>
+  </section>
+
+  <section>
+    <h2><span data-l="en">Made for cruise days</span><span data-l="es">Pensado para días de crucero</span></h2>
+    <div class="grid">
+      <div class="card"><b data-l="en">Back before all-aboard</b><b data-l="es">De vuelta antes del all-aboard</b><small data-l="en">The app only offers times that get you back to the port with time to spare.</small><small data-l="es">La app solo ofrece horarios que te regresan al puerto con tiempo de sobra.</small></div>
+      <div class="card"><b data-l="en">7 languages</b><b data-l="es">7 idiomas</b><small data-l="en">English, Español, Français, Deutsch, Português, Italiano, 中文.</small><small data-l="es">English, Español, Français, Deutsch, Português, Italiano, 中文.</small></div>
+      <div class="card"><b data-l="en">Tickets that work offline</b><b data-l="es">Boletos sin internet</b><small data-l="en">Your QR ticket opens even with no signal.</small><small data-l="es">Tu boleto QR abre aunque no tengas señal.</small></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="give">
+      <div class="big">10%</div>
+      <div><b style="display:block;font-size:18px">Every Child Roatán</b><span data-l="en">10% of what we earn goes to supporting Roatán kids.</span><span data-l="es">El 10% de lo que ganamos apoya a los niños de Roatán.</span></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2><span data-l="en">Questions? Talk to us</span><span data-l="es">¿Preguntas? Escríbenos</span></h2>
+    <div class="grid">
+      <a class="card" href="tel:+12072135757"><b data-l="en">Call</b><b data-l="es">Llamar</b><small>+1 (207) 213-5757</small></a>
+      <a class="card" href="https://wa.me/12072135757"><b>WhatsApp</b><small>+1 (207) 213-5757</small></a>
+      <a class="card" href="mailto:roatanexperienceapp@gmail.com"><b>Email</b><small>roatanexperienceapp@gmail.com</small></a>
+    </div>
+  </section>
+
+  <footer>
+    <p data-l="en">The app is launching soon on the App Store and Google Play. Bookings are not open on this website yet.</p>
+    <p data-l="es">La app llega pronto a App Store y Google Play. Todavía no se puede reservar en este sitio.</p>
+    <p style="margin-top:10px"><a href="/privacy" style="color:inherit">Privacy</a> · <a href="/terms" style="color:inherit">Terms</a> · <a href="/refunds" style="color:inherit">Refunds</a></p>
+    <p style="margin-top:10px">© 2026 Roatán Water Taxi · Roatán, Bay Islands, Honduras</p>
+  </footer>
+</div>
+<script>
+  function setLang(l) {
+    document.documentElement.lang = l;
+    document.getElementById('b-en').setAttribute('aria-pressed', l === 'en');
+    document.getElementById('b-es').setAttribute('aria-pressed', l === 'es');
+    try { localStorage.setItem('lang', l); } catch (e) {}
+  }
+  try { var s = localStorage.getItem('lang') || ((navigator.language || '').slice(0, 2) === 'es' ? 'es' : 'en'); setLang(s); } catch (e) {}
+</script>
+</body>
+</html>
