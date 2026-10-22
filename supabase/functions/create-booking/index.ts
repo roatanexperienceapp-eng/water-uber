@@ -71,6 +71,7 @@ export default {
           { area: listing.area, portal: listing.portal_key, start, durationMinutes: listing.duration_minutes, people: b.quantity },
         );
         if (!plan) return fail(409, 'van_not_available', 'Our van does not go to this area yet');
+        if (plan.pickupAt.getTime() < Date.now() + 10 * 60_000) return fail(409, 'van_too_soon', 'Too late to book the van for this time');
         const vanUsd = vanPriceUsd(b.quantity);
         van = { van_seats: b.quantity, van_usd: vanUsd, van_pickup_at: plan.pickupAt.toISOString(), van_return_at: plan.returnPickupAt.toISOString() };
         total += vanUsd;

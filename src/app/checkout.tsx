@@ -98,6 +98,7 @@ function errorText(t: (k: string) => string, e: unknown): string {
     boats_closed: 'closedH',
     payments_not_configured: 'payNotReady',
     misses_ship: 'missesShip',
+    van_too_soon: 'vanTooSoon',
     too_late_to_split: 'tooLateSplit',
     split_closed: 'splitClosed',
     no_shares_left: 'splitFull',
