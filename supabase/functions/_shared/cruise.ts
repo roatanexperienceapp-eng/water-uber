@@ -32,14 +32,14 @@ export const PORTS: Record<PortId, Port> = {
   mahogany: {
     id: 'mahogany',
     name: 'Mahogany Bay (Isla Tropicale)',
-    meetText: 'Walk out of the port gate to the tour and taxi area. Your guide holds an orange Water Uber sign.',
+    meetText: 'Walk out of the port gate to the tour and taxi area. Your guide holds an orange Roatán Water Taxi sign.',
     lat: 16.3519,
     lon: -86.4932,
   },
   coxen: {
     id: 'coxen',
     name: 'Port of Roatán · Coxen Hole',
-    meetText: 'Exit the Town Center gate to the tour pickup lot. Your guide holds an orange Water Uber sign.',
+    meetText: 'Exit the Town Center gate to the tour pickup lot. Your guide holds an orange Roatán Water Taxi sign.',
     lat: 16.3141,
     lon: -86.5466,
   },

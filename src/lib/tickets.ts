@@ -18,6 +18,12 @@ export interface SavedTicket {
   shipName?: string;
   allAboardAt?: string;
   backAtPortBy?: string;
+  /** Our van: leaves the port gate / leaves the tour for the port. */
+  vanPickupAt?: string;
+  vanReturnAt?: string;
+  vanSeats?: number;
+  /** For the trip-day "Getting there" card. */
+  listingId?: string;
   savedAt: string;
 }
 

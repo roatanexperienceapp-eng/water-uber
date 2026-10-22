@@ -4,6 +4,7 @@
 import { activityTotalUsd } from '../_shared/tours.ts';
 import { withSupabase } from 'npm:@supabase/server@1';
 import { fail, json, readBody } from '../_shared/http.ts';
+import { vanPlan, vanPriceUsd } from '../_shared/transport.ts';
 import { CRUISE_SETTINGS, fitsPortTime, roatanDate, roatanInstant, splitDeadline, type PortId } from '../_shared/cruise.ts';
 
 interface Body {
@@ -16,6 +17,8 @@ interface Body {
   shipCallId?: string;
   /** Split the price into this many equal shares paid separately (2–12). Instant bookings only. */
   splitShares?: number;
+  /** Cruise guests: add our van from the port gate to the tour and back ($25 per person). */
+  van?: boolean;
 }
 
 export default {
@@ -40,13 +43,15 @@ export default {
     // deno-lint-ignore no-explicit-any
     const partner = !!(listing as any).operators?.is_partner;
     const instant = listing.booking === 'instant' && partner && listing.price_usd != null;
-    const total = instant ? activityTotalUsd(Number(listing.price_usd), listing.unit, b.quantity) : null;
+    let total = instant ? activityTotalUsd(Number(listing.price_usd), listing.unit, b.quantity) : null;
 
     const start = roatanInstant(b.date, b.time);
     if (start.getTime() < Date.now()) return fail(400, 'past_time', 'That time has passed');
 
     // Cruise guests: never sell a time that gets them back after the ship's deadline.
     let shipCallId: string | null = null;
+    let van: { van_seats: number; van_usd: number; van_pickup_at: string; van_return_at: string } | null = null;
+    if (b.van && !b.shipCallId) return fail(400, 'van_needs_ship', 'The port van is for cruise guests. Pick your ship first.');
     if (b.shipCallId) {
       const { data: call } = await ctx.supabaseAdmin.from('ship_calls').select('*').eq('id', b.shipCallId).maybeSingle();
       if (!call) return fail(400, 'bad_ship', 'Unknown ship call');
@@ -59,6 +64,17 @@ export default {
         return fail(409, 'misses_ship', `This time gets you back after ${CRUISE_SETTINGS.backAtPortMinutesBefore} min before all-aboard`);
       }
       shipCallId = call.id;
+      if (b.van) {
+        if (!instant || total === null) return fail(409, 'van_not_available', 'The port van can only be added to tours with a fixed price');
+        const plan = vanPlan(
+          { id: call.id, date: call.call_date, ship: call.ship_name, port: call.port as PortId, arriveAt: new Date(call.arrive_at), allAboardAt: new Date(call.all_aboard_at) },
+          { area: listing.area, portal: listing.portal_key, start, durationMinutes: listing.duration_minutes, people: b.quantity },
+        );
+        if (!plan) return fail(409, 'van_not_available', 'Our van does not go to this area yet');
+        const vanUsd = vanPriceUsd(b.quantity);
+        van = { van_seats: b.quantity, van_usd: vanUsd, van_pickup_at: plan.pickupAt.toISOString(), van_return_at: plan.returnPickupAt.toISOString() };
+        total += vanUsd;
+      }
     }
 
     let deadline: Date | null = null;
@@ -83,6 +99,7 @@ export default {
         status: instant ? 'awaiting_payment' : 'requested',
         guest_note: b.note?.slice(0, 500) ?? null,
         ship_call_id: shipCallId,
+        ...(van ?? {}),
       })
       .select()
       .single();

@@ -4,6 +4,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DOCKS } from '../../../supabase/functions/_shared/geo.ts';
 import { FEATURE_SETTINGS, type SeaArea, type SeaState } from '../../../supabase/functions/_shared/features.ts';
+import { GuestsOnTheWay } from '@/components/GuestsOnTheWay';
 import { LanguageButton } from '@/components/LanguageButton';
 import { Button, Card, Note } from '@/components/ui';
 import { DEMO_MODE } from '@/config';
@@ -126,6 +127,8 @@ export default function Captain() {
           <Button variant={online ? 'ink' : 'brand'} label={online ? t('goOffline') : t('goOnline')} onPress={toggle} />
           {msg ? <Note>{msg}</Note> : <Note>{t('bgLocNote')}</Note>}
         </Card>
+
+        <GuestsOnTheWay />
 
         <Text style={[type.h2, { color: c.ink }]}>{t('seaTitle')}</Text>
         {(['west', 'north', 'south'] as const).map((area) => (

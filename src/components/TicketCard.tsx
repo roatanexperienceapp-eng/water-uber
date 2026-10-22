@@ -39,6 +39,19 @@ export function TicketCard({ ticket }: { ticket: SavedTicket }) {
           </Text>
         ) : null}
       </View>
+      {ticket.vanPickupAt ? (
+        <View style={[styles.meet, { backgroundColor: c.tile }]}>
+          <Text style={[type.bodyStrong, { color: c.ink }]}>🚐 {t('vanH')}</Text>
+          <Text style={[type.small, { color: c.ink }]}>
+            {t('vanThere').replace('{t}', islandClock(new Date(ticket.vanPickupAt), i18n.language))}
+          </Text>
+          {ticket.vanReturnAt ? (
+            <Text style={[type.small, { color: c.ink }]}>
+              {t('vanBack').replace('{t}', islandClock(new Date(ticket.vanReturnAt), i18n.language))}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
       {ticket.allAboardAt ? (
         <Text style={[type.small, { color: c.ink, fontWeight: '700' }]}>
           🚢 {ticket.shipName} · {t('allAboardAt').replace('{t}', islandClock(new Date(ticket.allAboardAt), i18n.language))}

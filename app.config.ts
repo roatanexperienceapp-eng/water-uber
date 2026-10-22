@@ -8,7 +8,7 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
  * Bundle ids can never change after the first App Store / Play Store release.
  */
 const VARIANT = (process.env.APP_VARIANT ?? 'guest') as 'guest' | 'captain';
-const BRAND = process.env.BRAND_NAME ?? 'Water Uber';
+const BRAND = process.env.BRAND_NAME ?? 'Roatán Water Taxi';
 const BUNDLE_BASE = process.env.BUNDLE_ID_BASE ?? 'com.roatanexperience.watertaxi';
 const IS_CAPTAIN = VARIANT === 'captain';
 // No-download website. Booking links (/l/…, /split/…, /ship/…) open the app when it's installed.

@@ -101,4 +101,9 @@ export interface Booking {
   checkedIn?: boolean;
   /** Paid in shares by a group (pay through the group link, not the single Pay button). */
   isSplit?: boolean;
+  /** Cruise guests: our van from the port gate and back (seats, price, island-clock instants). */
+  vanSeats?: number;
+  vanUsd?: number;
+  vanPickupAt?: string;
+  vanReturnAt?: string;
 }

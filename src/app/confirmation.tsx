@@ -17,8 +17,10 @@ import { space, type, useTheme } from '@/theme';
 import { AllAboardBar } from '@/components/AllAboardBar';
 import { SplitCard } from '@/components/SplitCard';
 import { TicketCard } from '@/components/TicketCard';
+import { GettingThereCard } from '@/components/GettingThereCard';
+import { rideTrip, ticketTrip } from '@/lib/gettingThere';
 import { LISTINGS } from '@/data/catalogue';
-import { CRUISE_SETTINGS, useMyShip } from '@/lib/cruise';
+import { CRUISE_SETTINGS, islandClock, useMyShip } from '@/lib/cruise';
 import { meetingText } from '@/lib/meeting';
 import { saveTicket, type SavedTicket } from '@/lib/tickets';
 import type { Booking, Ride } from '@/types';
@@ -81,12 +83,18 @@ export default function Confirmation() {
           time: booking.time,
           quantity: booking.quantity,
           ticketCode: booking.ticketCode,
-          meetText: listing ? meetingText(listing, bookingShip, t) : t('meetAskOperator').replace('{area}', ''),
+          meetText: listing
+            ? meetingText(listing, bookingShip, t, booking.vanPickupAt ? islandClock(new Date(booking.vanPickupAt), i18n.language) : null)
+            : t('meetAskOperator').replace('{area}', ''),
           contactName: contact?.name,
           whatsapp: contact?.whatsapp,
           shipName: bookingShip?.ship,
           allAboardAt: bookingShip?.allAboardAt.toISOString(),
           backAtPortBy: bookingShip ? new Date(bookingShip.allAboardAt.getTime() - CRUISE_SETTINGS.backAtPortMinutesBefore * 60_000).toISOString() : undefined,
+          vanPickupAt: booking.vanPickupAt,
+          vanReturnAt: booking.vanReturnAt,
+          vanSeats: booking.vanSeats,
+          listingId: booking.listingId,
           savedAt: '',
         }
       : null;
@@ -177,6 +185,8 @@ export default function Confirmation() {
         {waiting && <Note center>{zelle ? t('zelleWait') : t('confirmingPaySub')}</Note>}
         {bookingShip && <AllAboardBar />}
         {ticket && <TicketCard ticket={{ ...ticket, savedAt: new Date().toISOString() }} />}
+        {ticket && <GettingThereCard {...ticketTrip({ ...ticket, savedAt: '' }, bookingShip)} />}
+        {ride && rideTrip(ride) && <GettingThereCard {...rideTrip(ride)!} />}
         {split && booking?.status !== 'paid' && <SplitCard token={split.token} organizer onChange={load} />}
         {booking && booking.status !== 'paid' && listing && !split && (
           <Card>

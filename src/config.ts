@@ -5,7 +5,7 @@ const extra = (Constants.expoConfig?.extra ?? {}) as Extra;
 
 /** Which app this build is: the guest app or the captain app (set by APP_VARIANT in app.config.ts). */
 export const APP_VARIANT: 'guest' | 'captain' = extra.variant ?? 'guest';
-export const BRAND_NAME = extra.brandName ?? 'Water Uber';
+export const BRAND_NAME = extra.brandName ?? 'Roatán Water Taxi';
 
 export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 export const SUPABASE_KEY = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '';

@@ -26,6 +26,7 @@ import { meetingText } from '@/lib/meeting';
 import { pay, type PayOutcome } from '@/lib/payments';
 import { startZelle, type ZelleTarget } from '@/lib/api';
 import { ZELLE } from '../../supabase/functions/_shared/business.ts';
+import { VAN_SETTINGS, vanPlan, vanPriceUsd } from '../../supabase/functions/_shared/transport.ts';
 import { buyPass, createRepeatRide, currentPass, savedPlaces, type GuestPass } from '@/lib/stay';
 import { createPackage, packageTourOptions, quotePackage, type PickedTour } from '@/lib/bundles';
 import { hhmm, hourLabel, ymd } from '@/lib/stayUi';
@@ -216,6 +217,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const [pickedTime, setTime] = useState('09:00');
   const [qty, setQty] = useState(2);
   const [withTaxi, setWithTaxi] = useState(true);
+  const [withVan, setWithVan] = useState(true);
   const [split, setSplit] = useState(false);
   const [shares, setShares] = useState(2);
   // Most week-stay rentals are in West Bay; a saved "My rental" place overrides this.
@@ -269,16 +271,24 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const late = taxiOn && !!backAt && nightMode(backAt) === 'boats_closed';
   const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
 
+  // ---- Our van from the cruise port and back (fixed-price bookings; not when the business picks up itself) ----
+  const van = cruise && instant && start && !(listing.portPickup && !listing.ours)
+    ? vanPlan(cruise, { area: listing.area, portal: listing.portal, start, durationMinutes: listing.durationMinutes, people: qty })
+    : null;
+  const vanOn = !!van && withVan;
+  const vanUsd = vanOn ? vanPriceUsd(qty) : 0;
+  const vanTooSoon = vanOn && !!van && van.pickupAt.getTime() < now.getTime() + 10 * 60_000;
+
   // ---- Split with my group (fixed-price bookings only) ----
   const maxShares = Math.min(CRUISE_SETTINGS.splitMaxShares, Math.max(2, qty));
   const shareCount = Math.min(shares, maxShares);
-  const eachUsd = activityTotal ? Math.ceil((activityTotal * 100) / shareCount) / 100 : 0;
-  const payNow = split ? eachUsd : (activityTotal ?? 0) + taxiTotal;
+  const eachUsd = activityTotal ? Math.ceil(((activityTotal + vanUsd) * 100) / shareCount) / 100 : 0;
+  const payNow = split ? eachUsd : (activityTotal ?? 0) + taxiTotal + vanUsd;
 
   const zelleOk = ZELLE.enabled && instant && !split && !!start && start.getTime() - now.getTime() >= ZELLE.minLeadHours * 3_600_000;
 
   async function confirm(method: 'card' | 'zelle' = 'card') {
-    if (tooSoon || late || cruiseBlocked) return;
+    if (tooSoon || late || cruiseBlocked || vanTooSoon) return;
     setBusy(true);
     setErr('');
     try {
@@ -290,6 +300,8 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
         quantity: qty,
         shipCallId: cruise && !isDemo ? cruise.id : undefined,
         splitShares: split ? shareCount : undefined,
+        van: vanOn,
+        ship: cruise,
       });
       if (taxiOn && dest && pickupAt && backAt) {
         for (const [a, b, when] of [
@@ -393,8 +405,33 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
       {/* Where to meet */}
       <Card>
         <Text style={[type.bodyStrong, { color: c.ink }]}>📍 {t('meetH')}</Text>
-        <Note>{meetingText(listing, cruise, t)}</Note>
+        <Note>{meetingText(listing, cruise, t, vanOn && van ? islandClock(van.pickupAt, i18n.language) : null)}</Note>
       </Card>
+
+      {/* Our van from the cruise port */}
+      {van && (
+        <Card>
+          <View style={styles.switchRow}>
+            <Ionicons name="bus" size={20} color={c.flame} />
+            <View style={{ flex: 1 }}>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>{t('vanToggle')}</Text>
+              <Note>{t('vanPrice').replace('{p}', usd(VAN_SETTINGS.roundTripPerPerson))}</Note>
+            </View>
+            <Switch value={withVan} onValueChange={setWithVan} trackColor={{ true: c.flame }} />
+          </View>
+          {withVan ? (
+            <>
+              <Note>• {t('vanThere').replace('{t}', islandClock(van.pickupAt, i18n.language))}</Note>
+              <Note>• {t('vanBack').replace('{t}', islandClock(van.returnPickupAt, i18n.language))}</Note>
+              <Note>• {t('vanAtPort').replace('{t}', islandClock(van.backAtPort, i18n.language))}</Note>
+              {van.vans > 1 && <Note>• {t('vansNeeded').replace('{n}', String(van.vans)).replace('{s}', String(VAN_SETTINGS.seatsPerVan))}</Note>}
+            </>
+          ) : (
+            <Note>{t('vanOffHint').replace('{m}', String(van.transferMinutes))}</Note>
+          )}
+          {vanTooSoon && <Text style={[type.small, { color: c.sos }]}>{t('vanTooSoon')}</Text>}
+        </Card>
+      )}
 
       {/* Split with my group */}
       {instant && (
@@ -462,6 +499,12 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
             <Text style={[type.bodyStrong, { color: c.ink }]}>{taxiTotal === 0 ? t('included') : usd(taxiTotal)}</Text>
           </View>
         ) : null}
+        {vanOn ? (
+          <View style={styles.total}>
+            <Text style={[type.body, { color: c.ink }]}>{t('vanLine').replace('{n}', String(qty))}</Text>
+            <Text style={[type.bodyStrong, { color: c.ink }]}>{usd(vanUsd)}</Text>
+          </View>
+        ) : null}
         {split && (
           <View style={styles.total}>
             <Text style={[type.bodyStrong, { color: c.ink }]}>{t('yourShare')}</Text>
@@ -476,10 +519,10 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
         label={instant ? t('payBtn') : t('sendReq')}
         trailing={instant ? usd(payNow) : undefined}
         loading={busy}
-        disabled={tooSoon || late || cruiseBlocked}
+        disabled={tooSoon || late || cruiseBlocked || vanTooSoon}
         onPress={() => confirm()}
       />
-      {zelleOk && <ZelleButton disabled={busy || tooSoon || late || cruiseBlocked} onPress={() => confirm('zelle')} />}
+      {zelleOk && <ZelleButton disabled={busy || tooSoon || late || cruiseBlocked || vanTooSoon} onPress={() => confirm('zelle')} />}
     </>
   );
 }

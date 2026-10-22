@@ -6,6 +6,7 @@ import { BUNDLE_SETTINGS } from '../_shared/bundle.ts';
 import { FEATURE_SETTINGS } from '../_shared/features.ts';
 import { TOUR_SETTINGS } from '../_shared/tours.ts';
 import { BUSINESS, ZELLE } from '../_shared/business.ts';
+import { VAN_SETTINGS } from '../_shared/transport.ts';
 
 interface Turn {
   role: 'user' | 'assistant';
@@ -79,9 +80,11 @@ async function ourFacts(db: any): Promise<string> {
     `- Per-boat charters take up to ${TOUR_SETTINGS.seatsPerBoat} people per boat; bigger groups need more boats.`,
     `Week pass: unlimited West End-West Bay water taxi rides, $${p.perPersonPerWeek} per person per week, groups of ${p.minGroup}-${p.maxGroup}; two weeks costs double.`,
     `Packages: a week pass plus one of our tours is ${d[1]}% off everything; pass + a snorkel tour + a fishing tour is ${d[2]}% off. Build one on the Passes page.`,
+    `Cruise guests: when booking a fixed-price tour, add our van from the cruise port gate to the tour and back for $${VAN_SETTINGS.roundTripPerPerson} per person round trip (${VAN_SETTINGS.seatsPerVan} seats per van). The app times the van to the ship and gets guests back to the port well before all-aboard.`,
+    `On trip day, the ticket shows a "Getting there" card: distance to the meeting point, when to leave, and the best way (walk, water taxi or our van). Guests can choose to share their location with our crew for that day only; it stops when they turn it off.`,
     `Contact us: call ${BUSINESS.phoneDisplay}${BUSINESS.whatsapp ? ' (also WhatsApp)' : ''}, email ${BUSINESS.email}, or Account > Help in the app. Emergencies: call 911 first.`,
     ...(ZELLE.enabled
-      ? [`Paying: card, Apple Pay or Google Pay in the app. Guests with a US bank can also pay passes, packages and tours booked at least ${ZELLE.minLeadHours} hours ahead by Zelle to ${ZELLE.recipient}, using the code the app shows in the memo; our team confirms Zelle by hand, so it is not instant. Water taxi rides are card only.`]
+      ? [`Paying: card, Apple Pay or Google Pay in the app. Guests with a US bank can also pay passes, packages and tours booked at least ${ZELLE.minLeadHours} hours ahead by Zelle to ${ZELLE.recipient}, using the code the app shows in the memo; it confirms automatically when the deposit reaches our bank, usually within minutes. Water taxi rides are card only.`]
       : []),
   ];
   const names = ((crew ?? []) as { display_name: string; certified: boolean }[]);

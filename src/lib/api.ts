@@ -1,5 +1,7 @@
 import { crewFor } from '../../supabase/functions/_shared/crew.ts';
 import { activityTotalUsd } from '../../supabase/functions/_shared/tours.ts';
+import { vanPlan, vanPriceUsd } from '../../supabase/functions/_shared/transport.ts';
+import { roatanInstant, type ShipCall } from '../../supabase/functions/_shared/cruise.ts';
 import { quoteFare, type FareInput } from '../../supabase/functions/_shared/pricing.ts';
 import { nightMode, passCovers } from '../../supabase/functions/_shared/features.ts';
 import { demoActivePass, demoUsePassRide } from '@/lib/stay';
@@ -66,6 +68,10 @@ function toBooking(r: Row, listingName = ''): Booking {
     totalUsd: r.total_usd == null ? undefined : Number(r.total_usd),
     status: r.status as Booking['status'],
     createdAt: String(r.created_at),
+    vanSeats: r.van_seats == null ? undefined : Number(r.van_seats),
+    vanUsd: r.van_usd == null ? undefined : Number(r.van_usd),
+    vanPickupAt: (r.van_pickup_at as string) ?? undefined,
+    vanReturnAt: (r.van_return_at as string) ?? undefined,
   };
 }
 
@@ -208,6 +214,9 @@ export interface BookingRequest {
   shipCallId?: string;
   /** Split the price into this many shares paid separately. */
   splitShares?: number;
+  /** Cruise guests: add our van from the port gate and back. Demo mode needs the ship to time it. */
+  van?: boolean;
+  ship?: ShipCall | null;
 }
 
 export interface SplitInfo {
@@ -220,8 +229,16 @@ export async function createBooking(req: BookingRequest): Promise<Booking & { sp
   const { listing } = req;
   if (!supabase) {
     const instant = listing.booking === 'instant' && listing.priceUsd != null;
-    const total = instant ? activityTotalUsd(listing.priceUsd!, listing.unit, req.quantity) : undefined;
+    let total = instant ? activityTotalUsd(listing.priceUsd!, listing.unit, req.quantity) : undefined;
+    const plan = req.van && req.ship && total != null
+      ? vanPlan(req.ship, { area: listing.area, portal: listing.portal, start: roatanInstant(req.date, req.time), durationMinutes: listing.durationMinutes, people: req.quantity })
+      : null;
+    const van = plan
+      ? { vanSeats: req.quantity, vanUsd: vanPriceUsd(req.quantity), vanPickupAt: plan.pickupAt.toISOString(), vanReturnAt: plan.returnPickupAt.toISOString() }
+      : {};
+    if (plan && total != null) total += vanPriceUsd(req.quantity);
     const b: Booking & { split?: SplitInfo } = {
+      ...van,
       ticketCode: newId(),
       shipCallId: req.shipCallId,
       id: newId(),
@@ -252,6 +269,7 @@ export async function createBooking(req: BookingRequest): Promise<Booking & { sp
     note: req.note,
     shipCallId: req.shipCallId,
     splitShares: req.splitShares,
+    van: req.van || undefined,
   });
   return { ...toBooking(booking, listing.name), split: split ?? undefined };
 }
@@ -522,3 +540,81 @@ export async function askAssistant(turns: ChatTurn[], language: string): Promise
 }
 
 export const isDemo = DEMO_MODE;
+
+// ---------- Getting there: guest location sharing and the crew's "on the way" list ----------
+
+const SHARE_KEY = 'demo.sharePosition';
+
+/** Send the guest's position to our crew. The server only accepts it on a day with a paid trip, on the island. */
+export async function sharePosition(lat: number, lon: number, accuracyM?: number): Promise<void> {
+  if (!supabase) {
+    writeJSON(SHARE_KEY, { lat, lon, at: new Date().toISOString() });
+    return;
+  }
+  await ensureSession();
+  const { error } = await supabase.rpc('share_position', { p_lat: lat, p_lon: lon, p_accuracy_m: accuracyM == null ? null : Math.round(accuracyM) });
+  if (error) throw error;
+}
+
+/** Stop sharing. The server wipes the position. */
+export async function stopSharingPosition(): Promise<void> {
+  if (!supabase) {
+    writeJSON(SHARE_KEY, null);
+    return;
+  }
+  const { error } = await supabase.rpc('stop_sharing_position');
+  if (error) throw error;
+}
+
+export interface GuestOnTheWay {
+  kind: 'booking' | 'ride';
+  tripId: string;
+  title?: string;
+  area?: string;
+  startsAt: string;
+  people: number;
+  fromDock?: string;
+  toDock?: string;
+  shipName?: string;
+  shipPort?: 'mahogany' | 'coxen';
+  vanPickupAt?: string;
+  vanReturnAt?: string;
+  guestName: string;
+  guestWhatsapp?: string;
+  lat?: number;
+  lon?: number;
+  positionAt?: string;
+}
+
+/** Crew and office: today's paid guests and, if they share it, where they are. */
+export async function guestsOnTheWay(): Promise<GuestOnTheWay[]> {
+  if (!supabase) {
+    // Demo: a cruise family in the van and a West Bay couple heading to the West End dock.
+    const at = (min: number) => new Date(Date.now() + min * 60_000).toISOString();
+    return [
+      { kind: 'booking', tripId: 'demo-g1', title: 'Bottom fishing', area: 'West End', startsAt: at(70), people: 4, shipName: 'Demo Ship', shipPort: 'coxen', vanPickupAt: at(30), vanReturnAt: at(310), guestName: 'Maria', guestWhatsapp: '+15550001', lat: 16.3141, lon: -86.5366, positionAt: at(-1) },
+      { kind: 'ride', tripId: 'demo-g2', startsAt: at(25), people: 2, fromDock: 'we', toDock: 'inf', guestName: 'Tom', guestWhatsapp: '+15550002', lat: 16.2995, lon: -86.5905, positionAt: at(-3) },
+    ];
+  }
+  const { data, error } = await supabase.rpc('guests_on_the_way');
+  if (error) throw error;
+  return ((data as Row[] | null) ?? []).map((r) => ({
+    kind: r.kind as GuestOnTheWay['kind'],
+    tripId: String(r.trip_id),
+    title: (r.title as string) ?? undefined,
+    area: (r.area as string) ?? undefined,
+    startsAt: String(r.starts_at),
+    people: Number(r.people),
+    fromDock: (r.from_dock as string) ?? undefined,
+    toDock: (r.to_dock as string) ?? undefined,
+    shipName: (r.ship_name as string) ?? undefined,
+    shipPort: (r.ship_port as GuestOnTheWay['shipPort']) ?? undefined,
+    vanPickupAt: (r.van_pickup_at as string) ?? undefined,
+    vanReturnAt: (r.van_return_at as string) ?? undefined,
+    guestName: String(r.guest_name || ''),
+    guestWhatsapp: (r.guest_whatsapp as string) ?? undefined,
+    lat: r.lat == null ? undefined : Number(r.lat),
+    lon: r.lon == null ? undefined : Number(r.lon),
+    positionAt: (r.position_at as string) ?? undefined,
+  }));
+}
