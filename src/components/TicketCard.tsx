@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import { VAN_SETTINGS, vanLeavesAt } from '../../supabase/functions/_shared/transport.ts';
 import { ticketQrValue, type SavedTicket } from '@/lib/tickets';
 import { islandClock, islandDay, roatanInstant } from '@/lib/cruise';
 import { radius, space, type, useTheme } from '@/theme';
@@ -43,7 +44,10 @@ export function TicketCard({ ticket }: { ticket: SavedTicket }) {
         <View style={[styles.meet, { backgroundColor: c.tile }]}>
           <Text style={[type.bodyStrong, { color: c.ink }]}>🚐 {t('vanH')}</Text>
           <Text style={[type.small, { color: c.ink }]}>
-            {t('vanThere').replace('{t}', islandClock(new Date(ticket.vanPickupAt), i18n.language))}
+            {t('vanWindow')
+              .replace('{t}', islandClock(new Date(ticket.vanPickupAt), i18n.language))
+              .replace('{l}', islandClock(vanLeavesAt(new Date(ticket.vanPickupAt)), i18n.language))
+              .replace('{m}', String(VAN_SETTINGS.waitMinutes))}
           </Text>
           {ticket.vanReturnAt ? (
             <Text style={[type.small, { color: c.ink }]}>

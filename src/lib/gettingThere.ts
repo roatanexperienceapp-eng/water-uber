@@ -1,6 +1,6 @@
 import { PORTS, roatanInstant, type ShipCall } from '../../supabase/functions/_shared/cruise.ts';
 import { DOCKS } from '../../supabase/functions/_shared/geo.ts';
-import { meetingPoint } from '../../supabase/functions/_shared/transport.ts';
+import { meetingPoint, vanLeavesAt } from '../../supabase/functions/_shared/transport.ts';
 import type { GettingThereProps } from '@/components/GettingThereCard';
 import { LISTINGS } from '@/data/catalogue';
 import type { SavedTicket } from '@/lib/tickets';
@@ -15,7 +15,8 @@ export function ticketTrip(ticket: SavedTicket, ship: ShipCall | null): GettingT
   return {
     tripId: ticket.bookingId,
     title: ticket.title,
-    start: ticket.vanPickupAt ? new Date(ticket.vanPickupAt) : roatanInstant(ticket.date, ticket.time),
+    // Van guests must reach the port gate before the van leaves at the end of its wait.
+    start: ticket.vanPickupAt ? vanLeavesAt(new Date(ticket.vanPickupAt)) : roatanInstant(ticket.date, ticket.time),
     dest,
     destName: port?.name ?? dockName ?? listing?.area ?? ticket.title,
     riders: ticket.quantity,

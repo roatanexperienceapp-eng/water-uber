@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { BUSINESS } from '../../supabase/functions/_shared/business.ts';
 import { DOCKS } from '../../supabase/functions/_shared/geo.ts';
-import { gettingThere, timingFor, type MoveOption, type Point } from '../../supabase/functions/_shared/transport.ts';
+import { gettingThere, timingFor, VAN_SETTINGS, vanLeavesAt, type MoveOption, type Point } from '../../supabase/functions/_shared/transport.ts';
 import { Button, Note } from '@/components/ui';
 import { sharePosition, stopSharingPosition } from '@/lib/api';
 import { islandClock } from '@/lib/cruise';
@@ -159,7 +159,9 @@ export function GettingThereCard(p: GettingThereProps) {
       {vanAt ? (
         <View style={[styles.row, { backgroundColor: c.tile }]}>
           <Ionicons name="bus" size={20} color={c.flame} />
-          <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('vanThere').replace('{t}', clock(vanAt))}</Text>
+          <Text style={[type.small, { color: c.ink, flex: 1 }]}>
+            {t('vanWindow').replace('{t}', clock(vanAt)).replace('{l}', clock(vanLeavesAt(vanAt))).replace('{m}', String(VAN_SETTINGS.waitMinutes))}
+          </Text>
         </View>
       ) : null}
 

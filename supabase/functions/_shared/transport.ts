@@ -11,6 +11,8 @@ export const VAN_SETTINGS = {
   /** Cruise port → tour → cruise port, per person. */
   roundTripPerPerson: 25,
   seatsPerVan: 12,
+  /** The van waits this long at the port gate for guests coming off the ship. OWNER: set by the owner. */
+  waitMinutes: 45,
   /** Drop guests at the meeting point this long before the start. */
   arriveEarlyMinutes: 15,
 } as const;
@@ -64,11 +66,20 @@ export function meetingPoint(l: {
   return d ? { lat: d.lat, lon: d.lon, dockId: d.id } : null;
 }
 
+/** The van leaves the port gate at the end of its wait. */
+export function vanLeavesAt(pickupAt: Date): Date {
+  return new Date(pickupAt.getTime() + VAN_SETTINGS.waitMinutes * 60_000);
+}
+
 export interface VanPlan {
-  /** Van leaves the port gate. */
+  /** Van is at the port gate from this time (waits VAN_SETTINGS.waitMinutes). */
   pickupAt: Date;
-  /** Guests at the meeting point. */
+  /** Van leaves the port gate at the latest. */
+  leavesAt: Date;
+  /** Guests at the meeting point (worst case: van left at the end of its wait). */
   arriveAt: Date;
+  /** Even leaving at the end of its wait, the van gets guests there before the start. False: pick a later time. */
+  onTime: boolean;
   /** Van leaves the meeting point after the activity. */
   returnPickupAt: Date;
   /** Guests back at the port gate. */
@@ -82,12 +93,15 @@ export function vanPlan(call: ShipCall, a: { area: string; portal: string; start
   const transfer = transferMinutes(call.port, a.area);
   if (transfer === null) return null;
   const offShip = call.arriveAt.getTime() + CRUISE_SETTINGS.disembarkMinutes * 60_000;
-  const ideal = a.start.getTime() - (transfer + VAN_SETTINGS.arriveEarlyMinutes) * 60_000;
+  // The van must be able to wait its full time and still drop guests early at the tour.
+  const ideal = a.start.getTime() - (transfer + VAN_SETTINGS.arriveEarlyMinutes + VAN_SETTINGS.waitMinutes) * 60_000;
   const pickupAt = new Date(Math.max(offShip, ideal));
-  const arriveAt = new Date(pickupAt.getTime() + transfer * 60_000);
+  const leavesAt = vanLeavesAt(pickupAt);
+  const arriveAt = new Date(leavesAt.getTime() + transfer * 60_000);
+  const onTime = arriveAt.getTime() <= a.start.getTime() - VAN_SETTINGS.arriveEarlyMinutes * 60_000;
   const returnPickupAt = new Date(a.start.getTime() + activityMinutes(a.portal, a.durationMinutes) * 60_000);
   const backAtPort = new Date(returnPickupAt.getTime() + transfer * 60_000);
-  return { pickupAt, arriveAt, returnPickupAt, backAtPort, transferMinutes: transfer, vans: vansFor(a.people) };
+  return { pickupAt, leavesAt, arriveAt, onTime, returnPickupAt, backAtPort, transferMinutes: transfer, vans: vansFor(a.people) };
 }
 
 export type MoveMode = 'walk' | 'taxi' | 'van';

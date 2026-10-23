@@ -780,7 +780,7 @@
  "zelleCard": "Paga con carta",
  "zelleWaitH": "In attesa del tuo Zelle",
  "zelleWait": "La prenotazione si conferma da sola all'arrivo del bonifico Zelle, di solito entro 10 minuti. Tieni aperta questa schermata o guarda in Viaggi.",
- "vanMeet": "Il nostro van parte dall'uscita del porto alle {t}.",
+ "vanMeet": "Il nostro van ti aspetta all'uscita del porto dalle {t}, fino a 45 minuti.",
  "vanH": "Van dal porto",
  "vanThere": "Il van parte dall'uscita del porto alle {t}",
  "vanBack": "Il van di ritorno alla nave parte alle {t}",
@@ -828,5 +828,7 @@
  "otwAgo": "{m} min fa",
  "otwBy_walk": "a piedi",
  "otwBy_taxi": "taxi acqueo",
- "otwBy_van": "su strada"
+ "otwBy_van": "su strada",
+ "vanWindow": "Il van aspetta all'uscita del porto {t} – {l} ({m} min), poi parte",
+ "vanTooEarly": "Il van aspetta {m} min al porto tutti i passeggeri, quindi quest'orario è troppo presto. Scegli più tardi o togli il van."
 }

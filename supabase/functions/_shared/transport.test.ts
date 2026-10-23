@@ -15,20 +15,27 @@ Deno.test('van price and van count', () => {
   eq(vansFor(0), 1);
 });
 
-Deno.test('van plan: leaves the port so guests arrive 15 min early, returns after the tour', () => {
-  // Coxen → West End is 25 min. Tour 10:00, 4 h fishing.
+Deno.test('van plan: waits 45 min at the gate and still drops guests 15 min early', () => {
+  // Coxen → West End is 25 min. Tour 10:00, 4 h fishing. At the gate 08:35, leaves by 09:20, there 09:45.
   const p = vanPlan(ship, { area: 'West End', portal: 'fish', start: at('10:00'), people: 4 })!;
-  eq(p.pickupAt.getTime(), at('09:20').getTime());
+  eq(VAN_SETTINGS.waitMinutes, 45);
+  eq(p.pickupAt.getTime(), at('08:35').getTime());
+  eq(p.leavesAt.getTime(), at('09:20').getTime());
   eq(p.arriveAt.getTime(), at('09:45').getTime());
+  ok(p.onTime);
   eq(p.returnPickupAt.getTime(), at('14:00').getTime());
   eq(p.backAtPort.getTime(), at('14:25').getTime());
   eq(p.vans, 1);
 });
 
-Deno.test('van never leaves before guests are off the ship', () => {
-  // Ship docks 08:00, off by 08:30; tour at 09:00 → van can only leave 08:30.
+Deno.test('van is never at the gate before guests are off the ship; too-early tours are flagged', () => {
+  // Ship docks 08:00, off by 08:30; tour at 09:00 → van at the gate 08:30, leaves 09:15, there 09:40: too late.
   const p = vanPlan(ship, { area: 'West End', portal: 'snork', start: at('09:00'), people: 2 })!;
   eq(p.pickupAt.getTime(), at('08:30').getTime());
+  eq(p.onTime, false);
+  // Earliest West End start with the van: 08:30 + 45 + 25 + 15 = 09:55.
+  ok(vanPlan(ship, { area: 'West End', portal: 'snork', start: at('09:55'), people: 2 })!.onTime);
+  ok(!vanPlan(ship, { area: 'West End', portal: 'snork', start: at('09:50'), people: 2 })!.onTime);
 });
 
 Deno.test('unknown area has no van plan', () => {

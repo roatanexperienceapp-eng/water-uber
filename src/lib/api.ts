@@ -230,9 +230,10 @@ export async function createBooking(req: BookingRequest): Promise<Booking & { sp
   if (!supabase) {
     const instant = listing.booking === 'instant' && listing.priceUsd != null;
     let total = instant ? activityTotalUsd(listing.priceUsd!, listing.unit, req.quantity) : undefined;
-    const plan = req.van && req.ship && total != null
+    const planned = req.van && req.ship && total != null
       ? vanPlan(req.ship, { area: listing.area, portal: listing.portal, start: roatanInstant(req.date, req.time), durationMinutes: listing.durationMinutes, people: req.quantity })
       : null;
+    const plan = planned && planned.onTime ? planned : null;
     const van = plan
       ? { vanSeats: req.quantity, vanUsd: vanPriceUsd(req.quantity), vanPickupAt: plan.pickupAt.toISOString(), vanReturnAt: plan.returnPickupAt.toISOString() }
       : {};

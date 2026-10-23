@@ -4,7 +4,7 @@
 import { activityTotalUsd } from '../_shared/tours.ts';
 import { withSupabase } from 'npm:@supabase/server@1';
 import { fail, json, readBody } from '../_shared/http.ts';
-import { vanPlan, vanPriceUsd } from '../_shared/transport.ts';
+import { VAN_SETTINGS, vanPlan, vanPriceUsd } from '../_shared/transport.ts';
 import { CRUISE_SETTINGS, fitsPortTime, roatanDate, roatanInstant, splitDeadline, type PortId } from '../_shared/cruise.ts';
 
 interface Body {
@@ -71,7 +71,8 @@ export default {
           { area: listing.area, portal: listing.portal_key, start, durationMinutes: listing.duration_minutes, people: b.quantity },
         );
         if (!plan) return fail(409, 'van_not_available', 'Our van does not go to this area yet');
-        if (plan.pickupAt.getTime() < Date.now() + 10 * 60_000) return fail(409, 'van_too_soon', 'Too late to book the van for this time');
+        if (!plan.onTime) return fail(409, 'van_too_early', `The van waits ${VAN_SETTINGS.waitMinutes} min at the port gate. Pick a later start time.`);
+        if (plan.leavesAt.getTime() < Date.now() + 10 * 60_000) return fail(409, 'van_too_soon', 'Too late to book the van for this time');
         const vanUsd = vanPriceUsd(b.quantity);
         van = { van_seats: b.quantity, van_usd: vanUsd, van_pickup_at: plan.pickupAt.toISOString(), van_return_at: plan.returnPickupAt.toISOString() };
         total += vanUsd;

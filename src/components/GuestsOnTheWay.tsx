@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { PORTS } from '../../supabase/functions/_shared/cruise.ts';
 import { DOCKS } from '../../supabase/functions/_shared/geo.ts';
-import { gettingThere, meetingPoint, timingFor } from '../../supabase/functions/_shared/transport.ts';
+import { gettingThere, meetingPoint, timingFor, vanLeavesAt } from '../../supabase/functions/_shared/transport.ts';
 import { Card, Note } from '@/components/ui';
 import { guestsOnTheWay, type GuestOnTheWay } from '@/lib/api';
 import { islandClock } from '@/lib/cruise';
@@ -54,7 +54,7 @@ export function GuestsOnTheWay() {
       {err ? <Note>{err}</Note> : rows && upcoming.length === 0 ? <Note>{t('otwNone')}</Note> : null}
       {upcoming.map((g) => {
         const dest = destinationOf(g);
-        const start = new Date(g.vanPickupAt ?? g.startsAt);
+        const start = g.vanPickupAt ? vanLeavesAt(new Date(g.vanPickupAt)) : new Date(g.startsAt);
         const plan = g.lat != null && g.lon != null && dest ? gettingThere({ lat: g.lat, lon: g.lon }, dest, g.people) : null;
         const timing = plan?.best ? timingFor(now, start, plan.best.minutes) : null;
         const ago = g.positionAt ? Math.max(0, Math.round((now.getTime() - new Date(g.positionAt).getTime()) / 60_000)) : null;
@@ -81,7 +81,7 @@ export function GuestsOnTheWay() {
             {g.shipName ? <Note>🚢 {g.shipName}</Note> : null}
             {g.vanPickupAt ? (
               <Note>
-                🚐 {t('otwVan').replace('{t}', clock(g.vanPickupAt)).replace('{b}', g.vanReturnAt ? clock(g.vanReturnAt) : '—')}
+                🚐 {t('otwVan').replace('{t}', `${clock(g.vanPickupAt)}–${islandClock(vanLeavesAt(new Date(g.vanPickupAt)), i18n.language)}`).replace('{b}', g.vanReturnAt ? clock(g.vanReturnAt) : '—')}
               </Note>
             ) : null}
             {plan && !plan.arrived ? (

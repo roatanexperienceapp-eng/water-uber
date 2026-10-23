@@ -780,7 +780,7 @@
  "zelleCard": "Payer par carte",
  "zelleWaitH": "En attente de votre Zelle",
  "zelleWait": "Votre réservation se confirme toute seule à l'arrivée du virement Zelle, en général sous 10 minutes. Gardez cet écran ouvert ou consultez Voyages.",
- "vanMeet": "Notre van part de la sortie du port à {t}.",
+ "vanMeet": "Notre van vous attend à la sortie du port dès {t}, jusqu'à 45 minutes.",
  "vanH": "Van du port",
  "vanThere": "Le van part de la sortie du port à {t}",
  "vanBack": "Le van retour au navire part à {t}",
@@ -828,5 +828,7 @@
  "otwAgo": "il y a {m} min",
  "otwBy_walk": "à pied",
  "otwBy_taxi": "bateau-taxi",
- "otwBy_van": "par la route"
+ "otwBy_van": "par la route",
+ "vanWindow": "Le van attend à la sortie du port de {t} à {l} ({m} min), puis part",
+ "vanTooEarly": "Le van attend {m} min au port tous les passagers, cette heure est donc trop tôt. Choisissez plus tard ou retirez le van."
 }

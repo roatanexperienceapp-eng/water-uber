@@ -780,7 +780,7 @@
  "zelleCard": "Lieber per Karte zahlen",
  "zelleWaitH": "Wir warten auf deine Zelle-Zahlung",
  "zelleWait": "Deine Buchung wird automatisch bestätigt, sobald die Zelle-Zahlung eingeht, meist innerhalb von 10 Minuten. Lass diesen Bildschirm offen oder schau unter Reisen.",
- "vanMeet": "Unser Van fährt um {t} am Hafentor ab.",
+ "vanMeet": "Unser Van wartet ab {t} bis zu 45 Minuten am Hafentor.",
  "vanH": "Hafen-Van",
  "vanThere": "Van fährt um {t} am Hafentor ab",
  "vanBack": "Van zurück zum Schiff fährt um {t}",
@@ -828,5 +828,7 @@
  "otwAgo": "vor {m} Min.",
  "otwBy_walk": "zu Fuß",
  "otwBy_taxi": "Wassertaxi",
- "otwBy_van": "per Straße"
+ "otwBy_van": "per Straße",
+ "vanWindow": "Van wartet am Hafentor {t} – {l} ({m} Min.), dann fährt er",
+ "vanTooEarly": "Der Van wartet {m} Min. am Hafen auf alle Gäste, diese Startzeit ist daher zu früh. Wähle eine spätere Zeit oder schalte den Van aus."
 }

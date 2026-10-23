@@ -99,6 +99,7 @@ function errorText(t: (k: string) => string, e: unknown): string {
     payments_not_configured: 'payNotReady',
     misses_ship: 'missesShip',
     van_too_soon: 'vanTooSoon',
+    van_too_early: 'vanTooEarly',
     too_late_to_split: 'tooLateSplit',
     split_closed: 'splitClosed',
     no_shares_left: 'splitFull',
@@ -245,7 +246,13 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
 
   // ---- Cruise mode: the ship's day only, and only start times that get the group back in time ----
   const cruise = ship && ship.date >= roatanDate(now) ? ship : null;
-  const cruiseTimes = cruise ? cruiseStartTimes(cruise, listing, now) : [];
+  const shipTimes = cruise ? cruiseStartTimes(cruise, listing, now) : [];
+  // With our van on, only offer starts the van can reach after its full wait at the port gate.
+  const vanEligible = !!cruise && instant && !(listing.portPickup && !listing.ours);
+  const vanTimes = vanEligible && withVan
+    ? shipTimes.filter((x) => vanPlan(cruise!, { area: listing.area, portal: listing.portal, start: roatanInstant(cruise!.date, x), durationMinutes: listing.durationMinutes, people: qty })?.onTime !== false)
+    : shipTimes;
+  const cruiseTimes = vanTimes.length ? vanTimes : shipTimes;
   const date = cruise ? cruise.date : days[day];
   const time = cruise ? (cruiseTimes.includes(pickedTime) ? pickedTime : cruiseTimes[0] ?? '') : pickedTime;
   const start = time ? roatanInstant(date, time) : null;
@@ -273,12 +280,13 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
 
   // ---- Our van from the cruise port and back (fixed-price bookings; not when the business picks up itself) ----
-  const van = cruise && instant && start && !(listing.portPickup && !listing.ours)
+  const van = vanEligible && cruise && start
     ? vanPlan(cruise, { area: listing.area, portal: listing.portal, start, durationMinutes: listing.durationMinutes, people: qty })
     : null;
   const vanOn = !!van && withVan;
   const vanUsd = vanOn ? vanPriceUsd(qty) : 0;
-  const vanTooSoon = vanOn && !!van && van.pickupAt.getTime() < now.getTime() + 10 * 60_000;
+  const vanTooEarly = vanOn && !!van && !van.onTime;
+  const vanTooSoon = vanOn && !!van && (vanTooEarly || van.leavesAt.getTime() < now.getTime() + 10 * 60_000);
 
   // ---- Split with my group (fixed-price bookings only) ----
   const maxShares = Math.min(CRUISE_SETTINGS.splitMaxShares, Math.max(2, qty));
@@ -422,7 +430,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
           </View>
           {withVan ? (
             <>
-              <Note>• {t('vanThere').replace('{t}', islandClock(van.pickupAt, i18n.language))}</Note>
+              <Note>• {t('vanWindow').replace('{t}', islandClock(van.pickupAt, i18n.language)).replace('{l}', islandClock(van.leavesAt, i18n.language)).replace('{m}', String(VAN_SETTINGS.waitMinutes))}</Note>
               <Note>• {t('vanBack').replace('{t}', islandClock(van.returnPickupAt, i18n.language))}</Note>
               <Note>• {t('vanAtPort').replace('{t}', islandClock(van.backAtPort, i18n.language))}</Note>
               {van.vans > 1 && <Note>• {t('vansNeeded').replace('{n}', String(van.vans)).replace('{s}', String(VAN_SETTINGS.seatsPerVan))}</Note>}
@@ -430,7 +438,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
           ) : (
             <Note>{t('vanOffHint').replace('{m}', String(van.transferMinutes))}</Note>
           )}
-          {vanTooSoon && <Text style={[type.small, { color: c.sos }]}>{t('vanTooSoon')}</Text>}
+          {vanTooSoon && <Text style={[type.small, { color: c.sos }]}>{vanTooEarly ? t('vanTooEarly').replace('{m}', String(VAN_SETTINGS.waitMinutes)) : t('vanTooSoon')}</Text>}
         </Card>
       )}
 

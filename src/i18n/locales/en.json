@@ -780,7 +780,7 @@
  "zelleCard": "Pay by card instead",
  "zelleWaitH": "Waiting for your Zelle",
  "zelleWait": "Your booking confirms automatically when your Zelle deposit arrives, usually within 10 minutes. Keep this screen open or check Trips.",
- "vanMeet": "Our van leaves the port gate at {t}.",
+ "vanMeet": "Our van waits at the port gate from {t}, for up to 45 minutes.",
  "vanH": "Port van",
  "vanThere": "Van leaves the port gate at {t}",
  "vanBack": "Van back to your ship leaves at {t}",
@@ -828,5 +828,7 @@
  "otwAgo": "{m} min ago",
  "otwBy_walk": "walking",
  "otwBy_taxi": "water taxi",
- "otwBy_van": "by road"
+ "otwBy_van": "by road",
+ "vanWindow": "Van waits at the port gate {t} – {l} ({m} min), then leaves",
+ "vanTooEarly": "The van waits {m} min at the port for everyone off the ship, so this start is too early. Pick a later time or turn the van off."
 }
