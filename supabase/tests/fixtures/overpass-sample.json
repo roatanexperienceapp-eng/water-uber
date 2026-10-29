@@ -1,0 +1,13 @@
+{"elements":[
+ {"type":"node","id":1,"lat":16.3036,"lon":-86.5945,"tags":{"place":"village","name":"West End"}},
+ {"type":"node","id":2,"lat":16.3545,"lon":-86.4655,"tags":{"place":"town","name":"French Harbour"}},
+ {"type":"node","id":3,"lat":16.3051,"lon":-86.5950,"tags":{"amenity":"pharmacy","name":"Farmacia Test"}},
+ {"type":"way","id":4,"center":{"lat":16.3540,"lon":-86.4650},"tags":{"amenity":"fuel","name":"Gas Test","brand":"UNO"}},
+ {"type":"node","id":5,"lat":16.3541,"lon":-86.4651,"tags":{"amenity":"fuel","name":"Gas Test"}},
+ {"type":"node","id":6,"lat":16.3060,"lon":-86.5952,"tags":{"shop":"scuba_diving","name":"Dive Test"}},
+ {"type":"node","id":7,"lat":16.3062,"lon":-86.5951,"tags":{"amenity":"restaurant","name":"Café Ñandú"}},
+ {"type":"node","id":8,"lat":16.3065,"lon":-86.5955,"tags":{"tourism":"hotel","name":"Hotel Test"}},
+ {"type":"node","id":9,"lat":16.3065,"lon":-86.5955,"tags":{"shop":"supermarket","name":"Super Test"}},
+ {"type":"node","id":10,"lat":16.3065,"lon":-86.5955,"tags":{"amenity":"bench"}},
+ {"type":"node","id":11,"lat":16.3065,"lon":-86.5955,"tags":{"amenity":"restaurant"}}
+]}

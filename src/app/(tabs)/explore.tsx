@@ -12,11 +12,15 @@ import { LanguageButton } from '@/components/LanguageButton';
 import { ShipButton } from '@/components/ShipButton';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
 import { PORTAL_ART } from '@/data/portalArt';
+import { ISLAND_PLACES } from '@/data/islandPlaces';
 import { useCrew } from '@/lib/crew';
 import { usd } from '@/lib/format';
 import { searchListings } from '@/lib/search';
 import { radius, space, type, useTheme } from '@/theme';
 import type { LangCode } from '@/types';
+
+/** The Gas stations tile shows once the island map data has gas stations in it. */
+const HAS_GAS = ISLAND_PLACES.some((p) => p.kind === 'gas');
 
 export default function ExploreScreen() {
   const { t, i18n } = useTranslation();
@@ -113,6 +117,16 @@ export default function ExploreScreen() {
                 </Text>
               </Pressable>
             ))}
+            {HAS_GAS && (
+              <Pressable accessibilityRole="button" onPress={() => router.push('/gas')} style={styles.tile}>
+                <View style={[styles.tileIcon, { backgroundColor: c.tile }]}>
+                  <Text style={styles.tileEmoji}>⛽</Text>
+                </View>
+                <Text style={[styles.tileLabel, { color: c.ink }]} numberOfLines={2}>
+                  {t('gasH')}
+                </Text>
+              </Pressable>
+            )}
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel={t('captainsH')} onPress={() => router.push('/captains')} style={[styles.crewCard, { backgroundColor: c.ink }]}>
             <View style={styles.crewFaces}>

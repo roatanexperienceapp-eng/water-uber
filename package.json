@@ -53,7 +53,8 @@
     "test:db": "node supabase/tests/db.test.mjs && node supabase/tests/features.test.mjs && node supabase/tests/cruise.test.mjs && node supabase/tests/inbox.test.mjs && node supabase/tests/giving.test.mjs && node supabase/tests/account.test.mjs && node supabase/tests/bundles.test.mjs && node supabase/tests/crew.test.mjs && node supabase/tests/community.test.mjs",
     "test:server": "cd supabase/functions && deno test _shared/",
     "seed": "node scripts/generate-seed.mjs",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "places": "node scripts/osm-places.mjs"
   },
   "private": true,
   "jest": {

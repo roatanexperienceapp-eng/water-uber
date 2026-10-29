@@ -3,6 +3,7 @@
 // OWNER: every number in LAND_PRICING is yours to change.
 import { DOCKS, kmBetween } from './geo.ts';
 import { PORTS } from './cruise.ts';
+import { ISLAND_PLACES } from '../../../src/data/islandPlaces.ts';
 
 export type VehicleKind = 'car' | 'van';
 export type LandTiming = 'now' | 'scheduled';
@@ -37,7 +38,9 @@ export function onIsland(p: Point): boolean {
   );
 }
 
-export type PlaceKind = 'airport' | 'port' | 'beach' | 'town' | 'park' | 'health' | 'shop';
+export type PlaceKind =
+  | 'airport' | 'port' | 'beach' | 'town' | 'park' | 'health' | 'shop'
+  | 'community' | 'dive' | 'gas' | 'pharmacy' | 'hotel' | 'restaurant' | 'store' | 'bank' | 'landmark';
 
 export interface LandPlace extends Point {
   id: string;
@@ -50,8 +53,8 @@ export interface LandPlace extends Point {
 
 const dock = (id: string) => DOCKS.find((d) => d.id === id)!;
 
-/** Where guests usually go. OWNER: add hotels, restaurants and your rentals here. */
-export const LAND_PLACES: LandPlace[] = [
+/** Hand-picked places guests ask for most (always listed first). OWNER: add your rentals here. */
+export const KEY_PLACES: LandPlace[] = [
   { id: 'airport', name: 'Roatán Airport (RTB)', area: 'Coxen Hole', kind: 'airport', lat: 16.3168, lon: -86.523 },
   { id: 'portCoxen', name: PORTS.coxen.name, area: 'Coxen Hole', kind: 'port', lat: PORTS.coxen.lat, lon: PORTS.coxen.lon },
   { id: 'portMahogany', name: PORTS.mahogany.name, area: 'Mahogany Bay', kind: 'port', lat: PORTS.mahogany.lat, lon: PORTS.mahogany.lon },
@@ -68,6 +71,15 @@ export const LAND_PLACES: LandPlace[] = [
   { id: 'puntaGorda', name: 'Punta Gorda', area: 'Punta Gorda', kind: 'town', lat: 16.4045, lon: -86.3905, approx: true },
   { id: 'oakRidge', name: 'Oak Ridge', area: 'Oak Ridge', kind: 'town', lat: 16.3915, lon: -86.3585, approx: true },
   { id: 'campBay', name: 'Camp Bay Beach', area: 'Camp Bay', kind: 'beach', lat: 16.4385, lon: -86.2915, approx: true },
+];
+
+/**
+ * Every pickup and drop-off the app knows: the key places, then every store, hotel, restaurant, dive shop,
+ * pharmacy, park, gas station, beach and community on the island from OpenStreetMap (src/data/islandPlaces.ts).
+ */
+export const LAND_PLACES: LandPlace[] = [
+  ...KEY_PLACES,
+  ...ISLAND_PLACES.filter((p) => onIsland(p)).map((p) => ({ id: p.id, name: p.name, area: p.community, kind: p.kind, lat: p.lat, lon: p.lon })),
 ];
 
 export function placeById(id: string | null | undefined): LandPlace | undefined {

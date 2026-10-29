@@ -17,6 +17,7 @@ import { HOME_CENTER } from '@/config';
 import { clock, usd } from '@/lib/format';
 import { createLandRide, subscribeVehicles, type Spot } from '@/lib/land';
 import { pay } from '@/lib/payments';
+import { takePendingDropoff } from '@/lib/service';
 import { useNow } from '@/lib/useNow';
 import { radius, space, type, useTheme } from '@/theme';
 import { PlacePicker } from './PlacePicker';
@@ -44,7 +45,7 @@ export function LandHome() {
   const { height } = useWindowDimensions();
   const [cars, setCars] = useState<LiveVehicle[]>([]);
   const [pickup, setPickup] = useState<Spot | null>(null);
-  const [dropoff, setDropoff] = useState<Spot | null>(null);
+  const [dropoff, setDropoff] = useState<Spot | null>(() => takePendingDropoff());
   const [picker, setPicker] = useState<null | 'pickup' | 'dropoff'>(null);
   const [riders, setRiders] = useState(2);
   const [wantVan, setWantVan] = useState(false);
