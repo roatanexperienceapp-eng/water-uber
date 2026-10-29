@@ -17,7 +17,10 @@ import { CurrencyButton } from '@/components/CurrencyButton';
 import { DockPicker } from '@/components/DockPicker';
 import { ShipButton } from '@/components/ShipButton';
 import { Button, Note, Segmented, Stepper } from '@/components/ui';
-import { BRAND_NAME, DEMO_MODE, HOME_CENTER } from '@/config';
+import { DEMO_MODE, HOME_CENTER } from '@/config';
+import { LandHome } from '@/components/land/LandHome';
+import { ServiceSwitch } from '@/components/land/ServiceSwitch';
+import { useService } from '@/lib/service';
 import { DIVE_SITES, type DiveSite } from '@/data/diveSites';
 import { subscribeBoats } from '@/lib/api';
 import { currentPass, openSharedBoats, savedPlaces, savePlace, seaReports, type GuestPass, type SavedPlace } from '@/lib/stay';
@@ -35,7 +38,13 @@ function nextSlots(count: number): Date[] {
   return Array.from({ length: count }, (_, i) => new Date(d.getTime() + i * 30 * 60000));
 }
 
+/** Ride tab: water taxi or land taxi, picked with the switch at the top. */
 export default function RideScreen() {
+  const [service] = useService();
+  return service === 'land' ? <LandHome /> : <WaterRide />;
+}
+
+function WaterRide() {
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const { height } = useWindowDimensions();
@@ -191,10 +200,7 @@ export default function RideScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: space(10) }} stickyHeaderIndices={[]}>
         <View style={styles.header}>
-          <View style={styles.brandRow}>
-            <View style={[styles.logo, { backgroundColor: c.flame }]} />
-            <Text style={[type.h2, { color: c.ink }]}>{BRAND_NAME}</Text>
-          </View>
+          <ServiceSwitch />
           <View style={{ alignItems: 'flex-end', gap: space(1) }}>
             <View style={{ flexDirection: 'row', gap: space(2) }}>
               <ShipButton />
@@ -543,8 +549,6 @@ export default function RideScreen() {
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space(4), paddingTop: space(2), paddingBottom: space(3) },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: space(2) },
-  logo: { width: 24, height: 24, borderRadius: 7 },
   mapWrap: { marginHorizontal: space(4), borderRadius: radius.lg, overflow: 'hidden', backgroundColor: '#11618A' },
   livePill: { position: 'absolute', top: 10, left: 10, flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E' },

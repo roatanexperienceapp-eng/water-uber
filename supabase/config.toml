@@ -424,6 +424,9 @@ enabled = true
 [functions.create-ride]
 verify_jwt = true
 
+[functions.create-land-ride]
+verify_jwt = true
+
 [functions.create-booking]
 verify_jwt = true
 

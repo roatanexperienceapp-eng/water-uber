@@ -9,6 +9,7 @@ import { ZELLE, zelleMemo } from '../_shared/business.ts';
 
 interface Body {
   rideId?: string;
+  landRideId?: string;
   bookingId?: string;
   passId?: string;
   donationId?: string;
@@ -39,14 +40,14 @@ export default {
   fetch: withSupabase({ auth: 'user' }, async (req, ctx) => {
     if (req.method !== 'POST') return fail(405, 'method_not_allowed', 'Use POST');
     const b = await readBody<Body>(req);
-    if (!b || [b.rideId, b.bookingId, b.passId, b.donationId, b.bundleId, b.splitToken].filter(Boolean).length !== 1) {
-      return fail(400, 'bad_body', 'Send exactly one of rideId, bookingId, passId, donationId, bundleId or splitToken');
+    if (!b || [b.rideId, b.landRideId, b.bookingId, b.passId, b.donationId, b.bundleId, b.splitToken].filter(Boolean).length !== 1) {
+      return fail(400, 'bad_body', 'Send exactly one of rideId, landRideId, bookingId, passId, donationId, bundleId or splitToken');
     }
     const uid = ctx.userClaims!.id;
     const db = ctx.supabaseAdmin;
 
     const zelle = b.method === 'zelle';
-    if (zelle && (!ZELLE.enabled || b.rideId || b.donationId || b.splitToken)) {
+    if (zelle && (!ZELLE.enabled || b.rideId || b.landRideId || b.donationId || b.splitToken)) {
       // Rides are needed right away and splits are paid by several people: card only.
       return fail(409, 'zelle_not_allowed', 'Zelle is for passes, packages and tours booked ahead');
     }
@@ -86,6 +87,12 @@ export default {
         if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This ride is not awaiting payment');
         amount = Number(data.fare_usd);
         description = 'Water taxi ride';
+      } else if (b.landRideId) {
+        const { data } = await db.from('land_rides').select('guest_id, status, fare_usd').eq('id', b.landRideId).single();
+        if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Ride not found');
+        if (data.status !== 'awaiting_payment') return fail(409, 'not_payable', 'This ride is not awaiting payment');
+        amount = Number(data.fare_usd);
+        description = 'Land taxi ride';
       } else if (b.passId) {
         const { data } = await db.from('guest_passes').select('guest_id, status, price_usd').eq('id', b.passId).single();
         if (!data || data.guest_id !== uid) return fail(404, 'not_found', 'Pass not found');
@@ -125,7 +132,7 @@ export default {
       // Donations may only be paid on the website (Apple: no in-app charity payments unless approved nonprofit).
       if (b.donationId && b.appReturnUrl) return fail(409, 'donate_on_web', 'Donations are completed on the website');
 
-      const target = b.rideId ? { ride_id: b.rideId } : b.passId ? { pass_id: b.passId } : b.donationId ? { donation_id: b.donationId } : b.bundleId ? { bundle_id: b.bundleId } : { booking_id: b.bookingId };
+      const target = b.rideId ? { ride_id: b.rideId } : b.landRideId ? { land_ride_id: b.landRideId } : b.passId ? { pass_id: b.passId } : b.donationId ? { donation_id: b.donationId } : b.bundleId ? { bundle_id: b.bundleId } : { booking_id: b.bookingId };
       const [col, val] = Object.entries(target)[0];
       if (zelle) {
         // One pending Zelle payment per item: asking again shows the same code.

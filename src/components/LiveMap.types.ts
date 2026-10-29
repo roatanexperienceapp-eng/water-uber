@@ -20,4 +20,25 @@ export interface LiveMapProps {
   satellite: boolean;
   onBoatPress: (boat: LiveBoat) => void;
   onDivePress: (site: DiveSite) => void;
+  /** Land taxi: cars and vans on the road. */
+  cars?: MapCar[];
+  /** Land taxi: pickup and drop-off pins. */
+  pins?: MapPin[];
+}
+
+export interface MapCar {
+  id: string;
+  kind: 'car' | 'van';
+  available: boolean;
+  lat: number;
+  lon: number;
+  /** The guest's own driver: drawn bigger. */
+  mine?: boolean;
+}
+
+export interface MapPin {
+  id: string;
+  kind: 'pickup' | 'dropoff';
+  lat: number;
+  lon: number;
 }

@@ -74,6 +74,22 @@ export default function LiveMap(p: LiveMapProps) {
             </g>
           );
         })}
+        {(p.pins ?? []).map((pin) => {
+          const [x, y] = P(pin.lon, pin.lat);
+          return pin.kind === 'pickup' ? (
+            <circle key={pin.id} cx={x} cy={y} r={7} fill="#0b0b0c" stroke="#fff" strokeWidth={3} />
+          ) : (
+            <rect key={pin.id} x={x - 7} y={y - 7} width={14} height={14} fill={brand.flame} stroke="#fff" strokeWidth={3} />
+          );
+        })}
+        {(p.cars ?? []).map((car) => {
+          const [x, y] = P(car.lon, car.lat);
+          const cw = (car.kind === 'van' ? 20 : 16) * (car.mine ? 1.3 : 1);
+          const ch = car.mine ? 14 : 11;
+          return (
+            <rect key={car.id} x={x - cw / 2} y={y - ch / 2} width={cw} height={ch} rx={3} fill={car.mine ? brand.flame : '#0b0b0c'} stroke="#fff" strokeWidth={2} opacity={car.available || car.mine ? 1 : 0.55} style={{ transition: 'x 1s linear, y 1s linear' }} />
+          );
+        })}
         {p.boats.map((b) => {
           const [x, y] = P(b.lon, b.lat);
           return (

@@ -12,6 +12,7 @@ import { pay } from '@/lib/payments';
 import { savedTickets, type SavedTicket } from '@/lib/tickets';
 import { islandClock, islandDay, roatanInstant } from '@/lib/cruise';
 import { cancelRide, listMyBookings, listMyRides } from '@/lib/api';
+import { myLandRides, type LandRide } from '@/lib/land';
 import { clock, usd } from '@/lib/format';
 import { currentPass, myCredits, myRepeatRides, setRepeatActive, type GuestPass, type RepeatRide, type RideCredit } from '@/lib/stay';
 import { shortDate } from '@/lib/stayUi';
@@ -34,6 +35,7 @@ export default function Trips() {
   const { t, i18n } = useTranslation();
   const c = useTheme();
   const [rides, setRides] = useState<Ride[]>([]);
+  const [landRides, setLandRides] = useState<LandRide[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [repeats, setRepeats] = useState<RepeatRide[]>([]);
   const [pass, setPass] = useState<GuestPass | null>(null);
@@ -47,13 +49,15 @@ export default function Trips() {
   const load = useCallback(async () => {
     setLoading(true);
     setTickets(savedTickets()); // from the phone: shows even with no signal
-    const [r, b, rp, p, cr] = await Promise.all([
+    const [r, b, rp, p, cr, lr] = await Promise.all([
       listMyRides().catch(() => []),
       listMyBookings().catch(() => []),
       myRepeatRides().catch(() => []),
       currentPass().catch(() => null),
       myCredits().catch(() => []),
+      myLandRides().catch(() => []),
     ]);
+    setLandRides(lr);
     setRides(r);
     setBookings(b);
     setRepeats(rp);
@@ -81,7 +85,7 @@ export default function Trips() {
 
   const dockName = (d: string) => DOCKS.find((x) => x.id === d)?.name ?? d;
   const creditTotal = credits.filter((x) => !x.used).reduce((s, x) => s + x.amountUsd, 0);
-  const empty = !rides.length && !bookings.length && !repeats.length && !pass && !tickets.length;
+  const empty = !rides.length && !landRides.length && !bookings.length && !repeats.length && !pass && !tickets.length;
   const now = new Date();
 
   return (
@@ -128,6 +132,24 @@ export default function Trips() {
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={c.onInk} />
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        {landRides.length > 0 && (
+          <View style={{ gap: space(2) }}>
+            <Text style={[type.h2, { color: c.ink }]}>{t('svcLand')}</Text>
+            {landRides.slice(0, 8).map((lr) => (
+              <Pressable key={lr.id} accessibilityRole="button" onPress={() => router.push({ pathname: '/land/[id]', params: { id: lr.id } })} style={[styles.ticket, { backgroundColor: c.tile }]}>
+                <Ionicons name={lr.vehicle === 'van' ? 'bus' : 'car'} size={24} color={c.ink} />
+                <View style={{ flex: 1 }}>
+                  <Text style={[type.bodyStrong, { color: c.ink }]} numberOfLines={1}>{lr.pickup.label} → {lr.dropoff.label}</Text>
+                  <Text style={[type.small, { color: c.muted }]}>
+                    {islandDay(new Date(lr.scheduledFor ?? lr.createdAt), i18n.language)} · {islandClock(new Date(lr.scheduledFor ?? lr.createdAt), i18n.language)} · {t(lr.status === 'accepted' || lr.status === 'onboard' || lr.status === 'completed' ? `landStep_${lr.status}` : STATUS_KEY[lr.status] ?? 'statusPaid')}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={c.muted} />
               </Pressable>
             ))}
           </View>

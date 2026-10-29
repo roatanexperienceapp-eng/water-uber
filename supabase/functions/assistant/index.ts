@@ -7,6 +7,7 @@ import { FEATURE_SETTINGS } from '../_shared/features.ts';
 import { TOUR_SETTINGS } from '../_shared/tours.ts';
 import { BUSINESS, ZELLE } from '../_shared/business.ts';
 import { VAN_SETTINGS } from '../_shared/transport.ts';
+import { LAND_PRICING } from '../_shared/land.ts';
 
 interface Turn {
   role: 'user' | 'assistant';
@@ -81,6 +82,7 @@ async function ourFacts(db: any): Promise<string> {
     `Week pass: unlimited West End-West Bay water taxi rides, $${p.perPersonPerWeek} per person per week, groups of ${p.minGroup}-${p.maxGroup}; two weeks costs double.`,
     `Packages: a week pass plus one of our tours is ${d[1]}% off everything; pass + a snorkel tour + a fishing tour is ${d[2]}% off. Build one on the Passes page.`,
     `Cruise guests: when booking a fixed-price tour, add our van from the cruise port gate to the tour and back for $${VAN_SETTINGS.roundTripPerPerson} per person round trip (${VAN_SETTINGS.seatsPerVan} seats per van). The van waits up to ${VAN_SETTINGS.waitMinutes} minutes at the port gate for guests coming off the ship, then leaves. The app times the van to the ship and gets guests back to the port well before all-aboard.`,
+    `Land taxi: switch the Ride tab from "Water taxi" to "Land taxi" at the top. Our own cars (up to ${LAND_PRICING.car.seats} people) and vans (up to ${LAND_PRICING.van.seats}) go anywhere on the island. The price is for the whole vehicle, by distance, shown before paying (cars from $${LAND_PRICING.car.minUsd}, e.g. airport to West Bay about $26). Guests see the driver, car and plate and follow the car on the map.`,
     `On trip day, the ticket shows a "Getting there" card: distance to the meeting point, when to leave, and the best way (walk, water taxi or our van). Guests can choose to share their location with our crew for that day only; it stops when they turn it off.`,
     `Contact us: call ${BUSINESS.phoneDisplay}${BUSINESS.whatsapp ? ' (also WhatsApp)' : ''}, email ${BUSINESS.email}, or Account > Help in the app. Emergencies: call 911 first.`,
     ...(ZELLE.enabled

@@ -64,6 +64,16 @@ export default function LiveMap(p: LiveMapProps) {
           </View>
         </Marker>
       ))}
+      {(p.pins ?? []).map((pin) => (
+        <Marker key={pin.id} coordinate={{ latitude: pin.lat, longitude: pin.lon }} tracksViewChanges={false} anchor={{ x: 0.5, y: 0.5 }}>
+          <View style={pin.kind === 'pickup' ? styles.pinFrom : styles.pinTo} />
+        </Marker>
+      ))}
+      {(p.cars ?? []).map((car) => (
+        <Marker key={car.id} coordinate={{ latitude: car.lat, longitude: car.lon }} tracksViewChanges={false} anchor={{ x: 0.5, y: 0.5 }}>
+          <View style={[styles.car, car.mine && styles.carMine, { opacity: car.available || car.mine ? 1 : 0.55, width: car.kind === 'van' ? 20 : 16 }]} />
+        </Marker>
+      ))}
       {p.boats.map((b) => (
         <Marker
           key={b.id}
@@ -88,4 +98,8 @@ const styles = StyleSheet.create({
   flagStripe: { height: 2.5, width: 22, backgroundColor: '#fff', transform: [{ rotate: '34deg' }], marginLeft: -3 },
   halo: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   boat: { borderRadius: 999, borderWidth: 2, borderColor: '#fff' },
+  car: { height: 11, borderRadius: 3, backgroundColor: '#0b0b0c', borderWidth: 2, borderColor: '#fff' },
+  carMine: { backgroundColor: brand.flame, height: 15, transform: [{ scale: 1.3 }] },
+  pinFrom: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#0b0b0c', borderWidth: 3, borderColor: '#fff' },
+  pinTo: { width: 16, height: 16, backgroundColor: brand.flame, borderWidth: 3, borderColor: '#fff' },
 });

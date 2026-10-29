@@ -357,7 +357,7 @@ export async function bookingContact(id: string): Promise<{ name: string; whatsa
 
 // ---------- Payments ----------
 
-export type PayTarget = { rideId: string } | { bookingId: string } | { passId: string } | { donationId: string } | { bundleId: string } | { splitToken: string; shares: 'one' | 'rest' };
+export type PayTarget = { rideId: string } | { landRideId: string } | { bookingId: string } | { passId: string } | { donationId: string } | { bundleId: string } | { splitToken: string; shares: 'one' | 'rest' };
 
 /**
  * Starts a payment for a ride or booking. Live mode asks the server to create the payment (the server
@@ -384,6 +384,10 @@ export async function startPayment(target: PayTarget, returnPath = '/trips'): Pr
       const rides = readJSON<Ride[]>(RIDES_KEY, []).map((r) => (r.id === target.rideId ? { ...r, status: 'paid' as const } : r));
       writeJSON(RIDES_KEY, rides);
       return { paymentId: `DEMO-${target.rideId}`, amountUsd: rides.find((r) => r.id === target.rideId)?.fareUsd ?? 0 };
+    }
+    if ('landRideId' in target) {
+      const { demoPayLandRide } = await import('@/lib/land');
+      return { paymentId: `DEMO-${target.landRideId}`, amountUsd: demoPayLandRide(target.landRideId) };
     }
     if ('bundleId' in target) {
       const { demoPayPackage } = await import('@/lib/bundles');
