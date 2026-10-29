@@ -90,14 +90,22 @@ export function buildPlaces(elements) {
   });
 }
 
+const MIRRORS = ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+
+/** Uses curl so it works behind a proxy (Node's fetch ignores HTTPS_PROXY). Tries each mirror. */
 async function download() {
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'RoatanWaterTaxi/1.0 (roatanexperienceapp@gmail.com)' },
-    body: 'data=' + encodeURIComponent(QUERY),
-  });
-  if (!res.ok) throw new Error(`Overpass ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  return res.json();
+  const { execFileSync } = await import('node:child_process');
+  let last;
+  for (const url of MIRRORS) {
+    try {
+      const out = execFileSync('curl', ['-sS', '--fail', '-m', '180', '-A', 'RoatanWaterTaxi/1.0 (roatanexperienceapp@gmail.com)', '--data-urlencode', `data=${QUERY}`, url], { maxBuffer: 200 * 1024 * 1024 });
+      return JSON.parse(out.toString('utf8'));
+    } catch (e) {
+      last = e;
+      console.error(`${url} failed, trying the next mirror`);
+    }
+  }
+  throw last;
 }
 
 export function render(places, sourceNote) {
