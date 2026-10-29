@@ -22,7 +22,7 @@ export function ServiceSwitch() {
         <View style={[styles.logo, { backgroundColor: c.flame }]}>
           <Ionicons name={service === 'water' ? 'boat' : 'car'} size={14} color="#fff" />
         </View>
-        <Text style={[type.h2, { color: c.ink }]}>{label(service)}</Text>
+        <Text style={[styles.title, { color: c.ink }]}>{label(service)}</Text>
         <Ionicons name="chevron-down" size={20} color={c.ink} />
       </Pressable>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
@@ -52,6 +52,8 @@ export function ServiceSwitch() {
 
 const styles = StyleSheet.create({
   btn: { flexDirection: 'row', alignItems: 'center', gap: space(2), paddingVertical: 4 },
+  /** Hand-painted brush capitals, like the business card. */
+  title: { fontFamily: 'CaveatBrush_400Regular', fontSize: 32, lineHeight: 38, textTransform: 'uppercase', letterSpacing: 0.5 },
   logo: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', paddingTop: 90, paddingHorizontal: space(4) },
   menu: { borderRadius: radius.lg, padding: space(2), gap: 2, maxWidth: 420 },

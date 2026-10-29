@@ -1,4 +1,5 @@
 import '@/i18n';
+import { CaveatBrush_400Regular, useFonts } from '@expo-google-fonts/caveat-brush';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, useColorScheme } from 'react-native';
@@ -12,6 +13,8 @@ if (APP_VARIANT === 'captain' && Platform.OS !== 'web') {
 
 export default function RootLayout() {
   const scheme = useColorScheme();
+  // Brush lettering for the "Water taxi ▾" title. Screens render right away; the title switches font once loaded.
+  useFonts({ CaveatBrush_400Regular });
   return (
     <SafeAreaProvider>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />

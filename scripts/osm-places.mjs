@@ -98,7 +98,7 @@ async function download() {
   let last;
   for (const url of MIRRORS) {
     try {
-      const out = execFileSync('curl', ['-sS', '--fail', '-m', '180', '-A', 'RoatanWaterTaxi/1.0 (roatanexperienceapp@gmail.com)', '--data-urlencode', `data=${QUERY}`, url], { maxBuffer: 200 * 1024 * 1024 });
+      const out = execFileSync('curl', ['-sS', '--fail', '-m', process.env.OSM_TIMEOUT ?? '180', '-A', 'RoatanWaterTaxi/1.0 (roatanexperienceapp@gmail.com)', '--data-urlencode', `data=${QUERY}`, url], { maxBuffer: 200 * 1024 * 1024 });
       return JSON.parse(out.toString('utf8'));
     } catch (e) {
       last = e;
