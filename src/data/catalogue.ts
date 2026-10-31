@@ -200,6 +200,34 @@ export const PORTALS: Portal[] = [
    "zh": "纪念品"
   },
   "kind": "book"
+ },
+ {
+  "key": "nsnork",
+  "icon": "🔦",
+  "names": {
+   "en": "Night snorkeling",
+   "es": "Snorkel nocturno",
+   "fr": "Snorkeling de nuit",
+   "de": "Nachtschnorcheln",
+   "pt": "Snorkel noturno",
+   "it": "Snorkeling notturno",
+   "zh": "夜间浮潜"
+  },
+  "kind": "book"
+ },
+ {
+  "key": "horse",
+  "icon": "🐎",
+  "names": {
+   "en": "Horseback riding",
+   "es": "Paseos a caballo",
+   "fr": "Balades à cheval",
+   "de": "Reiten",
+   "pt": "Passeio a cavalo",
+   "it": "Equitazione",
+   "zh": "骑马"
+  },
+  "kind": "book"
  }
 ];
 
@@ -2559,5 +2587,46 @@ export const LISTINGS: Listing[] = [
   "description": "Local art, crafts and photography.",
   "unit": "person",
   "booking": "request"
+ },
+ {
+  "id": "nsnork-our-night-snorkel",
+  "portal": "nsnork",
+  "name": "Night snorkel with our captains",
+  "area": "West End",
+  "description": "The reef after dark with our boat, guide and dive lights: octopus, lobster, sleeping parrotfish and, on some nights, glowing plankton.",
+  "unit": "person",
+  "ours": true,
+  "booking": "request",
+  "durationMinutes": 90
+ },
+ {
+  "id": "nsnork-island-diving-center",
+  "portal": "nsnork",
+  "name": "Island Diving Center · night snorkel",
+  "area": "West End",
+  "description": "Guided night snorkel from West End.",
+  "unit": "person",
+  "booking": "request",
+  "durationMinutes": 90
+ },
+ {
+  "id": "horse-west-bay-beach-ride",
+  "portal": "horse",
+  "name": "Horseback ride to West Bay Beach",
+  "area": "West Bay",
+  "description": "Trail ride through the hills and along the beach. We book it with a local stable.",
+  "unit": "person",
+  "booking": "request",
+  "durationMinutes": 120
+ },
+ {
+  "id": "horse-west-bay-tours",
+  "portal": "horse",
+  "name": "West Bay Tours · horseback riding",
+  "area": "West Bay",
+  "description": "Horseback riding with beach time, booked through West Bay Tours.",
+  "unit": "person",
+  "booking": "request",
+  "durationMinutes": 120
  }
 ];
