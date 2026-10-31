@@ -233,7 +233,7 @@ function WaterRide() {
             <View style={[styles.zoom, { backgroundColor: c.bg }]}>
               {[7, 5, 2].map((r) => (
                 <Pressable key={r} onPress={() => setRange(r)} style={[styles.zoomBtn, range === r && { backgroundColor: c.ink }]}>
-                  <Text style={[type.label, { color: range === r ? c.onInk : c.muted }]}>{r} mi</Text>
+                  <Text style={[type.label, { fontSize: 11, lineHeight: 14, color: range === r ? c.onInk : c.muted }]}>{r} mi</Text>
                 </Pressable>
               ))}
             </View>
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
   liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22C55E' },
   mapCtl: { position: 'absolute', top: 10, right: 10, alignItems: 'flex-end', gap: 6 },
   zoom: { flexDirection: 'row', borderRadius: radius.pill, padding: 2 },
-  zoomBtn: { borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 5 },
+  zoomBtn: { borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 3 },
   ctlBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 6 },
   popup: { position: 'absolute', left: 10, right: 10, bottom: 10, borderRadius: radius.md, padding: space(3), gap: 2 },
   close: { position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', zIndex: 1 },
