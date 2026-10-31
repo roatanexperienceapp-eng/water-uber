@@ -12,7 +12,8 @@
         "EXPO_PUBLIC_SUPABASE_URL": "https://crcxjbiqnlzmqrdwpozj.supabase.co",
         "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_WpeyKzXsY64stW-JIAzFVQ_qFoXkRqw",
         "EXPO_PUBLIC_WEB_URL": "https://roatanwatertaxi.com"
-      }
+      },
+      "channel": "development"
     },
     "development-captain": {
       "extends": "development",
@@ -27,7 +28,8 @@
         "EXPO_PUBLIC_SUPABASE_URL": "https://crcxjbiqnlzmqrdwpozj.supabase.co",
         "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_WpeyKzXsY64stW-JIAzFVQ_qFoXkRqw",
         "EXPO_PUBLIC_WEB_URL": "https://roatanwatertaxi.com"
-      }
+      },
+      "channel": "preview"
     },
     "preview-captain": {
       "extends": "preview",
@@ -42,7 +44,8 @@
         "EXPO_PUBLIC_SUPABASE_URL": "https://crcxjbiqnlzmqrdwpozj.supabase.co",
         "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_WpeyKzXsY64stW-JIAzFVQ_qFoXkRqw",
         "EXPO_PUBLIC_WEB_URL": "https://roatanwatertaxi.com"
-      }
+      },
+      "channel": "production"
     },
     "production-captain": {
       "extends": "production",

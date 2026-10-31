@@ -54,6 +54,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         }),
   },
   web: { favicon: './assets/favicon.png', bundler: 'metro' },
+  // Over-the-air updates: JS changes reach installed apps without a new store build.
+  runtimeVersion: { policy: 'appVersion' },
+  updates: { url: 'https://u.expo.dev/e04fa82d-56e2-4fa2-a255-286935a7b916', enabled: !IS_CAPTAIN },
   plugins: [
     'expo-router',
     'expo-localization',

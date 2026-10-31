@@ -1,0 +1,15 @@
+# Builds the iPhone app and sends it to TestFlight.
+name: iOS build to TestFlight
+jobs:
+  build:
+    name: Build iOS
+    type: build
+    params:
+      platform: ios
+      profile: production
+  submit:
+    name: Submit to TestFlight
+    needs: [build]
+    type: submit
+    params:
+      build_id: ${{ needs.build.outputs.build_id }}

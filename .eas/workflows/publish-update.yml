@@ -1,0 +1,16 @@
+# Sends the current code to installed apps (no new build needed).
+name: Publish update
+on:
+  push:
+    branches: ['main']
+jobs:
+  update_preview:
+    name: Update preview builds
+    type: update
+    params:
+      branch: preview
+  update_production:
+    name: Update production builds
+    type: update
+    params:
+      branch: production
