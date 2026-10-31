@@ -182,5 +182,5 @@ export function timingFor(now: Date, start: Date, minutes: number): { leaveBy: D
   return { leaveBy, status: 'early', minutesLate: 0 };
 }
 
-/** Docks guests can take the $5 water taxi between (for suggestions). */
+/** Docks guests can take the flat-fare water taxi between (for suggestions). */
 export const FLAT_DOCKS = FLAT_ZONE;

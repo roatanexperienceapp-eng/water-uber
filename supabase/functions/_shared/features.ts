@@ -198,7 +198,7 @@ export interface PassCover {
 
 /**
  * Whether a pass pays for this ride. Passes cover flat-zone rides only. The pass pays for up to its own
- * rider count; anyone extra (a friend tagging along) pays the flat $5 per rider.
+ * rider count; anyone extra (a friend tagging along) pays the flat fare per rider.
  */
 export function passCovers(pass: ActivePass | null | undefined, ride: { from: string; to: string; riders: number; at: Date }): PassCover {
   const no = (reason: PassCover['reason']): PassCover => ({ covered: false, reason, extraRiders: 0, fareUsd: 0 });
@@ -211,8 +211,8 @@ export function passCovers(pass: ActivePass | null | undefined, ride: { from: st
   return { covered: true, extraRiders, fareUsd: extraRiders * PRICING.flatPerRider };
 }
 
-/** Value per ride vs paying $5 each way, to show the guest whether a pass is worth it. */
-export function passBreakEvenRides(id: PassId, farePerRide = 5): number {
+/** Value per ride vs paying the flat fare each way, to show the guest whether a pass is worth it. */
+export function passBreakEvenRides(id: PassId, farePerRide: number = PRICING.flatPerRider): number {
   const def = passDefinition(id);
   return Math.ceil(def.priceUsd / (farePerRide * def.riders));
 }

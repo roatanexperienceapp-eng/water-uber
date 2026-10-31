@@ -22,7 +22,7 @@ const MODEL = Deno.env.get('ASSISTANT_MODEL') ?? 'claude-haiku-5-5';
 
 const FACTS = `Facts about Roatán, Honduras:
 - Water taxis run between West End (main dock across from Splash Inn) and West Bay Beach (docks near Infinity Bay, Bananarama and the south end). About 10-15 minutes.
-- In this app: $5 per rider inside the West End-West Bay zone (private boat $20 minimum). West Bay to/from Sandy Bay is $15 per rider and West End to/from Sandy Bay is $10 per rider, both with a 3-person minimum. Other routes cost $5 per rider per mile. Scheduled pickups add a $5 reservation fee and use a private boat.
+- In this app: $6 per rider inside the West End-West Bay zone (private boat $20 minimum). West Bay to/from Sandy Bay is $15 per rider and West End to/from Sandy Bay is $10 per rider, both with a 3-person minimum. Other routes cost $5 per rider per mile. Scheduled pickups add a $5 reservation fee and use a private boat.
 - Cruise ships dock at Isla Tropicale (formerly Mahogany Bay) and Port of Roatán in Coxen Hole. West Bay gets crowded on big cruise days.
 - Airport: Juan Manuel Gálvez International (RTB) near Coxen Hole.
 - Emergencies: call 911. 24/7 care includes UNIMED Urgent Care (West End), Alert International Rescue (West Bay Mall) and Hospital Cemesa (French Harbour). The only hyperbaric chamber is at Anthony's Key Resort clinic (Sandy Bay).`;

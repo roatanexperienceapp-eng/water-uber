@@ -231,7 +231,7 @@ function WaterRide() {
           </View>
           <View style={styles.mapCtl}>
             <View style={[styles.zoom, { backgroundColor: c.bg }]}>
-              {[7, 2].map((r) => (
+              {[7, 5, 2].map((r) => (
                 <Pressable key={r} onPress={() => setRange(r)} style={[styles.zoomBtn, range === r && { backgroundColor: c.ink }]}>
                   <Text style={[type.label, { color: range === r ? c.onInk : c.muted }]}>{r} mi</Text>
                 </Pressable>

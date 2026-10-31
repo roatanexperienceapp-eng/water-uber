@@ -4,7 +4,7 @@ import { DOCKS, FLAT_ZONE, routeFor, type DockArea } from './geo.ts';
 
 export const PRICING = {
   /** Flat fare per rider inside the West End ↔ West Bay zone. */
-  flatPerRider: 5,
+  flatPerRider: 6,
   /** Private boat minimum inside the flat zone. */
   privateMinimum: 20,
   /** Outside the flat zone: dollars per rider per mile (owner's rule). */

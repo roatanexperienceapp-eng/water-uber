@@ -45,12 +45,12 @@ Deno.test('passes: cover flat-zone rides only, within dates, riders and ride cou
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 1, at }).covered, true);
   eq(passCovers(pass, { from: 'we', to: 'sandyD', riders: 1, at }).reason, 'outside_zone');
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 2, at }).fareUsd, 0); // 2-person pass covers both
-  eq(passCovers(pass, { from: 'we', to: 'inf', riders: 3, at }).fareUsd, 5); // a friend tagging along pays $5
+  eq(passCovers(pass, { from: 'we', to: 'inf', riders: 3, at }).fareUsd, 6); // a friend tagging along pays $6
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 1, at }).fareUsd, 0);
   eq(passCovers(pass, { from: 'we', to: 'inf', riders: 1, at: T('2026-11-09T15:00:00Z') }).reason, 'expired');
   eq(passCovers(null, { from: 'we', to: 'inf', riders: 1, at }).reason, 'no_pass');
   eq(ridesLeft(pass), null); // unlimited
-  eq(passBreakEvenRides('week2'), 7); // $70 ÷ ($5 × 2 people)
+  eq(passBreakEvenRides('week2'), 6); // $70 ÷ ($6 × 2 people), rounded up
   const twoWeeks = { passId: 'twoWeek4' as const, startsAt: T('2026-11-01T12:00:00Z'), ridesUsed: 0 };
   eq(passCovers(twoWeeks, { from: 'we', to: 'inf', riders: 4, at: T('2026-11-13T15:00:00Z') }).covered, true); // day 12
 });

@@ -6,15 +6,15 @@ import { DOCKS, routeFor } from './geo.ts';
 const q = (from: string, to: string, riders: number, mode: 'shared' | 'private' = 'shared', timing: 'now' | 'scheduled' = 'now') =>
   quoteFare({ from, to, riders, mode, timing });
 
-Deno.test('flat zone: shared is $5 per rider', () => {
-  assertEquals(q('we', 'inf', 1).total, 5);
-  assertEquals(q('we', 'inf', 4).total, 20);
+Deno.test('flat zone: shared is $6 per rider', () => {
+  assertEquals(q('we', 'inf', 1).total, 6);
+  assertEquals(q('we', 'inf', 4).total, 24);
   assertEquals(q('inf', 'we', 2).rule, 'flat');
 });
 
-Deno.test('flat zone: private has a $20 minimum, then $5 per rider', () => {
+Deno.test('flat zone: private has a $20 minimum, then $6 per rider', () => {
   assertEquals(q('we', 'inf', 2, 'private').total, 20);
-  assertEquals(q('we', 'inf', 6, 'private').total, 30);
+  assertEquals(q('we', 'inf', 6, 'private').total, 36);
 });
 
 Deno.test('scheduled pickups are private and add a $5 reservation fee', () => {
@@ -42,8 +42,8 @@ Deno.test('outside the zones: $5 per rider per mile, rounded to whole dollars', 
 });
 
 Deno.test('riders are clamped to 1–12', () => {
-  assertEquals(q('we', 'inf', 0).total, 5);
-  assertEquals(q('we', 'inf', 99).total, 60);
+  assertEquals(q('we', 'inf', 0).total, 6);
+  assertEquals(q('we', 'inf', 99).total, 72);
 });
 
 Deno.test('same dock is rejected', () => {
