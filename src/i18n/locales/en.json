@@ -929,5 +929,7 @@
  "gasNearest": "Nearest first.",
  "gasByArea": "Allow location to see the nearest first.",
  "gasNone": "No gas stations loaded yet.",
- "gasTaxi": "Taxi here"
+ "gasTaxi": "Taxi here",
+ "drvNotSetUp": "This account is not a driver yet",
+ "drvNotSetUpHint": "The office links your account to a car or van and checks your licence. Then you can go online and take land taxi rides here."
 }

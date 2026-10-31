@@ -929,5 +929,7 @@
  "gasNearest": "按距离由近到远。",
  "gasByArea": "允许定位以优先显示最近的加油站。",
  "gasNone": "尚未加载加油站。",
- "gasTaxi": "打车前往"
+ "gasTaxi": "打车前往",
+ "drvNotSetUp": "此账户尚未设为司机",
+ "drvNotSetUpHint": "办公室将您的账户关联到车辆并核验驾照后，即可在此上线接单。"
 }

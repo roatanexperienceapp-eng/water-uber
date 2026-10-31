@@ -49,7 +49,22 @@ export function DriverPanel() {
   }, [currentId]);
   const guest = guestFor && guestFor.rideId === currentId ? guestFor : null;
 
-  if (car === undefined || car === null) return null; // not a driver: nothing to show
+  if (car === undefined) return null; // still loading
+  if (car === null) {
+    // Not linked to a vehicle yet: say so instead of hiding the section.
+    return (
+      <>
+        <Text style={[type.h2, { color: c.ink }]}>{t('drvH')}</Text>
+        <Card>
+          <View style={styles.row}>
+            <Ionicons name="car" size={22} color={c.muted} />
+            <Text style={[type.bodyStrong, { color: c.ink, flex: 1 }]}>{t('drvNotSetUp')}</Text>
+          </View>
+          <Note>{t('drvNotSetUpHint')}</Note>
+        </Card>
+      </>
+    );
+  }
 
   async function toggle() {
     if (!car) return;

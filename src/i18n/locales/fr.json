@@ -929,5 +929,7 @@
  "gasNearest": "Les plus proches d'abord.",
  "gasByArea": "Autorisez la localisation pour voir les plus proches.",
  "gasNone": "Aucune station chargée.",
- "gasTaxi": "Taxi jusqu'ici"
+ "gasTaxi": "Taxi jusqu'ici",
+ "drvNotSetUp": "Ce compte n'est pas encore chauffeur",
+ "drvNotSetUpHint": "Le bureau associe votre compte à une voiture ou un van et vérifie votre permis. Ensuite vous pouvez prendre des courses ici."
 }

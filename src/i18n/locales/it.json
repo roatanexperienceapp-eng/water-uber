@@ -929,5 +929,7 @@
  "gasNearest": "Prima i più vicini.",
  "gasByArea": "Consenti la posizione per vedere i più vicini.",
  "gasNone": "Nessun benzinaio caricato.",
- "gasTaxi": "Taxi fin qui"
+ "gasTaxi": "Taxi fin qui",
+ "drvNotSetUp": "Questo account non è ancora un autista",
+ "drvNotSetUpHint": "L'ufficio collega il tuo account a un'auto o un van e verifica la patente. Poi puoi prendere corse qui."
 }

@@ -929,5 +929,7 @@
  "gasNearest": "Die nächsten zuerst.",
  "gasByArea": "Erlaube den Standort, um die nächsten zuerst zu sehen.",
  "gasNone": "Noch keine Tankstellen geladen.",
- "gasTaxi": "Taxi hierher"
+ "gasTaxi": "Taxi hierher",
+ "drvNotSetUp": "Dieses Konto ist noch kein Fahrerkonto",
+ "drvNotSetUpHint": "Das Büro verknüpft dein Konto mit einem Auto oder Van und prüft deine Lizenz. Danach kannst du hier Fahrten annehmen."
 }
