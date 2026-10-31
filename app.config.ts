@@ -18,7 +18,8 @@ const WEB_HOST = new URL(process.env.EXPO_PUBLIC_WEB_URL ?? 'https://roatanwater
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: IS_CAPTAIN ? `${BRAND} Captain` : BRAND,
-  slug: IS_CAPTAIN ? 'islandride-captain' : 'islandride',
+  owner: 'deanbodden',
+  slug: IS_CAPTAIN ? 'water-uber-captain' : 'water-uber',
   scheme: IS_CAPTAIN ? 'islandride-captain' : 'islandride',
   version: '1.0.0',
   orientation: 'portrait',
