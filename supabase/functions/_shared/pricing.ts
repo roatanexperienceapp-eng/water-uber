@@ -8,7 +8,7 @@ export const PRICING = {
   /** Private boat minimum inside the flat zone. */
   privateMinimum: 20,
   /** Outside the flat zone: dollars per rider per mile (owner's rule). */
-  perRiderPerMile: 5,
+  perRiderPerMile: 6,
   /**
    * Fixed fares between areas (both directions). Per rider, charged for at least `minRiders`.
    * Owner's prices: West Bay ↔ Sandy Bay $15 pp, West End ↔ Sandy Bay $10 pp, 3-person minimum.

@@ -34,10 +34,10 @@ Deno.test('Sandy Bay: West Bay $15 pp, West End $10 pp, 3-person minimum, both d
   assertEquals(q('we', 'sandyD', 2, 'shared', 'scheduled').total, 35); // + $5 reservation
 });
 
-Deno.test('outside the zones: $5 per rider per mile, rounded to whole dollars', () => {
+Deno.test('outside the zones: $6 per rider per mile, rounded to whole dollars', () => {
   const r = q('we', 'coxenD', 2);
   assertEquals(r.rule, 'distance');
-  assertEquals(r.total, Math.round(5 * 2 * r.miles));
+  assertEquals(r.total, Math.round(6 * 2 * r.miles));
   assert(r.breakdown.endsWith(`= $${r.total}`));
 });
 
