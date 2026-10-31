@@ -94,6 +94,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   extra: {
     variant: VARIANT,
     brandName: BRAND,
-    eas: { projectId: process.env.EAS_PROJECT_ID },
+    eas: { projectId: process.env.EAS_PROJECT_ID ?? (IS_CAPTAIN ? undefined : 'e04fa82d-56e2-4fa2-a255-286935a7b916') },
   },
 });
