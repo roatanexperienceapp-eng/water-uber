@@ -168,7 +168,7 @@ export default function ExploreScreen() {
         keyExtractor={(h) => h.listing.id}
         renderItem={({ item }) => <ListingRow listing={item.listing} likely={item.likely} showPortal />}
         ListHeaderComponent={header}
-        ListEmptyComponent={searching ? <Text style={[type.body, { color: c.muted, paddingVertical: space(6) }]}>{t('noResults')}</Text> : null}
+        ListEmptyComponent={searching ? <Text style={[type.body, { color: c.muted, paddingVertical: space(6) }]}>{t('noResults')}</Text> : undefined}
         contentContainerStyle={{ paddingHorizontal: space(4), paddingTop: space(2), paddingBottom: space(10) }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"

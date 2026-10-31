@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { askAssistant, isDemo, type ChatTurn } from '@/lib/api';
 import { radius, space, type, useTheme } from '@/theme';
@@ -13,7 +13,7 @@ export default function Assistant() {
   const [turns, setTurns] = useState<ChatTurn[]>([{ role: 'assistant', content: t('hi') }]);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const chips = t('chips', { returnObjects: true }) as string[];
 
   async function send(q: string) {

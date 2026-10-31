@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ViewInstance } from 'react-native';
 import { COAST } from '@/data/coast';
 import { brand } from '@/theme';
 import type { LiveMapProps } from './LiveMap.types';
@@ -12,7 +12,7 @@ const KM_PER_MI = 1.609344;
 const BOAT_COLOR = { taxi: brand.flame, tour: brand.lagoon, fish: brand.fishing } as const;
 
 export default function LiveMap(p: LiveMapProps) {
-  const ref = useRef<View>(null);
+  const ref = useRef<ViewInstance>(null);
   const [size, setSize] = useState({ w: 360, h: 300 });
   useEffect(() => {
     const el = ref.current as unknown as HTMLElement | null;
