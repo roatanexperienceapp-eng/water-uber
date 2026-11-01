@@ -297,7 +297,7 @@ export function pickupForActivity(activityStart: Date, rideMinutes: number): Dat
 
 /** Typical length of an activity, used to suggest the ride back. */
 export const ACTIVITY_HOURS: Record<string, number> = {
-  fish: 4, snork: 2.5, nsnork: 1.5, horse: 2, dive: 3.5, jet: 1, para: 1, land: 4, zip: 3, park: 2.5, food: 2, hotel: 0, car: 0, merch: 1, rx: 0, med: 0,
+  fish: 4, snork: 2.5, nsnork: 1.5, horse: 2, jetcar: 0.5, dive: 3.5, jet: 1, para: 1, land: 4, zip: 3, park: 2.5, food: 2, hotel: 0, car: 0, merch: 1, rx: 0, med: 0,
 };
 
 /** Where the guest needs to get to for an activity, by the listing's area. Null when no dock is near. */

@@ -228,6 +228,20 @@ export const PORTALS: Portal[] = [
    "zh": "骑马"
   },
   "kind": "book"
+ },
+ {
+  "key": "jetcar",
+  "icon": "🏎️",
+  "names": {
+   "en": "Jet car",
+   "es": "Jet car",
+   "fr": "Jet car",
+   "de": "Jet-Car",
+   "pt": "Jet car",
+   "it": "Jet car",
+   "zh": "水上跑车"
+  },
+  "kind": "book"
  }
 ];
 
@@ -2628,5 +2642,15 @@ export const LISTINGS: Listing[] = [
   "unit": "person",
   "booking": "request",
   "durationMinutes": 120
+ },
+ {
+  "id": "jetcar-west-bay-ride",
+  "portal": "jetcar",
+  "name": "Jet car ride",
+  "area": "West Bay",
+  "description": "Drive a sports-car-shaped jet boat along West Bay. No boating licence needed; a guide rides with you on the first lap.",
+  "unit": "person",
+  "booking": "request",
+  "durationMinutes": 30
  }
 ];
