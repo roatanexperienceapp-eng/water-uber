@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Office · Roatán Water Taxi</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23FF4A1C'/><text x='32' y='44' font-size='34' text-anchor='middle'>🗂️</text></svg>">
+<style>
+  :root { --ink:#0b0b0c; --muted:#5f6368; --bg:#ffffff; --tile:#f3f3f3; --line:#e6e6e6; --flame:#FF4A1C; --ok:#15803d; --warn:#b45309; --bad:#b42318; --sea:#0E7490; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink:#f5f5f5; --muted:#a5a8ad; --bg:#0b0b0c; --tile:#1a1b1d; --line:#2a2b2e; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --sea:#22d3ee; } }
+  :root[data-theme="dark"] { --ink:#f5f5f5; --muted:#a5a8ad; --bg:#0b0b0c; --tile:#1a1b1d; --line:#2a2b2e; --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --sea:#22d3ee; }
+  * { box-sizing:border-box; margin:0; }
+  body { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; background:var(--bg); color:var(--ink); line-height:1.4; }
+  .wrap { max-width:1100px; margin:0 auto; padding:0 16px 60px; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 0; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; letter-spacing:-.3px; }
+  .logo { width:28px; height:28px; border-radius:8px; background:var(--flame); }
+  .who { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:14px; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-weight:800; font-size:12px; text-transform:uppercase; letter-spacing:.4px; background:var(--ink); color:var(--bg); }
+  button, .btn { font:inherit; border:0; border-radius:999px; padding:9px 14px; font-weight:700; cursor:pointer; background:var(--tile); color:var(--ink); }
+  button.primary { background:var(--flame); color:#fff; }
+  button.dark { background:var(--ink); color:var(--bg); }
+  button:disabled { opacity:.5; cursor:default; }
+  input, select, textarea { font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:10px 12px; width:100%; }
+  label { display:block; font-weight:700; font-size:14px; margin:12px 0 6px; }
+  nav { display:flex; gap:6px; overflow-x:auto; padding:4px 0 12px; border-bottom:1px solid var(--line); margin-bottom:16px; }
+  nav button { white-space:nowrap; }
+  nav button[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+  .bar input[type=date] { width:auto; }
+  h2 { font-size:20px; letter-spacing:-.4px; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+  h2 .n { font-size:13px; color:var(--muted); font-weight:700; }
+  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); }
+  .card { background:var(--tile); border-radius:16px; padding:14px; display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .row { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+  .t { font-weight:800; font-size:16px; }
+  .m { color:var(--muted); font-size:14px; }
+  .s { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; padding:2px 8px; border-radius:999px; background:var(--bg); white-space:nowrap; }
+  .s.ok { color:var(--ok); } .s.warn { color:var(--warn); } .s.bad { color:var(--bad); } .s.sea { color:var(--sea); }
+  .contact { display:flex; gap:6px; flex-wrap:wrap; }
+  .contact a { font-size:13px; font-weight:700; color:var(--ink); background:var(--bg); padding:5px 10px; border-radius:999px; text-decoration:none; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .actions { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .actions button, .actions select { font-size:13px; padding:7px 11px; width:auto; }
+  .stats { display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); }
+  .stat { background:var(--tile); border-radius:16px; padding:16px; }
+  .stat b { display:block; font-size:28px; letter-spacing:-.8px; }
+  .stat small { color:var(--muted); font-size:13px; }
+  .stat.hl { background:var(--flame); color:#fff; } .stat.hl small { color:#ffe4dc; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.3px; }
+  .tablewrap { overflow-x:auto; background:var(--tile); border-radius:16px; padding:4px 8px; }
+  .empty { color:var(--muted); padding:18px; background:var(--tile); border-radius:16px; }
+  .auth { max-width:420px; margin:40px auto; background:var(--tile); border-radius:20px; padding:24px; }
+  .auth h1 { font-size:26px; letter-spacing:-.6px; margin-bottom:6px; }
+  .msg { margin-top:12px; font-size:14px; } .msg.err { color:var(--bad); } .msg.ok { color:var(--ok); }
+  .link { background:none; padding:0; color:var(--flame); font-weight:700; }
+  .demo { background:#FFF1EC; color:#B42318; border-radius:12px; padding:10px 14px; font-size:14px; font-weight:700; margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .hidden { display:none !important; }
+  .note { font-size:13px; background:var(--bg); border-radius:10px; padding:6px 8px; }
+  @media (max-width:520px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="logo"></div> Roatán Water Taxi · Office</div>
+    <div class="who hidden" id="who"><span id="whoName"></span><span class="badge" id="whoRole"></span><button id="signOut">Sign out</button></div>
+  </header>
+
+  <div id="demoBar" class="demo hidden">Demo data — nothing here is real. View as:
+    <button data-demo="owner">Owner</button><button data-demo="manager">Manager</button><button data-demo="team">Team member</button>
+  </div>
+
+  <!-- Sign in / sign up -->
+  <section id="authView" class="auth hidden">
+    <h1 id="authTitle">Sign in</h1>
+    <p class="m" id="authSub">For the owner, managers and team members.</p>
+    <form id="authForm">
+      <div id="nameRow" class="hidden"><label for="name">Your name</label><input id="name" autocomplete="name" maxlength="60"></div>
+      <label for="email">Email</label><input id="email" type="email" autocomplete="email" required>
+      <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" minlength="8" required>
+      <div class="actions" style="margin-top:16px"><button class="primary" id="authBtn" type="submit">Sign in</button></div>
+    </form>
+    <p class="msg" id="authMsg" role="status"></p>
+    <p class="m" style="margin-top:16px"><button class="link" id="toggleAuth" type="button">New to the team? Create your login</button></p>
+    <p class="m" style="margin-top:8px"><button class="link" id="forgot" type="button">Forgot password?</button></p>
+  </section>
+
+  <!-- Waiting for the owner -->
+  <section id="waitView" class="auth hidden">
+    <h1>Almost there</h1>
+    <p class="m" id="waitText">Your login is ready. The owner needs to give you access before you can see bookings.</p>
+    <form id="reqForm" style="margin-top:12px">
+      <label for="reqName">Your name</label><input id="reqName" maxlength="60" required>
+      <div class="actions" style="margin-top:12px"><button class="primary" type="submit">Ask the owner for access</button></div>
+    </form>
+    <p class="msg" id="waitMsg" role="status"></p>
+  </section>
+
+  <!-- The office -->
+  <section id="officeView" class="hidden">
+    <nav id="tabs"></nav>
+    <div id="panel"></div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script>
+(() => {
+  const SUPABASE_URL = 'https://crcxjbiqnlzmqrdwpozj.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_WpeyKzXsY64stW-JIAzFVQ_qFoXkRqw';
+  const TZ = 'America/Tegucigalpa';
+  const DEMO = new URLSearchParams(location.search).has('demo');
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const money = (n) => n == null ? '' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const islandDate = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(d);
+  const addDays = (iso, n) => { const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  const time = (ts) => ts ? new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' }).format(new Date(ts)) : '';
+  const dayTime = (ts) => ts ? new Intl.DateTimeFormat('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(ts)) : '';
+  const digits = (p) => String(p || '').replace(/[^\d+]/g, '');
+  const contact = (name, phone, email) => {
+    const parts = [];
+    if (phone) {
+      parts.push(`<a href="tel:${esc(digits(phone))}">📞 ${esc(phone)}</a>`);
+      parts.push(`<a href="https://wa.me/${esc(digits(phone).replace('+', ''))}" target="_blank" rel="noopener">WhatsApp</a>`);
+    }
+    if (email) parts.push(`<a href="mailto:${esc(email)}">✉️ ${esc(email)}</a>`);
+    return `<div class="m">${esc(name || 'Guest')}</div>${parts.length ? `<div class="contact">${parts.join('')}</div>` : ''}`;
+  };
+  const STATUS = {
+    paid: ['Booked', 'sea'], accepted: ['Accepted', 'warn'], onboard: ['On the way', 'warn'], completed: ['Done', 'ok'],
+    cancelled: ['Cancelled', 'bad'], requested: ['Request', 'warn'], quoted: ['Quoted', 'warn'], awaiting_payment: ['Not paid', 'bad'],
+  };
+  const chip = (s) => { const [t, c] = STATUS[s] || [s, '']; return `<span class="s ${c}">${esc(t)}</span>`; };
+  const ROLE_NAME = { owner: 'Owner', manager: 'Manager', team: 'Team' };
+
+  let sb = null, me = null, tab = 'board', range = { from: islandDate(), to: islandDate() }, timer = null, providers = null;
+
+  // ---------- Data access (live or demo) ----------
+  async function rpc(fn, args = {}) {
+    if (DEMO) return demoRpc(fn, args);
+    const { data, error } = await sb.rpc(fn, args);
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  // ---------- Views ----------
+  function show(view) {
+    for (const v of ['authView', 'waitView', 'officeView']) $(v).classList.toggle('hidden', v !== view);
+    $('who').classList.toggle('hidden', view === 'authView');
+  }
+
+  const TABS = [
+    { key: 'board', label: 'Bookings', roles: ['owner', 'manager', 'team'] },
+    { key: 'people', label: 'Who did what', roles: ['owner', 'manager'] },
+    { key: 'money', label: 'Money', roles: ['owner'] },
+    { key: 'payouts', label: 'Pay providers', roles: ['owner'] },
+    { key: 'team', label: 'Team', roles: ['owner'] },
+    { key: 'activity', label: 'Activity', roles: ['owner'] },
+    { key: 'settings', label: 'Settings', roles: ['owner'] },
+  ];
+
+  function renderTabs() {
+    const mine = TABS.filter((t) => t.roles.includes(me.role));
+    if (!mine.some((t) => t.key === tab)) tab = mine[0].key;
+    $('tabs').innerHTML = mine.map((t) => `<button data-tab="${t.key}" aria-pressed="${t.key === tab}">${t.label}</button>`).join('');
+  }
+
+  function rangeBar(extra = '') {
+    return `<div class="bar">
+      <button data-range="today">Today</button><button data-range="tomorrow">Tomorrow</button><button data-range="week">Next 7 days</button><button data-range="past">Last 30 days</button>
+      <input type="date" id="from" value="${range.from}" aria-label="From"> <span class="m">to</span> <input type="date" id="to" value="${range.to}" aria-label="To">
+      ${extra}
+    </div>`;
+  }
+
+  async function render() {
+    clearInterval(timer);
+    renderTabs();
+    const p = $('panel');
+    p.innerHTML = '<p class="m">Loading…</p>';
+    try {
+      if (tab === 'board') { p.innerHTML = await viewBoard(); timer = setInterval(() => tab === 'board' && refreshBoard(), 30000); }
+      else if (tab === 'people') p.innerHTML = await viewPeople();
+      else if (tab === 'money') p.innerHTML = await viewMoney();
+      else if (tab === 'payouts') p.innerHTML = await viewPayouts();
+      else if (tab === 'team') p.innerHTML = await viewTeam();
+      else if (tab === 'activity') p.innerHTML = await viewActivity();
+      else if (tab === 'settings') p.innerHTML = await viewSettings();
+    } catch (e) {
+      p.innerHTML = `<p class="msg err">Could not load: ${esc(e.message)}</p>`;
+    }
+  }
+  async function refreshBoard() { try { $('panel').innerHTML = await viewBoard(); } catch { /* keep the last view */ } }
+
+  // Bookings board
+  async function viewBoard() {
+    const b = await rpc('office_board', { p_from: range.from, p_to: range.to });
+    if (!providers) providers = await rpc('office_providers');
+    const head = rangeBar(`<span class="m">Updates every 30 seconds</span>`);
+    const sec = (title, items, fn) => `<h2>${title} <span class="n">${items.length}</span></h2>` +
+      (items.length ? `<div class="grid">${items.map(fn).join('')}</div>` : `<div class="empty">Nothing booked.</div>`);
+    let html = head;
+    if (b.role !== 'team') {
+      html += sec('🚤 Water taxi', b.rides, (r) => `<div class="card">
+        <div class="row"><span class="t">${esc(time(r.at))} · ${esc(r.from)} → ${esc(r.to)}</span>${chip(r.status)}</div>
+        <div class="m">${r.riders} rider${r.riders > 1 ? 's' : ''} · ${r.mode === 'private' ? 'Private' : 'Shared'}${r.fare != null ? ' · ' + money(r.fare) : ''}</div>
+        <div class="m">Captain: <b>${esc(r.captain || 'Not accepted yet')}</b>${r.captain_phone ? ` · <a href="tel:${esc(digits(r.captain_phone))}">${esc(r.captain_phone)}</a>` : ''}</div>
+        ${contact(r.guest, r.guest_phone, r.guest_email)}
+      </div>`);
+      html += sec('🚕 Land taxi', b.land_rides, (r) => `<div class="card">
+        <div class="row"><span class="t">${esc(time(r.at))} · ${esc(r.from)} → ${esc(r.to)}</span>${chip(r.status)}</div>
+        <div class="m">${r.riders} rider${r.riders > 1 ? 's' : ''} · ${r.vehicle_kind === 'van' ? 'Van' : 'Car'}${r.fare != null ? ' · ' + money(r.fare) : ''}</div>
+        <div class="m">Driver: <b>${esc(r.driver || 'Not accepted yet')}</b>${r.vehicle ? ` · ${esc(r.vehicle)} ${esc(r.plate || '')}` : ''}${r.driver_phone ? ` · <a href="tel:${esc(digits(r.driver_phone))}">${esc(r.driver_phone)}</a>` : ''}</div>
+        ${contact(r.guest, r.guest_phone, r.guest_email)}
+      </div>`);
+    }
+    html += sec('🎟️ Tours & excursions', b.bookings, (k) => tourCard(k));
+    return html;
+  }
+
+  function providerSelect(k) {
+    const opts = ['<option value="">Who runs it?</option>'];
+    for (const c of providers?.captains || []) opts.push(`<option value="captain:${esc(c.id)}" ${k.provider_captain_id === c.id ? 'selected' : ''}>Captain · ${esc(c.name)}</option>`);
+    for (const o of providers?.operators || []) opts.push(`<option value="operator:${esc(o.id)}" ${!k.provider_captain_id && k.provider_operator_id === o.id ? 'selected' : ''}>${esc(o.name)}</option>`);
+    return `<select data-provider="${esc(k.id)}" aria-label="Who runs this tour">${opts.join('')}</select>`;
+  }
+  function tourCard(k) {
+    const canAct = k.status === 'paid';
+    return `<div class="card">
+      <div class="row"><span class="t">${esc(k.time)} · ${esc(k.listing)}</span>${k.checked_in_at && k.status === 'paid' ? '<span class="s ok">Checked in</span>' : chip(k.status)}</div>
+      <div class="m">${esc(k.date)} · ${esc(k.area)} · ${k.quantity} ${k.quantity > 1 ? 'people' : 'person'}${k.total != null ? ' · ' + money(k.total) : ''}</div>
+      <div class="m">Runs it: <b>${esc(k.provider || 'Not assigned')}</b>${k.provider_phone ? ` · <a href="tel:${esc(digits(k.provider_phone))}">${esc(k.provider_phone)}</a>` : ''}</div>
+      ${contact(k.guest, k.guest_phone, k.guest_email)}
+      ${k.guest_note ? `<div class="note">Guest: ${esc(k.guest_note)}</div>` : ''}
+      ${k.ops_note ? `<div class="note">Team note: ${esc(k.ops_note)}</div>` : ''}
+      ${k.handled_by ? `<div class="m" style="font-size:12px">Last handled by ${esc(k.handled_by)}</div>` : ''}
+      <div class="actions">
+        ${canAct && !k.checked_in_at ? `<button data-act="check_in" data-id="${esc(k.id)}">Checked in</button>` : ''}
+        ${canAct ? `<button class="dark" data-act="complete" data-id="${esc(k.id)}">Mark done</button>` : ''}
+        <button data-act="note" data-id="${esc(k.id)}">Note</button>
+        ${providerSelect(k)}
+      </div>
+    </div>`;
+  }
+
+  // People
+  async function viewPeople() {
+    const p = await rpc('office_people', { p_from: range.from, p_to: range.to });
+    const owner = me.role === 'owner';
+    const ph = (x) => x.phone ? `<a href="tel:${esc(digits(x.phone))}">${esc(x.phone)}</a>` : '';
+    const cert = (x) => x.certified ? '<span class="s ok">Certified</span>' : '<span class="s warn">Not verified</span>';
+    const table = (heads, rows) => rows.length ? `<div class="tablewrap"><table><thead><tr>${heads.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>` : '<div class="empty">No one yet.</div>';
+    return rangeBar() +
+      `<h2>⚓ Captains <span class="n">${p.captains.length}</span></h2>` +
+      table(['Captain', 'Status', 'Taxi rides', 'Tours', 'Cancelled after accepting', ...(owner ? ['Earned'] : []), 'Contact'],
+        p.captains.map((c) => `<tr><td><b>${esc(c.name)}</b>${c.active ? '' : ' <span class="m">(inactive)</span>'}</td><td>${cert(c)}</td><td>${c.rides_done}</td><td>${c.tours_done}</td><td>${c.cancelled_after_accept}</td>${owner ? `<td>${money(c.earned)}</td>` : ''}<td>${ph(c)}${c.email ? `<br><a href="mailto:${esc(c.email)}">${esc(c.email)}</a>` : ''}</td></tr>`)) +
+      `<h2>🚕 Drivers <span class="n">${p.drivers.length}</span></h2>` +
+      table(['Driver', 'Vehicle', 'Status', 'Rides', 'Cancelled after accepting', ...(owner ? ['Earned'] : []), 'Contact'],
+        p.drivers.map((d) => `<tr><td><b>${esc(d.name)}</b></td><td>${esc(d.vehicle)} ${esc(d.plate || '')}</td><td>${cert(d)}</td><td>${d.rides_done}</td><td>${d.cancelled_after_accept}</td>${owner ? `<td>${money(d.earned)}</td>` : ''}<td>${ph(d)}${d.email ? `<br><a href="mailto:${esc(d.email)}">${esc(d.email)}</a>` : ''}</td></tr>`)) +
+      `<h2>🏝️ Tour companies <span class="n">${p.operators.length}</span></h2>` +
+      table(['Company', 'Partner', 'Tours done', 'Contact'],
+        p.operators.map((o) => `<tr><td><b>${esc(o.name)}</b></td><td>${o.is_partner ? 'Yes' : 'No'}</td><td>${o.tours_done}</td><td>${ph(o)}${o.email ? `<br><a href="mailto:${esc(o.email)}">${esc(o.email)}</a>` : ''}</td></tr>`));
+  }
+
+  // Money
+  async function viewMoney() {
+    const m = await rpc('office_money', { p_from: range.from, p_to: range.to });
+    const st = (label, v, hl) => `<div class="stat ${hl ? 'hl' : ''}"><small>${label}</small><b>${v}</b></div>`;
+    const methods = Object.entries(m.by_method || {});
+    return rangeBar() + `<div class="stats">
+      ${st(`You keep (${Number(m.commission_pct)}%)`, money(m.you_keep), true)}
+      ${st('Sales (paid)', money(m.net_sales))}
+      ${st(`Providers' share (${100 - Number(m.commission_pct)}%)`, money(m.providers_share))}
+      ${st('Already paid out', money(m.paid_out))}
+      ${st('Refunded', money(m.refunded))}
+      ${st('Donations for Roatán kids', money(m.donations))}
+      ${st(`Waiting to confirm (${m.pending_count})`, money(m.pending_usd))}
+    </div>
+    <h2>By payment method</h2>
+    ${methods.length ? `<div class="tablewrap"><table><tbody>${methods.map(([k, v]) => `<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No payments in these dates.</div>'}
+    <p class="m" style="margin-top:12px">"You keep" uses today's percentage. Payouts already made keep the percentage they were paid at.</p>`;
+  }
+
+  // Payouts
+  async function viewPayouts() {
+    const [owed, hist] = await Promise.all([rpc('office_payouts_owed'), rpc('office_payout_history', { p_limit: 50 })]);
+    const today = islandDate();
+    const kind = { captain: '⚓ Captain', driver: '🚕 Driver', operator: '🏝️ Company' };
+    return `<h2>Owed now <span class="n">${owed.length}</span></h2>` +
+      (owed.length ? `<div class="grid">${owed.map((o) => {
+        const late = o.due_on && o.due_on <= today;
+        return `<div class="card">
+          <div class="row"><span class="t">${esc(o.payee_name)}</span>${o.due_on ? `<span class="s ${late ? 'bad' : 'warn'}">${late ? 'Due' : 'Due ' + esc(o.due_on)}</span>` : ''}</div>
+          <div class="m">${kind[o.payee_kind]} · ${o.items} job${o.items > 1 ? 's' : ''}${o.phone ? ` · <a href="tel:${esc(digits(o.phone))}">${esc(o.phone)}</a>` : ''}</div>
+          <div class="m">Guests paid ${money(o.gross_usd)} · you keep ${money(o.commission_usd)}</div>
+          <div class="t" style="font-size:22px">Pay ${money(o.amount_usd)}</div>
+          <div class="actions">
+            <select data-method="${esc(o.payee_kind)}:${esc(o.payee_id)}" aria-label="How you paid"><option>Bank transfer</option><option>Tigo Money</option><option>Cash</option><option>Zelle</option><option>Other</option></select>
+            <button class="primary" data-pay="${esc(o.payee_kind)}:${esc(o.payee_id)}" data-amount="${esc(o.amount_usd)}" data-name="${esc(o.payee_name)}">Mark paid</button>
+          </div>
+        </div>`;
+      }).join('')}</div>` : '<div class="empty">Nobody is owed anything right now.</div>') +
+      `<h2>Paid <span class="n">${hist.length}</span></h2>` +
+      (hist.length ? `<div class="tablewrap"><table><thead><tr><th>When</th><th>Who</th><th>Amount</th><th>Jobs</th><th>Your %</th><th>How</th><th>Marked by</th></tr></thead><tbody>${hist.map((h) => `<tr><td>${esc(dayTime(h.paid_at))}</td><td>${esc(h.payee_name)}</td><td><b>${money(h.amount_usd)}</b></td><td>${h.items}</td><td>${Number(h.commission_pct)}%</td><td>${esc(h.method || '')}${h.reference ? ' · ' + esc(h.reference) : ''}</td><td>${esc(h.paid_by || '')}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No payouts yet.</div>');
+  }
+
+  // Team
+  async function viewTeam() {
+    const t = await rpc('office_staff');
+    return `<h2>Waiting for access <span class="n">${t.requests.length}</span></h2>` +
+      (t.requests.length ? `<div class="grid">${t.requests.map((r) => `<div class="card">
+        <div class="t">${esc(r.name)}</div><div class="m">${esc(r.email || '')}</div>
+        <div class="actions"><button class="dark" data-role="manager" data-user="${esc(r.user_id)}">Make manager</button><button data-role="team" data-user="${esc(r.user_id)}">Make team member</button><button data-role="" data-user="${esc(r.user_id)}">Turn down</button></div>
+      </div>`).join('')}</div>` : '<div class="empty">No one is waiting. New people sign up at this page with "Create your login", then appear here.</div>') +
+      `<h2>Your team <span class="n">${t.staff.filter((s) => s.active).length}</span></h2>` +
+      `<div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr></thead><tbody>${t.staff.map((s) => `<tr>
+        <td><b>${esc(s.name)}</b>${s.active ? '' : ' <span class="m">(removed)</span>'}</td><td>${esc(s.email || '')}</td><td>${ROLE_NAME[s.role]}</td>
+        <td>${s.role === 'owner' ? '' : `<div class="actions">${s.role !== 'manager' || !s.active ? `<button data-role="manager" data-user="${esc(s.user_id)}">Manager</button>` : ''}${s.role !== 'team' || !s.active ? `<button data-role="team" data-user="${esc(s.user_id)}">Team</button>` : ''}${s.active ? `<button data-role="" data-user="${esc(s.user_id)}">Remove</button>` : ''}</div>`}</td>
+      </tr>`).join('')}</tbody></table></div>
+      <p class="m" style="margin-top:12px"><b>Owner</b>: everything, including money and your percentage. <b>Manager</b>: every booking and who did what, no money splits. <b>Team</b>: tours and excursions only.</p>`;
+  }
+
+  // Activity
+  async function viewActivity() {
+    const a = await rpc('office_activity', { p_limit: 200 });
+    const say = (l) => {
+      const d = l.detail || {};
+      if (l.action === 'payout.paid') return `Paid ${esc(d.payee)} ${money(d.amount)} (${d.items} jobs, ${esc(d.method || '')})`;
+      if (l.action === 'settings') return `Changed settings: your % ${esc(d.commission_pct?.[0])} → ${esc(d.commission_pct?.[1])}, captain pay every ${esc(d.captain_payout_days?.[1])} days`;
+      if (l.action === 'staff') return d.role ? `Gave someone the ${esc(ROLE_NAME[d.role])} role` : 'Removed someone from the team';
+      if (l.action.startsWith('booking.')) return ({ 'booking.check_in': 'Checked in a guest', 'booking.complete': 'Marked a tour done', 'booking.note': 'Wrote a note on a tour', 'booking.provider': 'Changed who runs a tour' })[l.action] || esc(l.action);
+      return esc(l.action);
+    };
+    return `<h2>Activity <span class="n">${a.length}</span></h2>` + (a.length ? `<div class="tablewrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th></tr></thead><tbody>${a.map((l) => `<tr><td>${esc(dayTime(l.at))}</td><td>${esc(l.who)}</td><td>${say(l)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nothing yet.</div>');
+  }
+
+  // Settings
+  async function viewSettings() {
+    const s = await rpc('office_settings');
+    return `<div class="card" style="max-width:460px">
+      <form id="settingsForm">
+        <label for="pct">Your percentage (what you keep from each paid ride and tour)</label>
+        <input id="pct" type="number" min="0" max="100" step="0.5" value="${Number(s.commission_pct)}" required>
+        <label for="days">Pay water taxi captains every … days</label>
+        <input id="days" type="number" min="1" max="31" step="1" value="${s.captain_payout_days}" required>
+        <div class="actions" style="margin-top:14px"><button class="primary" type="submit">Save</button></div>
+      </form>
+      <p class="msg" id="setMsg" role="status"></p>
+      <p class="m" style="margin-top:8px">Only you can see or change this. Changing it does not change payouts you already made.</p>
+    </div>`;
+  }
+
+  // ---------- Events ----------
+  document.addEventListener('click', async (e) => {
+    const el = e.target.closest('button');
+    if (!el) return;
+    try {
+      if (el.dataset.tab) { tab = el.dataset.tab; render(); return; }
+      if (el.dataset.demo) { me = { role: el.dataset.demo, name: { owner: 'Dean (demo)', manager: 'Maria (demo)', team: 'Tom (demo)' }[el.dataset.demo] }; afterLogin(); return; }
+      if (el.dataset.range) {
+        const t = islandDate();
+        range = { today: { from: t, to: t }, tomorrow: { from: addDays(t, 1), to: addDays(t, 1) }, week: { from: t, to: addDays(t, 6) }, past: { from: addDays(t, -29), to: t } }[el.dataset.range];
+        render(); return;
+      }
+      if (el.dataset.act) {
+        const id = el.dataset.id;
+        if (el.dataset.act === 'note') {
+          const note = prompt('Note for the team (the guest never sees it):');
+          if (note === null) return;
+          await rpc('office_update_booking', { p_id: id, p_action: 'note', p_note: note });
+        } else {
+          el.disabled = true;
+          await rpc('office_update_booking', { p_id: id, p_action: el.dataset.act });
+        }
+        render(); return;
+      }
+      if (el.dataset.pay) {
+        const [kind, id] = el.dataset.pay.split(':');
+        const method = document.querySelector(`[data-method="${CSS.escape(el.dataset.pay)}"]`).value;
+        const ref = prompt(`Mark ${el.dataset.name} as paid ${money(el.dataset.amount)} by ${method}?\nAdd a reference (optional), then press OK.`, '');
+        if (ref === null) return;
+        el.disabled = true;
+        await rpc('office_mark_paid', { p_kind: kind, p_payee: id, p_method: method, p_reference: ref });
+        render(); return;
+      }
+      if ('role' in el.dataset && el.dataset.user) {
+        const role = el.dataset.role || null;
+        if (!role && !confirm('Remove their access to the office?')) return;
+        await rpc('office_set_staff', { p_user: el.dataset.user, p_role: role });
+        render(); return;
+      }
+    } catch (err) { alert('That did not work: ' + err.message); render(); }
+  });
+
+  document.addEventListener('change', async (e) => {
+    const el = e.target;
+    if (el.id === 'from' || el.id === 'to') {
+      range = { from: $('from').value || range.from, to: $('to').value || range.to };
+      if (range.to < range.from) range.to = range.from;
+      render(); return;
+    }
+    if (el.dataset.provider) {
+      const [kind, id] = (el.value || ':').split(':');
+      try { await rpc('office_update_booking', { p_id: el.dataset.provider, p_action: 'provider', p_provider_kind: kind || null, p_provider_id: id || null }); }
+      catch (err) { alert('That did not work: ' + err.message); }
+      render();
+    }
+  });
+
+  document.addEventListener('submit', async (e) => {
+    if (e.target.id !== 'settingsForm') return;
+    e.preventDefault();
+    try {
+      await rpc('office_set_settings', { p_commission_pct: Number($('pct').value), p_captain_payout_days: Number($('days').value) });
+      $('setMsg').className = 'msg ok'; $('setMsg').textContent = 'Saved.';
+    } catch (err) { $('setMsg').className = 'msg err'; $('setMsg').textContent = err.message; }
+  });
+
+  // ---------- Sign in ----------
+  let signingUp = false;
+  function setAuthMode(up) {
+    signingUp = up;
+    $('authTitle').textContent = up ? 'Create your login' : 'Sign in';
+    $('authSub').textContent = up ? 'After you confirm your email, the owner gives you access.' : 'For the owner, managers and team members.';
+    $('authBtn').textContent = up ? 'Create login' : 'Sign in';
+    $('toggleAuth').textContent = up ? 'Already have a login? Sign in' : 'New to the team? Create your login';
+    $('nameRow').classList.toggle('hidden', !up);
+    $('password').autocomplete = up ? 'new-password' : 'current-password';
+    $('authMsg').textContent = '';
+  }
+  $('toggleAuth').onclick = () => setAuthMode(!signingUp);
+  $('forgot').onclick = async () => {
+    const email = $('email').value.trim();
+    if (!email) { $('authMsg').className = 'msg err'; $('authMsg').textContent = 'Type your email first.'; return; }
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/office' });
+    $('authMsg').className = 'msg ' + (error ? 'err' : 'ok');
+    $('authMsg').textContent = error ? error.message : 'Check your email for a link to set a new password.';
+  };
+  $('authForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $('email').value.trim(), password = $('password').value;
+    $('authBtn').disabled = true;
+    try {
+      if (signingUp) {
+        const name = $('name').value.trim();
+        if (name.length < 2) throw new Error('Please type your name.');
+        try { localStorage.setItem('officeName', name); } catch { /* private mode */ }
+        const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin + '/office', data: { full_name: name } } });
+        if (error) throw error;
+        if (!data.session) { $('authMsg').className = 'msg ok'; $('authMsg').textContent = 'Check your email and tap the link to confirm. Then sign in here.'; setAuthMode(false); return; }
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+      await loadMe();
+    } catch (err) { $('authMsg').className = 'msg err'; $('authMsg').textContent = err.message; }
+    finally { $('authBtn').disabled = false; }
+  };
+  $('reqForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try { await rpc('office_request_access', { p_name: $('reqName').value.trim() }); await loadMe(); }
+    catch (err) { $('waitMsg').className = 'msg err'; $('waitMsg').textContent = err.message; }
+  };
+  $('signOut').onclick = async () => { if (DEMO) { location.href = location.pathname; return; } await sb.auth.signOut(); me = null; providers = null; show('authView'); };
+
+  async function loadMe() {
+    me = await rpc('office_me');
+    if (!me.role) {
+      $('whoName').textContent = me.name || ''; $('whoRole').textContent = 'Waiting';
+      let saved = ''; try { saved = localStorage.getItem('officeName') || ''; } catch { /* private mode */ }
+      $('reqName').value = me.name || saved;
+      $('reqForm').classList.toggle('hidden', !!me.requested);
+      $('waitText').textContent = me.requested ? 'The owner has your request. You will see bookings here as soon as they give you access — refresh this page then.' : 'Your login is ready. Ask the owner for access below.';
+      show('waitView'); return;
+    }
+    afterLogin();
+  }
+  function afterLogin() {
+    $('whoName').textContent = me.name || ''; $('whoRole').textContent = ROLE_NAME[me.role];
+    show('officeView'); render();
+  }
+
+  // ---------- Demo data (?demo) ----------
+  function demoRpc(fn, args) {
+    const t = islandDate(), at = (h, m) => new Date(`${t}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00-06:00`).toISOString();
+    const own = me.role === 'owner', cash = me.role !== 'team';
+    const D = {
+      office_providers: { captains: [{ id: 'c1', name: 'Captain Fletcher' }, { id: 'c2', name: 'Captain Big John' }], operators: [{ id: 'o1', name: 'West Bay Tours' }] },
+      office_board: {
+        role: me.role,
+        rides: me.role === 'team' ? [] : [
+          { id: 'r1', status: 'completed', mode: 'shared', at: at(8, 40), from: 'Water taxi pier (Splash Inn)', to: 'Infinity Bay pier', riders: 3, fare: cash ? 18 : null, captain: 'Captain Fletcher', captain_phone: '+504 9999-0001', guest: 'Ana Smith', guest_phone: '+1 555 010 2030', guest_email: 'ana@example.com' },
+          { id: 'r2', status: 'accepted', mode: 'private', at: at(10, 15), from: 'Infinity Bay pier', to: "Anthony's Key pier", riders: 4, fare: cash ? 60 : null, captain: 'Captain Big John', captain_phone: '+504 9999-0002', guest: 'Tom Becker', guest_phone: '+49 151 0000 111', guest_email: 'tom@example.com' },
+          { id: 'r3', status: 'paid', mode: 'shared', at: at(13, 0), from: 'Half Moon Bay pier', to: "Foster's pier", riders: 2, fare: cash ? 12 : null, captain: null, guest: 'Lucy Park', guest_phone: '+1 555 222 3344', guest_email: 'lucy@example.com' },
+        ],
+        land_rides: me.role === 'team' ? [] : [
+          { id: 'l1', status: 'onboard', vehicle_kind: 'car', at: at(9, 30), from: 'Roatán Airport (RTB)', to: 'West Bay Beach', riders: 2, fare: cash ? 25 : null, driver: 'Kevin', vehicle: 'Toyota Corolla', plate: 'HBX 1234', driver_phone: '+504 9999-0102', guest: 'Maria Lopez', guest_phone: '+1 555 000 1', guest_email: 'maria@example.com' },
+        ],
+        bookings: [
+          { id: 'b1', status: 'paid', date: t, time: '09:00', listing: 'Horseback ride to West Bay Beach', area: 'West Bay', quantity: 2, total: cash ? 130 : null, guest: 'Ana Smith', guest_phone: '+1 555 010 2030', guest_email: 'ana@example.com', guest_note: 'First time riding', checked_in_at: at(8, 55), provider_operator_id: 'o1', provider: 'West Bay Tours', provider_phone: '+504 9999-0300' },
+          { id: 'b2', status: 'paid', date: t, time: '19:00', listing: 'Night snorkel with our captains', area: 'West End', quantity: 4, total: cash ? 220 : null, guest: 'The Becker family', guest_phone: '+49 151 0000 111', guest_email: 'tom@example.com', ops_note: 'Bring 4 dive lights', provider_captain_id: 'c1', provider: 'Captain Fletcher', provider_phone: '+504 9999-0001', handled_by: 'Tom' },
+          { id: 'b3', status: 'completed', date: t, time: '08:00', listing: 'Jet car ride', area: 'West Bay', quantity: 1, total: cash ? 95 : null, guest: 'Lucy Park', guest_phone: '+1 555 222 3344', guest_email: 'lucy@example.com' },
+        ],
+      },
+      office_people: {
+        captains: [
+          { name: 'Captain Big John', certified: true, active: true, rides_done: 9, tours_done: 1, cancelled_after_accept: 0, earned: own ? 312 : null, phone: '+504 9999-0002' },
+          { name: 'Captain Fletcher', certified: true, active: true, rides_done: 14, tours_done: 3, cancelled_after_accept: 1, earned: own ? 488 : null, phone: '+504 9999-0001' },
+        ],
+        drivers: [{ name: 'Kevin', vehicle: 'Toyota Corolla', plate: 'HBX 1234', certified: true, active: true, rides_done: 6, cancelled_after_accept: 0, earned: own ? 140 : null, phone: '+504 9999-0102' }],
+        operators: [{ name: 'West Bay Tours', is_partner: true, tours_done: 5, phone: '+504 9999-0300', email: 'hello@example.com' }],
+      },
+      office_money: { commission_pct: 20, taken: 1840, refunded: 40, donations: 60, net_sales: 1740, you_keep: 348, providers_share: 1392, pending_count: 2, pending_usd: 72, paid_out: 910, by_method: { card: 1310, zelle: 430 } },
+      office_payouts_owed: [
+        { payee_kind: 'captain', payee_id: 'c1', payee_name: 'Captain Fletcher', items: 7, gross_usd: 214, commission_usd: 42.8, amount_usd: 171.2, due_on: t, phone: '+504 9999-0001' },
+        { payee_kind: 'captain', payee_id: 'c2', payee_name: 'Captain Big John', items: 3, gross_usd: 96, commission_usd: 19.2, amount_usd: 76.8, due_on: addDays(t, 2), phone: '+504 9999-0002' },
+        { payee_kind: 'operator', payee_id: 'o1', payee_name: 'West Bay Tours', items: 2, gross_usd: 260, commission_usd: 52, amount_usd: 208, due_on: null, phone: '+504 9999-0300' },
+      ],
+      office_payout_history: [{ paid_at: at(7, 5), payee_kind: 'captain', payee_name: 'Captain Fletcher', amount_usd: 240, gross_usd: 300, commission_pct: 20, method: 'Tigo Money', reference: 'TX 4471', items: 9, paid_by: 'Dean' }],
+      office_staff: { staff: [{ user_id: 'u0', name: 'Dean', role: 'owner', active: true, email: 'owner@example.com' }, { user_id: 'u1', name: 'Maria', role: 'manager', active: true, email: 'maria@example.com' }, { user_id: 'u2', name: 'Tom', role: 'team', active: true, email: 'tom@example.com' }], requests: [{ user_id: 'u3', name: 'Kelly', email: 'kelly@example.com' }] },
+      office_activity: [{ at: at(8, 55), who: 'Tom', action: 'booking.check_in', detail: {} }, { at: at(7, 5), who: 'Dean', action: 'payout.paid', detail: { payee: 'Captain Fletcher', amount: 240, items: 9, method: 'Tigo Money' } }],
+      office_settings: { commission_pct: 20, captain_payout_days: 3 },
+    };
+    if (fn in D) return Promise.resolve(D[fn]);
+    return Promise.reject(new Error('This is the demo — nothing is saved.'));
+  }
+
+  // ---------- Start ----------
+  if (DEMO) {
+    $('demoBar').classList.remove('hidden');
+    me = { role: 'owner', name: 'Dean (demo)' };
+    afterLogin();
+    return;
+  }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, detectSessionInUrl: true } });
+  sb.auth.getSession().then(async ({ data }) => {
+    if (data.session) { try { await loadMe(); return; } catch { /* fall through to sign in */ } }
+    show('authView');
+  });
+  sb.auth.onAuthStateChange((event) => { if (event === 'PASSWORD_RECOVERY') {
+    const pw = prompt('Type your new password (8+ characters):');
+    if (pw) sb.auth.updateUser({ password: pw }).then(({ error }) => alert(error ? error.message : 'Password changed.'));
+  } });
+})();
+</script>
+</body>
+</html>
