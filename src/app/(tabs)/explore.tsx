@@ -8,6 +8,7 @@ import { ListingRow } from '@/components/ListingRow';
 import { AllAboardBar } from '@/components/AllAboardBar';
 import { CrowdMeter } from '@/components/CrowdMeter';
 import { CurrencyButton } from '@/components/CurrencyButton';
+import { InfoSlides } from '@/components/InfoSlides';
 import { LanguageButton } from '@/components/LanguageButton';
 import { ShipButton } from '@/components/ShipButton';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
@@ -94,14 +95,7 @@ export default function ExploreScreen() {
       ) : (
         <View style={{ gap: space(4) }}>
           <CrowdMeter />
-          <View style={styles.promo}>
-            <Image source={require('../../../assets/images/promo.jpg')} style={StyleSheet.absoluteFill} resizeMode="cover" />
-            <View style={styles.promoShade} />
-            <View style={styles.promoText}>
-              <Text style={[type.h2, { color: '#fff' }]}>{t('promoH')}</Text>
-              <Text style={[type.small, { color: '#fff' }]}>{t('promoS')}</Text>
-            </View>
-          </View>
+          <InfoSlides />
           <View style={styles.grid}>
             {PORTALS.map((p) => (
               <Pressable key={p.key} accessibilityRole="button" onPress={() => router.push(`/portal/${p.key}`)} style={styles.tile}>
@@ -185,9 +179,6 @@ const styles = StyleSheet.create({
   notice: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.md, padding: space(4) },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space(2) },
   chip: { borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 9 },
-  promo: { height: 150, borderRadius: radius.lg, overflow: 'hidden' },
-  promoShade: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.35)' },
-  promoText: { position: 'absolute', left: space(4), bottom: space(4), right: '35%', gap: 2 },
   // Round tiles, three per row: big light circle, large icon, label underneath.
   grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: space(5) },
   tile: { width: '33.333%', alignItems: 'center', gap: space(2), paddingHorizontal: space(2) },
