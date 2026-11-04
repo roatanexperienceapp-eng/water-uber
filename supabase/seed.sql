@@ -52,7 +52,8 @@ insert into public.portals (key, icon, names, kind, sort) values
   ('merch', '🛍️', '{"en":"Island merch","es":"Tienda","fr":"Souvenirs","de":"Souvenirs","pt":"Lembranças","it":"Souvenir","zh":"纪念品"}'::jsonb, 'book', 13),
   ('nsnork', '🔦', '{"en":"Night snorkeling","es":"Snorkel nocturno","fr":"Snorkeling de nuit","de":"Nachtschnorcheln","pt":"Snorkel noturno","it":"Snorkeling notturno","zh":"夜间浮潜"}'::jsonb, 'book', 14),
   ('horse', '🐎', '{"en":"Horseback riding","es":"Paseos a caballo","fr":"Balades à cheval","de":"Reiten","pt":"Passeio a cavalo","it":"Equitazione","zh":"骑马"}'::jsonb, 'book', 15),
-  ('jetcar', '🏎️', '{"en":"Jet car","es":"Jet car","fr":"Jet car","de":"Jet-Car","pt":"Jet car","it":"Jet car","zh":"水上跑车"}'::jsonb, 'book', 16)
+  ('jetcar', '🏎️', '{"en":"Jet car","es":"Jet car","fr":"Jet car","de":"Jet-Car","pt":"Jet car","it":"Jet car","zh":"水上跑车"}'::jsonb, 'book', 16),
+  ('books', '📚', '{"en":"Roatán books","es":"Libros de Roatán","fr":"Livres de Roatán","de":"Bücher aus Roatán","pt":"Livros de Roatán","it":"Libri di Roatán","zh":"罗阿坦图书"}'::jsonb, 'book', 17)
 on conflict (key) do update set icon = excluded.icon, names = excluded.names, kind = excluded.kind, sort = excluded.sort;
 
 insert into public.listings (id, portal_key, operator_id, name, area, description, price_usd, price_is_from, price_text, unit, rating, reviews, phone, lon, lat, tag, ours, booking, sort, port_pickup, meeting_text, duration_minutes) values
@@ -351,7 +352,8 @@ insert into public.listings (id, portal_key, operator_id, name, area, descriptio
   ('food-romeo-s', 'food', null, 'Romeo''s', 'French Harbour', 'Restaurant.', null, false, null, 'person', null, null, null, null, null, null, false, 'request', 458, false, null, null),
   ('food-the-outpost', 'food', null, 'The Outpost', 'French Harbour', 'Restaurant.', null, false, null, 'person', null, null, null, null, null, null, false, 'request', 459, false, null, null),
   ('food-bar-sport-herbys', 'food', null, 'Bar Sport Herbys', 'French Harbour', 'Bar.', null, false, null, 'person', null, null, null, null, null, null, false, 'request', 460, false, null, null),
-  ('food-cafe314', 'food', null, 'Cafe314', 'West Bay', 'Café.', null, false, null, 'person', null, null, null, null, null, null, false, 'request', 461, false, null, null)
+  ('food-cafe314', 'food', null, 'Cafe314', 'West Bay', 'Café.', null, false, null, 'person', null, null, null, null, null, null, false, 'request', 461, false, null, null),
+  ('books-saca-tu-mejor-version', 'books', null, 'Saca tu mejor versión · Evelyn Posas', 'Roatán', 'Evelyn Posas''s book in Spanish on faith, discipline and perseverance: routines, devotionals and encouragement for women ready for a fresh start. Paperback, 32 pages (2025). ISBN 979-8285138730. Also on Amazon.', null, false, null, 'person', null, null, null, null, null, 'Local author', false, 'request', 500, false, null, null)
 on conflict (id) do update set portal_key = excluded.portal_key, name = excluded.name, area = excluded.area, description = excluded.description, price_usd = excluded.price_usd, price_is_from = excluded.price_is_from, price_text = excluded.price_text, unit = excluded.unit, rating = excluded.rating, reviews = excluded.reviews, phone = excluded.phone, lon = excluded.lon, lat = excluded.lat, tag = excluded.tag, ours = excluded.ours, booking = excluded.booking, sort = excluded.sort, port_pickup = excluded.port_pickup, meeting_text = excluded.meeting_text, duration_minutes = excluded.duration_minutes, updated_at = now();
 
 -- Captains (names and roles only; licences are entered and verified by the office in the admin tools).

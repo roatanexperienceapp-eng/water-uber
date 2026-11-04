@@ -242,6 +242,20 @@ export const PORTALS: Portal[] = [
    "zh": "水上跑车"
   },
   "kind": "book"
+ },
+ {
+  "key": "books",
+  "icon": "📚",
+  "names": {
+   "en": "Roatán books",
+   "es": "Libros de Roatán",
+   "fr": "Livres de Roatán",
+   "de": "Bücher aus Roatán",
+   "pt": "Livros de Roatán",
+   "it": "Libri di Roatán",
+   "zh": "罗阿坦图书"
+  },
+  "kind": "book"
  }
 ];
 
@@ -3209,6 +3223,16 @@ export const LISTINGS: Listing[] = [
   "area": "West Bay",
   "description": "Café.",
   "unit": "person",
+  "booking": "request"
+ },
+ {
+  "id": "books-saca-tu-mejor-version",
+  "portal": "books",
+  "name": "Saca tu mejor versión · Evelyn Posas",
+  "area": "Roatán",
+  "description": "Evelyn Posas's book in Spanish on faith, discipline and perseverance: routines, devotionals and encouragement for women ready for a fresh start. Paperback, 32 pages (2025). ISBN 979-8285138730. Also on Amazon.",
+  "unit": "person",
+  "tag": "Local author",
   "booking": "request"
  }
 ];
