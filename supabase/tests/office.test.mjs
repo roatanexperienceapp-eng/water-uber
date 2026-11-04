@@ -119,6 +119,23 @@ ok(hist[0].payee_name === 'Captain Ray' && hist[0].paid_by === 'Dean' && Number(
 const log = await val(OWNER, 'select office_activity(50)');
 ok(log.some((l) => l.action === 'payout.paid') && log.some((l) => l.action === 'booking.complete' && l.who === 'Tom Team'), 'activity log records payouts and who completed the tour');
 
+// ---- Chart ----
+const tr = await val(OWNER, "select office_trend('today')");
+ok(tr.unit === 'hour' && tr.buckets.length === 24, 'today chart has 24 hourly bars');
+const sum = (t, k) => t.buckets.reduce((a, b) => a + (b[k] ?? 0), 0);
+ok(sum(tr, 'water') === 1 && sum(tr, 'land') === 1 && sum(tr, 'tours') === 1, 'today chart counts the ride, land ride and tour');
+ok(tr.buckets.find((b) => b.tours === 1).start.endsWith('T09:00'), 'tour is counted at its 9:00 start');
+const wk = await val(MGR, "select office_trend('week')");
+ok(wk.unit === 'day' && wk.buckets.length === 7 && sum(wk, 'water') === 1, 'manager sees the 7-day chart');
+const yr = await val(OWNER, "select office_trend('year')");
+ok(yr.unit === 'month' && yr.buckets.length === 12 && yr.by_weekday.length === 7 && yr.busiest_hour !== null, 'year chart has 12 months and busiest day/hour');
+ok((await val(OWNER, "select office_trend('yesterday')")).buckets.length === 24, 'yesterday chart has 24 hourly bars');
+ok((await val(OWNER, "select office_trend('month')")).buckets.length === 30, 'month chart has 30 days');
+const tt = await val(TEAM, "select office_trend('today')");
+ok(tt.buckets.every((b) => b.water === null && b.land === null) && sum(tt, 'tours') === 1, 'team member chart shows tours only');
+await throws(() => as(STRANGER, "select office_trend('today')"), /office_forbidden/, 'a stranger cannot see the chart');
+await throws(() => as(OWNER, "select office_trend('decade')"), /bad_period/, 'unknown period refused');
+
 // ---- Tables are closed to direct reads ----
 ok((await as(MGR, 'select * from payouts')).rows.length === 0, 'payouts table is not readable directly');
 ok((await as(GUEST, 'select * from staff')).rows.length === 0, 'staff table is not readable directly');

@@ -60,6 +60,42 @@
   .hidden { display:none !important; }
   .note { font-size:13px; background:var(--bg); border-radius:10px; padding:6px 8px; }
   @media (max-width:520px) { .grid { grid-template-columns:1fr; } }
+
+  /* Bookings chart */
+  :root { --s-water:#2a78d6; --s-land:#eb6834; --s-tours:#1baf7a; --grid:#e3e3e1; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --s-water:#3987e5; --s-land:#d95926; --s-tours:#199e70; --grid:#2e2f32; } }
+  :root[data-theme="dark"] { --s-water:#3987e5; --s-land:#d95926; --s-tours:#199e70; --grid:#2e2f32; }
+  .trend { background:var(--tile); border-radius:20px; padding:16px; margin-bottom:16px; }
+  .trend-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+  .trend-title { font-weight:800; font-size:17px; letter-spacing:-.3px; }
+  .trend-total { font-size:34px; font-weight:800; letter-spacing:-1px; line-height:1.1; }
+  .periods { display:flex; gap:4px; flex-wrap:wrap; }
+  .periods button { font-size:13px; padding:7px 11px; background:var(--bg); }
+  .periods button[aria-pressed="true"] { background:var(--ink); color:var(--bg); }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin:10px 0 6px; font-size:13px; color:var(--muted); }
+  .legend span { display:inline-flex; align-items:center; gap:6px; }
+  .legend i { width:10px; height:10px; border-radius:3px; display:inline-block; }
+  .legend b { color:var(--ink); }
+  .plot { position:relative; height:190px; margin-top:6px; padding-left:30px; }
+  .plot .gl { position:absolute; left:30px; right:0; border-top:1px solid var(--grid); }
+  .plot .gl span { position:absolute; left:-30px; top:-8px; width:24px; text-align:right; font-size:11px; color:var(--muted); }
+  .bars { position:absolute; left:30px; right:0; top:0; bottom:0; display:flex; align-items:flex-end; gap:2px; }
+  .col { flex:1; height:100%; display:flex; flex-direction:column-reverse; gap:2px; cursor:default; position:relative; min-width:0; }
+  .col:hover, .col:focus { outline:none; }
+  .col:hover::before, .col:focus::before { content:''; position:absolute; inset:0 -1px; background:var(--ink); opacity:.06; border-radius:4px; }
+  .seg { width:100%; }
+  .seg.top { border-radius:4px 4px 0 0; }
+  .xlab { display:flex; gap:2px; margin-left:30px; margin-top:6px; }
+  .xlab span { flex:1; font-size:11px; color:var(--muted); text-align:center; white-space:nowrap; overflow:visible; min-width:0; }
+  .tip { position:absolute; z-index:5; pointer-events:none; background:var(--ink); color:var(--bg); border-radius:10px; padding:8px 10px; font-size:12px; line-height:1.5; white-space:nowrap; transform:translate(-50%, -100%); }
+  .tip b { font-size:13px; }
+  .tip i { width:8px; height:8px; border-radius:2px; display:inline-block; margin-right:6px; }
+  .insight { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .insight span { background:var(--bg); border-radius:999px; padding:6px 12px; font-size:13px; }
+  .weekbars { display:flex; gap:4px; align-items:flex-end; height:36px; }
+  .weekbars div { flex:1; background:var(--s-water); opacity:.35; border-radius:3px 3px 0 0; min-height:2px; }
+  .weekbars div.max { opacity:1; }
+  .tablebtn { background:none; padding:0; color:var(--flame); font-size:13px; font-weight:700; }
 </style>
 </head>
 <body>
@@ -101,6 +137,7 @@
 
   <!-- The office -->
   <section id="officeView" class="hidden">
+    <div class="trend" id="trend" aria-label="Bookings chart"></div>
     <nav id="tabs"></nav>
     <div id="panel"></div>
   </section>
@@ -355,11 +392,97 @@
     </div>`;
   }
 
+  // ---------- Bookings chart (top of every office page) ----------
+  const SERIES = [
+    { key: 'water', label: 'Water taxi', color: 'var(--s-water)' },
+    { key: 'land', label: 'Land taxi', color: 'var(--s-land)' },
+    { key: 'tours', label: 'Tours & excursions', color: 'var(--s-tours)' },
+  ];
+  const PERIODS = [['today', 'Today'], ['yesterday', 'Yesterday'], ['week', 'Last 7 days'], ['month', 'Last 30 days'], ['year', 'Last 12 months']];
+  const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  let trendPeriod = 'today', trendData = null, trendTable = false, trendTimer = null;
+
+  const hourName = (h) => h == null ? '' : `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`;
+  function bucketName(start, unit, long) {
+    const d = new Date(start + ':00Z');
+    if (unit === 'hour') { const h = d.getUTCHours(); return long ? `${hourName(h)}–${hourName((h + 1) % 24)}` : hourName(h).replace(' ', '').toLowerCase(); }
+    if (unit === 'day') return d.toLocaleDateString('en-US', { timeZone: 'UTC', weekday: long ? 'long' : 'short', month: long ? 'short' : undefined, day: long ? 'numeric' : undefined });
+    return d.toLocaleDateString('en-US', { timeZone: 'UTC', month: long ? 'long' : 'short', year: long ? 'numeric' : undefined });
+  }
+  function niceMax(v) { if (v <= 4) return 4; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= v) return m * p; return 10 * p; }
+
+  async function renderTrend() {
+    clearInterval(trendTimer);
+    try { trendData = await rpc('office_trend', { p_period: trendPeriod }); } catch (e) { $('trend').innerHTML = `<p class="msg err">Chart could not load: ${esc(e.message)}</p>`; return; }
+    drawTrend();
+    if (trendPeriod === 'today') trendTimer = setInterval(renderTrend, 60000);
+  }
+
+  function drawTrend() {
+    const t = trendData, series = SERIES.filter((s) => t.buckets.some((b) => b[s.key] != null));
+    const totals = Object.fromEntries(series.map((s) => [s.key, t.buckets.reduce((a, b) => a + (b[s.key] || 0), 0)]));
+    const grand = Object.values(totals).reduce((a, b) => a + b, 0);
+    const peak = Math.max(0, ...t.buckets.map((b) => series.reduce((a, s) => a + (b[s.key] || 0), 0)));
+    const max = niceMax(peak);
+    const every = t.buckets.length > 20 ? (t.unit === 'hour' ? 3 : 5) : 1;
+    const per = { hour: 'hour', day: 'day', month: 'month' }[t.unit];
+    const busiestBucket = peak ? t.buckets.reduce((best, b) => series.reduce((a, s) => a + (b[s.key] || 0), 0) > series.reduce((a, s) => a + (best[s.key] || 0), 0) ? b : best) : null;
+
+    let plot;
+    if (trendTable) {
+      plot = `<div class="tablewrap" style="margin-top:10px;max-height:260px;overflow:auto"><table><thead><tr><th>${per[0].toUpperCase() + per.slice(1)}</th>${series.map((s) => `<th>${s.label}</th>`).join('')}<th>Total</th></tr></thead><tbody>${t.buckets.map((b) => `<tr><td>${esc(bucketName(b.start, t.unit, true))}</td>${series.map((s) => `<td>${b[s.key] || 0}</td>`).join('')}<td><b>${series.reduce((a, s) => a + (b[s.key] || 0), 0)}</b></td></tr>`).join('')}</tbody></table></div>`;
+    } else {
+      const grid = [0, max / 2, max].map((v) => `<div class="gl" style="top:${100 - (v / max) * 100}%"><span>${Math.round(v)}</span></div>`).join('');
+      const cols = t.buckets.map((b, i) => {
+        const segs = series.filter((s) => b[s.key] > 0);
+        return `<div class="col" tabindex="0" data-i="${i}" aria-label="${esc(bucketName(b.start, t.unit, true))}: ${series.map((s) => `${s.label} ${b[s.key] || 0}`).join(', ')}">${segs.map((s, j) =>
+          `<div class="seg${j === segs.length - 1 ? ' top' : ''}" style="height:calc(${(b[s.key] / max) * 100}% - 2px);background:${s.color}"></div>`).join('')}</div>`;
+      }).join('');
+      const labels = t.buckets.map((b, i) => `<span>${i % every === 0 ? esc(bucketName(b.start, t.unit, false)) : ''}</span>`).join('');
+      plot = `<div class="plot" id="plot">${grid}<div class="bars">${cols}</div></div><div class="xlab">${labels}</div>`;
+    }
+
+    const wk = t.by_weekday || [], wkMax = Math.max(1, ...wk);
+    $('trend').innerHTML = `
+      <div class="trend-head">
+        <div><div class="trend-title">${t.role === 'team' ? 'Tours & excursions booked' : 'Everything booked on the island'}</div>
+          <div class="trend-total">${grand.toLocaleString('en-US')}</div>
+          <div class="m">${PERIODS.find((p) => p[0] === trendPeriod)[1]}, by ${per}${busiestBucket ? ` · busiest: ${esc(bucketName(busiestBucket.start, t.unit, true))}` : ''}</div></div>
+        <div class="periods" role="group" aria-label="Chart period">${PERIODS.map(([k, l]) => `<button data-period="${k}" aria-pressed="${k === trendPeriod}">${l}</button>`).join('')}</div>
+      </div>
+      <div class="legend">${series.length > 1 ? series.map((s) => `<span><i style="background:${s.color}"></i>${s.label} <b>${totals[s.key]}</b></span>`).join('') : ''}
+        <button class="tablebtn" data-trendtable="1">${trendTable ? 'Show chart' : 'Show as table'}</button></div>
+      ${plot}
+      ${t.busiest_weekday != null ? `<div class="insight">
+        <span>Last 12 months · busiest day: <b>${WEEKDAYS[t.busiest_weekday]}</b></span>
+        <span>Busiest hour: <b>${hourName(t.busiest_hour)}</b></span>
+        <span style="display:flex;align-items:center;gap:8px">Mon→Sun <span class="weekbars" style="width:90px;padding:0;background:none" aria-label="Bookings by weekday">${[1, 2, 3, 4, 5, 6, 0].map((d) => `<div class="${wk[d] === wkMax ? 'max' : ''}" style="height:${(wk[d] || 0) / wkMax * 100}%" title="${WEEKDAYS[d]}: ${wk[d] || 0}"></div>`).join('')}</span></span>
+      </div>` : ''}`;
+    $('trend').querySelectorAll('.col').forEach((c) => {
+      const showTip = () => {
+        const b = t.buckets[+c.dataset.i], plotEl = $('plot');
+        plotEl.querySelector('.tip')?.remove();
+        const tip = document.createElement('div');
+        tip.className = 'tip';
+        tip.innerHTML = `<b>${esc(bucketName(b.start, t.unit, true))}</b><br>${series.map((s) => `<i style="background:${s.color}"></i>${s.label}: ${b[s.key] || 0}`).join('<br>')}`;
+        const pr = plotEl.getBoundingClientRect(), cr = c.getBoundingClientRect();
+        tip.style.left = Math.min(Math.max(cr.left - pr.left + cr.width / 2, 70), pr.width - 70) + 'px';
+        tip.style.top = '-6px';
+        plotEl.appendChild(tip);
+      };
+      c.addEventListener('mouseenter', showTip); c.addEventListener('focus', showTip); c.addEventListener('click', showTip);
+      c.addEventListener('mouseleave', () => $('plot')?.querySelector('.tip')?.remove());
+      c.addEventListener('blur', () => $('plot')?.querySelector('.tip')?.remove());
+    });
+  }
+
   // ---------- Events ----------
   document.addEventListener('click', async (e) => {
     const el = e.target.closest('button');
     if (!el) return;
     try {
+      if (el.dataset.period) { trendPeriod = el.dataset.period; renderTrend(); return; }
+      if (el.dataset.trendtable) { trendTable = !trendTable; drawTrend(); return; }
       if (el.dataset.tab) { tab = el.dataset.tab; render(); return; }
       if (el.dataset.demo) { me = { role: el.dataset.demo, name: { owner: 'Dean (demo)', manager: 'Maria (demo)', team: 'Tom (demo)' }[el.dataset.demo] }; afterLogin(); return; }
       if (el.dataset.range) {
@@ -482,7 +605,7 @@
   }
   function afterLogin() {
     $('whoName').textContent = me.name || ''; $('whoRole').textContent = ROLE_NAME[me.role];
-    show('officeView'); render();
+    show('officeView'); render(); renderTrend();
   }
 
   // ---------- Demo data (?demo) ----------
@@ -526,6 +649,26 @@
       office_activity: [{ at: at(8, 55), who: 'Tom', action: 'booking.check_in', detail: {} }, { at: at(7, 5), who: 'Dean', action: 'payout.paid', detail: { payee: 'Captain Fletcher', amount: 240, items: 9, method: 'Tigo Money' } }],
       office_settings: { commission_pct: 20, captain_payout_days: 3 },
     };
+    if (fn === 'office_trend') {
+      // Made-up but realistic shape: mornings and afternoons busy, weekends busier, high season Dec–Apr.
+      const p = args.p_period, rnd = (i, s) => (Math.sin(i * 12.9898 + s * 78.233) * 43758.5453) % 1;
+      const r01 = (i, s) => Math.abs(rnd(i, s));
+      let starts = [], unit;
+      if (p === 'today' || p === 'yesterday') { unit = 'hour'; const day = p === 'today' ? t : addDays(t, -1); starts = [...Array(24).keys()].map((h) => `${day}T${String(h).padStart(2, '0')}:00`); }
+      else if (p === 'week' || p === 'month') { unit = 'day'; const n = p === 'week' ? 7 : 30; starts = [...Array(n).keys()].map((i) => `${addDays(t, i - n + 1)}T00:00`); }
+      else { unit = 'month'; const [y, m] = t.split('-').map(Number); starts = [...Array(12).keys()].map((i) => { const d = new Date(Date.UTC(y, m - 1 - 11 + i, 1)); return d.toISOString().slice(0, 7) + '-01T00:00'; }); }
+      const shape = (s, i) => {
+        const d = new Date(s + ':00Z');
+        if (unit === 'hour') { const h = d.getUTCHours(); const curve = h < 6 ? 0 : h < 9 ? 0.6 : h < 12 ? 1 : h < 14 ? 0.7 : h < 17 ? 0.9 : h < 20 ? 0.6 : 0.15; return curve * (p === 'today' && h > new Date().getUTCHours() - 6 ? 0.5 : 1); }
+        if (unit === 'day') { const w = d.getUTCDay(); return (w === 6 || w === 0 ? 1.4 : w === 5 ? 1.2 : 0.9) * 8; }
+        const mo = d.getUTCMonth(); return ([3.2, 3.4, 3.6, 3.1, 1.8, 1.5, 2.0, 1.9, 1.0, 1.2, 1.9, 3.0][mo]) * 60;
+      };
+      const buckets = starts.map((s, i) => {
+        const base = shape(s, i), team = me.role === 'team';
+        return { start: s, water: team ? null : Math.round(base * (3 + 2 * r01(i, 1))), land: team ? null : Math.round(base * (1 + r01(i, 2))), tours: Math.round(base * (1.2 + r01(i, 3))) };
+      });
+      return Promise.resolve({ period: p, unit, role: me.role, buckets, busiest_weekday: 6, busiest_hour: 10, by_weekday: [410, 280, 265, 270, 300, 360, 455] });
+    }
     if (fn in D) return Promise.resolve(D[fn]);
     return Promise.reject(new Error('This is the demo — nothing is saved.'));
   }
