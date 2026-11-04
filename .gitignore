@@ -46,3 +46,4 @@ yarn-error.*
 supabase/functions/node_modules
 supabase/.temp
 supabase/.branches
+dist-captain/
