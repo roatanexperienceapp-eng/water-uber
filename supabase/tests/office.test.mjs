@@ -136,6 +136,25 @@ ok(tt.buckets.every((b) => b.water === null && b.land === null) && sum(tt, 'tour
 await throws(() => as(STRANGER, "select office_trend('today')"), /office_forbidden/, 'a stranger cannot see the chart');
 await throws(() => as(OWNER, "select office_trend('decade')"), /bad_period/, 'unknown period refused');
 
+// ---- Chart v2 ----
+const tot = (c, k) => c.points.reduce((a, b) => a + Number(b[k] ?? 0), 0);
+const h1 = await val(OWNER, "select office_chart('1h')");
+ok(h1.points.length === 12 && tot(h1, 'water') === 1 && tot(h1, 'land') === 1, '1H: 12 five-minute points with the ride and land ride just now');
+const d1 = await val(OWNER, "select office_chart('24h')"), w1 = await val(OWNER, "select office_chart('1w')");
+ok(d1.points.length === 24 && w1.points.length === 28, '24H has 24 points, 1W has 28');
+const m1 = await val(OWNER, "select office_chart('1m')");
+ok(m1.points.length === 30 && tot(m1, 'tours') === 1 && Number(m1.prev_total) === 0, '1M counts the tour; nothing in the month before');
+const y1 = await val(OWNER, "select office_chart('1y')"), a1 = await val(OWNER, "select office_chart('all')");
+ok(y1.points.length === 52 && a1.points.length >= 12 && a1.prev_total === null, '1Y weekly, All monthly');
+const ppl = await val(OWNER, "select office_chart('1m', 'people')");
+ok(tot(ppl, 'water') === 2 && tot(ppl, 'land') === 2 && tot(ppl, 'tours') === 2, 'people counts riders and tour guests');
+const rev = await val(OWNER, "select office_chart('1m', 'revenue')");
+ok(tot(rev, 'water') === 12 && tot(rev, 'land') === 25 && tot(rev, 'tours') === 100, 'owner sees revenue by service');
+await throws(() => as(MGR, "select office_chart('1m', 'revenue')"), /office_forbidden/, 'manager cannot chart revenue');
+const tm = await val(TEAM, "select office_chart('1m')");
+ok(tm.series.length === 1 && tm.points.every((p) => p.water === null) && tot(tm, 'tours') === 1, 'team member chart is tours only');
+await throws(() => as(OWNER, "select office_chart('5y')"), /bad_period/, 'unknown chart period refused');
+
 // ---- Tables are closed to direct reads ----
 ok((await as(MGR, 'select * from payouts')).rows.length === 0, 'payouts table is not readable directly');
 ok((await as(GUEST, 'select * from staff')).rows.length === 0, 'staff table is not readable directly');
