@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ShareQR } from '@/components/ShareQR';
 import { PORTALS } from '@/data/catalogue';
+import { LISTING_IMAGES } from '@/data/listingImages';
 import { listingFit, useMyShip } from '@/lib/cruise';
 import { phone as fmtPhone } from '@/lib/format';
 import { radius, space, type, useTheme } from '@/theme';
@@ -22,9 +23,13 @@ export function ListingRow({ listing: l, likely, showPortal }: { listing: Listin
   return (
     <View style={[styles.row, { borderBottomColor: c.line, opacity: fit === 'no' ? 0.55 : 1 }]}>
       <View style={styles.top}>
-        <View style={[styles.thumb, { backgroundColor: c.tile }]}>
-          <Text style={{ fontSize: 24 }}>{portal?.icon ?? '📍'}</Text>
-        </View>
+        {LISTING_IMAGES[l.id] ? (
+          <Image source={LISTING_IMAGES[l.id]} style={styles.cover} accessibilityLabel={l.name} resizeMode="cover" />
+        ) : (
+          <View style={[styles.thumb, { backgroundColor: c.tile }]}>
+            <Text style={{ fontSize: 24 }}>{portal?.icon ?? '📍'}</Text>
+          </View>
+        )}
         <View style={{ flex: 1, gap: 2 }}>
           {tag ? <Text style={[type.label, { color: c.flame }]}>{tag}</Text> : null}
           <Text style={[type.bodyStrong, { color: c.ink }]}>{l.name}</Text>
@@ -78,6 +83,7 @@ const styles = StyleSheet.create({
   row: { paddingVertical: space(4), borderBottomWidth: 1, gap: space(3) },
   top: { flexDirection: 'row', gap: space(3) },
   thumb: { width: 52, height: 52, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  cover: { width: 72, height: 110, borderRadius: 6 },
   foot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space(2) },
   actions: { flexDirection: 'row', gap: space(2) },
   btn: { borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
