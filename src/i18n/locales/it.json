@@ -951,5 +951,9 @@
  "slide_ship_s": "Scegli la tua nave: mostriamo solo i tour che ti riportano in tempo.",
  "slide_give_h": "Il 10% ai bambini di Roatán",
  "slide_give_s": "Parte di ogni prenotazione sostiene Every Child Roatán.",
- "slide_give_cta": "Scopri di più"
+ "slide_give_cta": "Scopri di più",
+ "crashTitle": "Qualcosa è andato storto",
+ "crashBody": "Il nostro team è già stato avvisato, non serve segnalarlo. Prenotazioni e biglietti sono al sicuro.",
+ "crashRetry": "Riprova",
+ "crashHome": "Torna alla home"
 }

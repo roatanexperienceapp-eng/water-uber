@@ -951,5 +951,9 @@
  "slide_ship_s": "选择你的邮轮，只显示能让你按时返船的行程。",
  "slide_give_h": "10% 捐给罗阿坦的孩子",
  "slide_give_s": "每笔预订的一部分支持 Every Child Roatán。",
- "slide_give_cta": "了解更多"
+ "slide_give_cta": "了解更多",
+ "crashTitle": "出了点问题",
+ "crashBody": "我们已通知团队，你无需报告。你的预订和票都很安全。",
+ "crashRetry": "重试",
+ "crashHome": "返回首页"
 }

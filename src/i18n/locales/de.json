@@ -951,5 +951,9 @@
  "slide_ship_s": "Schiff wählen – wir zeigen nur Touren, die Sie pünktlich zurückbringen.",
  "slide_give_h": "10 % für Kinder auf Roatán",
  "slide_give_s": "Ein Teil jeder Buchung unterstützt Every Child Roatán.",
- "slide_give_cta": "Mehr erfahren"
+ "slide_give_cta": "Mehr erfahren",
+ "crashTitle": "Etwas ist schiefgelaufen",
+ "crashBody": "Unser Team ist bereits informiert, Sie müssen nichts melden. Ihre Buchungen und Tickets sind sicher.",
+ "crashRetry": "Erneut versuchen",
+ "crashHome": "Zur Startseite"
 }

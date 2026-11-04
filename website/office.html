@@ -198,6 +198,7 @@
     { key: 'payouts', label: 'Pay providers', roles: ['owner'] },
     { key: 'team', label: 'Team', roles: ['owner'] },
     { key: 'activity', label: 'Activity', roles: ['owner'] },
+    { key: 'health', label: 'App health', roles: ['owner', 'manager'] },
     { key: 'settings', label: 'Settings', roles: ['owner'] },
   ];
 
@@ -228,6 +229,7 @@
       else if (tab === 'team') p.innerHTML = await viewTeam();
       else if (tab === 'activity') p.innerHTML = await viewActivity();
       else if (tab === 'settings') p.innerHTML = await viewSettings();
+      else if (tab === 'health') p.innerHTML = await viewHealth();
     } catch (e) {
       p.innerHTML = `<p class="msg err">Could not load: ${esc(e.message)}</p>`;
     }
@@ -374,6 +376,27 @@
       return esc(l.action);
     };
     return `<h2>Activity <span class="n">${a.length}</span></h2>` + (a.length ? `<div class="tablewrap"><table><thead><tr><th>When</th><th>Who</th><th>What</th></tr></thead><tbody>${a.map((l) => `<tr><td>${esc(dayTime(l.at))}</td><td>${esc(l.who)}</td><td>${say(l)}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">Nothing yet.</div>');
+  }
+
+  // App health: crashes and errors from the guest app, the captain app and this office page
+  let healthDays = 7;
+  async function viewHealth() {
+    const h = await rpc('office_app_errors', { p_days: healthDays });
+    const appName = { guest: 'Guest app', captain: 'Captain app', office: 'Office', web: 'Website' };
+    const kindName = { crash: 'Crash', render: 'Screen crashed', handled: 'Error', promise: 'Error' };
+    const st = (label, v, hl) => `<div class="stat ${hl ? 'hl' : ''}"><small>${label}</small><b>${v}</b></div>`;
+    const status = h.crashes === 0 && h.total === 0 ? '<span class="s ok">All good</span>' : h.crashes > 0 ? '<span class="s bad">Needs a look</span>' : '<span class="s warn">Minor errors</span>';
+    return `<div class="bar">${[1, 7, 30].map((d) => `<button data-hdays="${d}" ${d === healthDays ? 'class="dark"' : ''}>${d === 1 ? 'Last 24 hours' : `Last ${d} days`}</button>`).join('')} ${status}</div>
+      <div class="stats">${st('Crashes', h.crashes, h.crashes > 0)}${st('All errors', h.total)}${st('Phones affected', h.devices)}</div>
+      <h2>Problems <span class="n">${h.problems.length}</span></h2>
+      ${h.problems.length ? `<div class="grid">${h.problems.map((x) => `<div class="card">
+        <div class="row"><span class="t" style="font-size:14px;word-break:break-word">${esc(x.message)}</span><span class="s ${x.kind === 'crash' || x.kind === 'render' ? 'bad' : 'warn'}">${kindName[x.kind] || 'Error'}</span></div>
+        <div class="m">${esc(appName[x.app] || x.app)} · ${esc(x.platforms)}${x.app_version ? ' · v' + esc(x.app_version) : ''}</div>
+        <div class="m">${x.times} time${x.times > 1 ? 's' : ''} on ${x.devices} phone${x.devices > 1 ? 's' : ''} · last ${esc(dayTime(x.last_seen))}</div>
+        ${x.route ? `<div class="m">Screen: <b>${esc(x.route)}</b></div>` : ''}
+        ${x.stack ? `<details><summary class="m" style="cursor:pointer">Technical details (for Claude)</summary><pre style="white-space:pre-wrap;font-size:11px;max-height:200px;overflow:auto">${esc(x.stack)}</pre></details>` : ''}
+      </div>`).join('')}</div>` : '<div class="empty">No crashes or errors reported. 🎉</div>'}
+      <p class="m" style="margin-top:12px">Reports come in automatically from guests' and captains' phones and from this office page. No names, phone numbers or card details are included.</p>`;
   }
 
   // Settings
@@ -544,6 +567,7 @@
     const el = e.target.closest('button');
     if (!el) return;
     try {
+      if (el.dataset.hdays) { healthDays = Number(el.dataset.hdays); render(); return; }
       if (el.dataset.period) { cs.period = el.dataset.period; saveCs(); renderTrend(); return; }
       if (el.dataset.chartsettings) { settingsOpen = !settingsOpen; drawTrend(); return; }
       if (el.dataset.cset) {
@@ -719,6 +743,12 @@
       office_activity: [{ at: at(8, 55), who: 'Tom', action: 'booking.check_in', detail: {} }, { at: at(7, 5), who: 'Dean', action: 'payout.paid', detail: { payee: 'Captain Fletcher', amount: 240, items: 9, method: 'Tigo Money' } }],
       office_settings: { commission_pct: 20, captain_payout_days: 3 },
     };
+    if (fn === 'office_app_errors') {
+      return Promise.resolve({ days: args.p_days, total: 9, devices: 4, crashes: 2, by_day: [], problems: [
+        { message: "TypeError: Cannot read property 'fare' of undefined", app: 'guest', kind: 'render', times: 3, devices: 2, platforms: 'ios', app_version: '1.0.0', route: '/checkout', last_seen: at(9, 12), stack: 'at Checkout (checkout.tsx:88)' },
+        { message: 'Network request failed', app: 'captain', kind: 'handled', times: 6, devices: 2, platforms: 'android', app_version: '1.0.0', route: '/captain', last_seen: at(8, 40), stack: null },
+      ] });
+    }
     if (fn === 'office_chart') {
       // Made-up but realistic: busy mornings and afternoons, busier weekends, high season Dec–Apr, a little noise.
       const p = args.p_period, metric = args.p_metric || 'count', team = me.role === 'team';
@@ -756,6 +786,16 @@
     return;
   }
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, detectSessionInUrl: true } });
+  // Report crashes on this page to App health (never names or contact details: only the error text).
+  const officeDevice = (() => { try { let d = localStorage.getItem('officeDevice'); if (!d) { d = 'o-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem('officeDevice', d); } return d; } catch { return 'o-private-' + Math.random().toString(36).slice(2, 8); } })();
+  const sentErrors = new Set();
+  const reportOffice = (err, kind) => {
+    const msg = String(err && err.message ? `${err.name || 'Error'}: ${err.message}` : err || 'Unknown error').slice(0, 500);
+    if (sentErrors.has(msg) || sentErrors.size > 20) return; sentErrors.add(msg);
+    sb.rpc('log_app_error', { p_app: 'office', p_platform: 'web', p_app_version: null, p_route: '/office#' + tab, p_kind: kind, p_message: msg, p_stack: err && err.stack ? String(err.stack).slice(0, 4000) : null, p_device_id: officeDevice }).then(() => {}, () => {});
+  };
+  window.addEventListener('error', (e) => reportOffice(e.error || e.message, 'crash'));
+  window.addEventListener('unhandledrejection', (e) => reportOffice(e.reason, 'promise'));
   sb.auth.getSession().then(async ({ data }) => {
     if (data.session) { try { await loadMe(); return; } catch { /* fall through to sign in */ } }
     show('authView');

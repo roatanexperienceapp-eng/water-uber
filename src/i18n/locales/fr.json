@@ -951,5 +951,9 @@
  "slide_ship_s": "Choisissez votre navire : seules les excursions qui vous ramènent à temps s’affichent.",
  "slide_give_h": "10 % pour les enfants de Roatán",
  "slide_give_s": "Une part de chaque réservation soutient Every Child Roatán.",
- "slide_give_cta": "En savoir plus"
+ "slide_give_cta": "En savoir plus",
+ "crashTitle": "Un problème est survenu",
+ "crashBody": "Notre équipe est déjà prévenue, inutile de le signaler. Vos réservations et billets sont en sécurité.",
+ "crashRetry": "Réessayer",
+ "crashHome": "Retour à l’accueil"
 }

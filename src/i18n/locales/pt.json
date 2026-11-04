@@ -951,5 +951,9 @@
  "slide_ship_s": "Escolha seu navio e mostramos só passeios que trazem você de volta a tempo.",
  "slide_give_h": "10% para as crianças de Roatán",
  "slide_give_s": "Parte de cada reserva apoia a Every Child Roatán.",
- "slide_give_cta": "Saiba mais"
+ "slide_give_cta": "Saiba mais",
+ "crashTitle": "Algo deu errado",
+ "crashBody": "Já avisamos nossa equipe, você não precisa relatar. Suas reservas e ingressos estão seguros.",
+ "crashRetry": "Tentar de novo",
+ "crashHome": "Voltar ao início"
 }

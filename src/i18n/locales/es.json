@@ -951,5 +951,9 @@
  "slide_ship_s": "Elige tu barco y solo verás tours que te regresan antes del all aboard.",
  "slide_give_h": "El 10% es para los niños de Roatán",
  "slide_give_s": "Parte de cada reserva apoya a Every Child Roatán.",
- "slide_give_cta": "Saber más"
+ "slide_give_cta": "Saber más",
+ "crashTitle": "Algo salió mal",
+ "crashBody": "Ya le avisamos a nuestro equipo, no necesitas reportarlo. Tus reservas y boletos están a salvo.",
+ "crashRetry": "Intentar de nuevo",
+ "crashHome": "Volver al inicio"
 }

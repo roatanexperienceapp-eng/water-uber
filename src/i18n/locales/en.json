@@ -951,5 +951,9 @@
  "slide_ship_s": "Pick your ship and we only show tours that get you back before all aboard.",
  "slide_give_h": "10% goes to Roatán kids",
  "slide_give_s": "Part of every booking supports Every Child Roatán.",
- "slide_give_cta": "Learn more"
+ "slide_give_cta": "Learn more",
+ "crashTitle": "Something went wrong",
+ "crashBody": "We've told our team, so you don't need to report it. Your bookings and tickets are safe.",
+ "crashRetry": "Try again",
+ "crashHome": "Back to home"
 }
