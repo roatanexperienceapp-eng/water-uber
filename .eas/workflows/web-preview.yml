@@ -1,0 +1,7 @@
+# Puts the browser version of the app on a preview link you can open on any phone.
+# Run it by hand; it never runs on its own and never touches the production site.
+name: Web preview link
+jobs:
+  deploy:
+    name: Deploy web preview
+    type: deploy
