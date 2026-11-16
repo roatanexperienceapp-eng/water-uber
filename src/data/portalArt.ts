@@ -1,8 +1,9 @@
 import type { ImageSourcePropType } from 'react-native';
 
 /**
- * Round illustrations for the Explore tiles (owner-supplied artwork, text cropped out so the
- * translated label underneath works in every language). Portals without art fall back to their emoji.
+ * Round illustrations for the Explore tiles. One family: every tile is a full island scene in the
+ * same outlined style, with no lettering, so the translated label underneath works in every language.
+ * Portals without art fall back to their emoji. `paddle` is ready for the Paddleboarding tile.
  */
 export const PORTAL_ART: Partial<Record<string, ImageSourcePropType>> = {
   fish: require('../../assets/images/portals/fish.jpg'),
@@ -19,4 +20,9 @@ export const PORTAL_ART: Partial<Record<string, ImageSourcePropType>> = {
   hotel: require('../../assets/images/portals/hotel.jpg'),
   food: require('../../assets/images/portals/food.jpg'),
   merch: require('../../assets/images/portals/merch.jpg'),
+  nsnork: require('../../assets/images/portals/nsnork.jpg'),
+  horse: require('../../assets/images/portals/horse.jpg'),
+  jetcar: require('../../assets/images/portals/jetcar.jpg'),
+  books: require('../../assets/images/portals/books.jpg'),
+  paddle: require('../../assets/images/portals/paddle.jpg'),
 };
