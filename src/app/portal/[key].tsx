@@ -38,7 +38,7 @@ export default function PortalScreen() {
               {portal?.icon} {portal ? (portal.names[i18n.language as LangCode] ?? portal.names.en) : ''}
             </Text>
             <Text style={[type.small, { color: c.muted }]}>
-              {items.length} {t('options')}
+              {items.length === 0 ? t('comingSoon') : `${items.length} ${t('options')}`}
               {info ? ` · ${t('infoNote')}` : ''}
             </Text>
             <AllAboardBar />
