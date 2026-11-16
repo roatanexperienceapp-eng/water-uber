@@ -63,7 +63,7 @@ function WaterRide() {
   const [center, setCenter] = useState(HOME_CENTER);
   const [picker, setPicker] = useState<null | 'from' | 'to'>(null);
   const [popup, setPopup] = useState<null | { kind: 'boat'; boat: LiveBoat } | { kind: 'dive'; site: DiveSite }>(null);
-  const [locNote, setLocNote] = useState<string>(t('ctrWE'));
+  const [locKey, setLocKey] = useState<'ctrWE' | 'ctrYou' | 'outside' | 'noLoc'>('ctrWE');
   // Week-stay features
   const [places, setPlaces] = useState<SavedPlace[]>([]);
   const [pass, setPass] = useState<GuestPass | null>(null);
@@ -149,18 +149,18 @@ function WaterRide() {
   async function nearMe() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return setLocNote(t('noLoc'));
+      if (status !== 'granted') return setLocKey('noLoc');
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       const here = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
       if (kmBetween([here.longitude, here.latitude], [HOME_CENTER.longitude, HOME_CENTER.latitude]) < 35) {
         setCenter(here);
-        setLocNote(t('ctrYou'));
+        setLocKey('ctrYou');
       } else {
         setCenter(HOME_CENTER);
-        setLocNote(t('outside'));
+        setLocKey('outside');
       }
     } catch {
-      setLocNote(t('noLoc'));
+      setLocKey('noLoc');
     }
   }
 
@@ -198,7 +198,7 @@ function WaterRide() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
-      <ScrollView contentContainerStyle={{ paddingBottom: space(10) }} stickyHeaderIndices={[]}>
+      <ScrollView contentContainerStyle={{ paddingBottom: space(24) }} stickyHeaderIndices={[]}>
         <View style={styles.header}>
           <ServiceSwitch />
           <View style={{ alignItems: 'flex-end', gap: space(1) }}>
@@ -211,7 +211,216 @@ function WaterRide() {
         </View>
         <Text style={[type.hero, { color: c.ink, paddingHorizontal: space(4), marginBottom: space(3) }]}>{t('greet')}</Text>
 
-        <View style={[styles.mapWrap, { height: Math.round(height * 0.42) }]}>
+        {/* Booking first: where, how many, when, which boat, then the button. The map sits below. */}
+        <View style={styles.panel}>
+          <View style={[styles.legs, { backgroundColor: c.tile }]}>
+            {(['from', 'to'] as const).map((k, i) => (
+              <Pressable key={k} accessibilityRole="button" accessibilityLabel={t(k === 'from' ? 'from_' : 'to')} onPress={() => setPicker(k)} style={[styles.leg, i === 1 && { borderTopWidth: 1, borderTopColor: c.tile2 }]}>
+                <View style={[i === 0 ? styles.dotFrom : styles.dotTo, { backgroundColor: c.ink }]} />
+                <Text style={[type.bodyStrong, { color: c.ink, flex: 1 }]} numberOfLines={1}>
+                  {dockName(k === 'from' ? from : to)}
+                </Text>
+                <Ionicons name="chevron-down" size={18} color={c.muted} />
+              </Pressable>
+            ))}
+          </View>
+
+          {places.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
+              {places.map((p) => (
+                <Pressable key={p.id} accessibilityRole="button" onPress={() => goTo(p.dockId)} style={[styles.chip, { backgroundColor: to === p.dockId ? c.ink : c.tile }]}>
+                  <Ionicons name={PLACE_ICONS[p.icon]} size={15} color={to === p.dockId ? c.onInk : c.ink} />
+                  <Text style={[type.label, { fontSize: 14, color: to === p.dockId ? c.onInk : c.ink }]}>{p.label}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+
+          <Stepper label={t('riders')} value={riders} min={1} max={PRICING.maxRiders} onChange={setRiders} />
+
+          <Segmented
+            value={timing}
+            onChange={(v) => {
+              setTiming(v);
+              setMode(v === 'scheduled' ? 'private' : 'shared');
+            }}
+            options={[
+              { value: 'now', label: t('now') },
+              { value: 'scheduled', label: t('later') },
+            ]}
+          />
+
+          {flat && timing === 'now' && (
+            <View>
+              {(['shared', 'private'] as const).map((m) => {
+                const on = mode === m;
+                return (
+                  <Pressable key={m} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setMode(m)} style={[styles.opt, { borderColor: on ? c.ink : 'transparent' }]}>
+                    <Text style={{ fontSize: 30 }}>{m === 'shared' ? '🚤' : '🛥️'}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[type.bodyStrong, { color: c.ink }]}>{t(m)}</Text>
+                      <Note>{t(`${m}Sub`).replace('{n}', String(FEATURE_SETTINGS.shared.seatsToDepart)).replace('{m}', String(FEATURE_SETTINGS.shared.maxWaitMinutes))}</Note>
+                    </View>
+                    <Text style={[type.bodyStrong, { color: c.ink }]}>{usd(covered ? cover.fareUsd : quoteFare({ from, to, riders, mode: m, timing }).total + nightExtra)}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+
+          {timing === 'scheduled' && (
+            <View style={{ gap: space(3) }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
+                {slots.map((s, i) => (
+                  <Pressable key={s.toISOString()} onPress={() => setSlot(i)} style={[styles.slot, { backgroundColor: i === slot ? c.ink : c.tile }]}>
+                    <Text style={[type.label, { fontSize: 14, color: i === slot ? c.onInk : c.ink }]}>{clock(s, i18n.language)}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              <View style={styles.switchRow}>
+                <Text style={[type.body, { color: c.ink, flex: 1 }]}>{t('wet')}</Text>
+                <Switch value={towels} onValueChange={setTowels} trackColor={{ true: c.flame }} />
+              </View>
+              <View style={styles.switchRow}>
+                <Text style={[type.body, { color: c.ink, flex: 1 }]}>{t('kids')}</Text>
+                <Switch value={kids} onValueChange={setKids} trackColor={{ true: c.flame }} />
+              </View>
+              <Note>{needsFamilyBoat(riders, kids) ? `${t('cap2')} · ${t('jackets')}` : t('cap1')}</Note>
+
+              <View style={styles.switchRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[type.body, { color: c.ink }]}>{t('repeatToggle')}</Text>
+                  <Note>{t('repeatHint')}</Note>
+                </View>
+                <Switch value={repeat} onValueChange={setRepeat} trackColor={{ true: c.flame }} />
+              </View>
+              {repeat && (
+                <View style={{ gap: space(3) }}>
+                  <View style={styles.days}>
+                    <Pressable onPress={() => setRepeatDays([])} style={[styles.day, { backgroundColor: repeatDays.length === 0 ? c.ink : c.tile, paddingHorizontal: 12 }]}>
+                      <Text style={[type.label, { color: repeatDays.length === 0 ? c.onInk : c.ink }]}>{t('everyDay')}</Text>
+                    </Pressable>
+                    {WEEKDAYS.map((d) => {
+                      const on = repeatDays.includes(d);
+                      return (
+                        <Pressable key={d} onPress={() => setRepeatDays(on ? repeatDays.filter((x) => x !== d) : [...repeatDays, d].sort())} style={[styles.day, { backgroundColor: on ? c.ink : c.tile }]}>
+                          <Text style={[type.label, { color: on ? c.onInk : c.ink }]}>{t(`wd${d}`)}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <Stepper label={t('repeatUntil')} value={repeatFor} min={1} max={14} onChange={setRepeatFor} />
+                </View>
+              )}
+
+              <View style={[styles.banner, { backgroundColor: c.tile }]}>
+                <Ionicons name="shield-checkmark" size={20} color={c.flame} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[type.bodyStrong, { color: c.ink }]}>{t('guaranteeH')}</Text>
+                  <Note>{t('guaranteeMsg').replace('{c}', String(FEATURE_SETTINGS.guarantee.missedPickupCreditUsd))}</Note>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {blocked && <Button variant="ink" label={t('landTaxi')} onPress={() => router.push('/assistant')} />}
+
+          <Button
+            label={joined ? t('joinedBoat').replace('{m}', String(minsUntil(joined.departsAt))) : timing === 'scheduled' ? t('reserve') : t('request')}
+            trailing={usd(price)}
+            disabled={blocked}
+            onPress={request}
+          />
+          <Note center>{timing === 'scheduled' && flat ? t('feeNote') : t('note')}</Note>
+
+          <View style={{ gap: 2 }}>
+            <Text style={[type.bodyStrong, { color: c.ink }]}>
+              {quote.miles.toFixed(1)} mi · {t('rideMin').replace('{m}', String(quote.rideMinutes))} · {t('arrive')} ~{clock(arrive, i18n.language)}
+            </Text>
+            {timing === 'now' && <Note>{pickupMin ? t('pickup').replace('{m}', String(pickupMin)) : t('noTaxi')}</Note>}
+          </View>
+
+          {flat && timing === 'now' && mode === 'shared' && (
+            <View style={{ gap: space(2) }}>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>{t('sharedH')}</Text>
+              {joinable.length === 0 ? (
+                <Note>
+                  {t('noShared').replace('{n}', String(FEATURE_SETTINGS.shared.seatsToDepart)).replace('{m}', String(FEATURE_SETTINGS.shared.maxWaitMinutes))}
+                </Note>
+              ) : (
+                joinable.map((b) => {
+                  const on = b.id === joinId;
+                  return (
+                    <Pressable key={b.id} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setJoinId(on ? null : b.id)} style={[styles.opt, { borderColor: on ? c.ink : c.line }]}>
+                      <Ionicons name="people" size={22} color={c.flame} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={[type.bodyStrong, { color: c.ink }]}>{t('leavesIn').replace('{m}', String(minsUntil(b.departsAt)))}</Text>
+                        <Note>{t('seatsTaken').replace('{n}', String(b.seatsTaken)).replace('{t}', String(b.seatsTotal))}</Note>
+                      </View>
+                      <Text style={[type.label, { color: on ? c.flame : c.ink, fontSize: 14 }]}>{on ? '✓' : t('joinBoat')}</Text>
+                    </Pressable>
+                  );
+                })
+              )}
+            </View>
+          )}
+
+          {!flat && (
+            <View style={[styles.mileNote, { backgroundColor: c.tile }]}>
+              <Text style={[type.small, { color: c.ink }]}>
+                {quote.rule === 'zone' ? t('zoneNote') : t('mileNote')} {quote.breakdown}
+              </Text>
+            </View>
+          )}
+
+          {night !== 'day' && (
+            <View style={[styles.banner, { backgroundColor: night === 'night' ? '#14213D' : '#3A1410' }]}>
+              <Ionicons name={night === 'night' ? 'moon' : 'close-circle'} size={20} color="#fff" />
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={[type.bodyStrong, { color: '#fff' }]}>{t(night === 'night' ? 'nightH' : 'closedH')}</Text>
+                <Text style={[type.small, { color: '#E5E7EB' }]}>
+                  {night === 'night' ? t('nightMsg') : t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {covered ? (
+            <View style={[styles.banner, { backgroundColor: c.tile }]}>
+              <Ionicons name="ticket" size={20} color={c.flame} />
+              <View style={{ flex: 1 }}>
+                <Text style={[type.bodyStrong, { color: c.ink }]}>{t('passCovered')}</Text>
+                {cover.extraRiders > 0 && <Note>{t('passExtra').replace('{n}', String(cover.extraRiders)).replace('{p}', usd(cover.fareUsd))}</Note>}
+              </View>
+            </View>
+          ) : flat && !pass ? (
+            <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/pass', params: { group: String(riders) } })} style={[styles.banner, { backgroundColor: c.tile }]}>
+              <Ionicons name="ticket-outline" size={20} color={c.flame} />
+              <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('passPromo').replace('{p}', String(FEATURE_SETTINGS.passes[0].priceUsd / FEATURE_SETTINGS.passes[0].riders))}</Text>
+              <Text style={[type.label, { color: c.flame, fontSize: 14 }]}>{t('passSeeOptions')} ›</Text>
+            </Pressable>
+          ) : null}
+
+          <View style={[styles.banner, { backgroundColor: c.tile }]}>
+            <View style={[styles.seaDot, { backgroundColor: SEA_COLOR[cond.state] }]} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={[type.bodyStrong, { color: c.ink }]}>
+                {t('seaTitle')}: {t(`sea_${cond.state}`)}
+              </Text>
+              <Note>
+                {t({ none: 'seaCalmMsg', expect_spray: 'seaChoppyMsg', land_taxi: 'seaRoughMsg' }[advice])}
+                {cond.state === 'unknown' ? '' : condAgo ? ` ${t('reportedAgo').replace('{m}', String(condAgo))}` : ''}
+              </Note>
+            </View>
+          </View>
+
+          <Pressable accessibilityRole="button" onPress={() => setSaving(true)} style={[styles.chip, { alignSelf: 'flex-start', borderWidth: 1, borderColor: c.line }]}>
+            <Ionicons name="bookmark-outline" size={15} color={c.ink} />
+            <Text style={[type.label, { fontSize: 14, color: c.ink }]}>{t('savePlace')}</Text>
+          </Pressable>
+        </View>
+
+        <View style={[styles.mapWrap, { height: Math.round(height * 0.42), marginTop: space(2) }]}>
           <LiveMap
             center={center}
             rangeMiles={range}
@@ -310,212 +519,8 @@ function WaterRide() {
         </View>
         <View style={{ paddingHorizontal: space(5) }}>
           <Note>
-            {locNote} {DEMO_MODE ? t('demoBoats') : ''}
+            {t(locKey)} {DEMO_MODE ? t('demoBoats') : ''}
           </Note>
-        </View>
-
-        <View style={styles.panel}>
-          <View style={[styles.legs, { backgroundColor: c.tile }]}>
-            {(['from', 'to'] as const).map((k, i) => (
-              <Pressable key={k} accessibilityRole="button" accessibilityLabel={t(k === 'from' ? 'from_' : 'to')} onPress={() => setPicker(k)} style={[styles.leg, i === 1 && { borderTopWidth: 1, borderTopColor: c.tile2 }]}>
-                <View style={[i === 0 ? styles.dotFrom : styles.dotTo, { backgroundColor: c.ink }]} />
-                <Text style={[type.bodyStrong, { color: c.ink, flex: 1 }]} numberOfLines={1}>
-                  {dockName(k === 'from' ? from : to)}
-                </Text>
-                <Ionicons name="chevron-down" size={18} color={c.muted} />
-              </Pressable>
-            ))}
-          </View>
-
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
-            {places.map((p) => (
-              <Pressable key={p.id} accessibilityRole="button" onPress={() => goTo(p.dockId)} style={[styles.chip, { backgroundColor: to === p.dockId ? c.ink : c.tile }]}>
-                <Ionicons name={PLACE_ICONS[p.icon]} size={15} color={to === p.dockId ? c.onInk : c.ink} />
-                <Text style={[type.label, { fontSize: 14, color: to === p.dockId ? c.onInk : c.ink }]}>{p.label}</Text>
-              </Pressable>
-            ))}
-            <Pressable accessibilityRole="button" onPress={() => setSaving(true)} style={[styles.chip, { borderWidth: 1, borderColor: c.line }]}>
-              <Ionicons name="bookmark-outline" size={15} color={c.ink} />
-              <Text style={[type.label, { fontSize: 14, color: c.ink }]}>{t('savePlace')}</Text>
-            </Pressable>
-          </ScrollView>
-
-          <View style={{ gap: 2 }}>
-            <Text style={[type.bodyStrong, { color: c.ink }]}>
-              {quote.miles.toFixed(1)} mi · {t('rideMin').replace('{m}', String(quote.rideMinutes))} · {t('arrive')} ~{clock(arrive, i18n.language)}
-            </Text>
-            {timing === 'now' && <Note>{pickupMin ? t('pickup').replace('{m}', String(pickupMin)) : t('noTaxi')}</Note>}
-          </View>
-
-          <View style={[styles.banner, { backgroundColor: c.tile }]}>
-            <View style={[styles.seaDot, { backgroundColor: SEA_COLOR[cond.state] }]} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={[type.bodyStrong, { color: c.ink }]}>
-                {t('seaTitle')}: {t(`sea_${cond.state}`)}
-              </Text>
-              <Note>
-                {t({ none: 'seaCalmMsg', expect_spray: 'seaChoppyMsg', land_taxi: 'seaRoughMsg' }[advice])}
-                {cond.state === 'unknown' ? '' : condAgo ? ` ${t('reportedAgo').replace('{m}', String(condAgo))}` : ''}
-              </Note>
-            </View>
-          </View>
-
-          {night !== 'day' && (
-            <View style={[styles.banner, { backgroundColor: night === 'night' ? '#14213D' : '#3A1410' }]}>
-              <Ionicons name={night === 'night' ? 'moon' : 'close-circle'} size={20} color="#fff" />
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={[type.bodyStrong, { color: '#fff' }]}>{t(night === 'night' ? 'nightH' : 'closedH')}</Text>
-                <Text style={[type.small, { color: '#E5E7EB' }]}>
-                  {night === 'night' ? t('nightMsg') : t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}
-                </Text>
-              </View>
-            </View>
-          )}
-
-          {blocked && <Button variant="ink" label={t('landTaxi')} onPress={() => router.push('/assistant')} />}
-
-          {!flat && (
-            <View style={[styles.mileNote, { backgroundColor: c.tile }]}>
-              <Text style={[type.small, { color: c.ink }]}>
-                {quote.rule === 'zone' ? t('zoneNote') : t('mileNote')} {quote.breakdown}
-              </Text>
-            </View>
-          )}
-
-          {flat && timing === 'now' && (
-            <View>
-              {(['shared', 'private'] as const).map((m) => {
-                const on = mode === m;
-                return (
-                  <Pressable key={m} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setMode(m)} style={[styles.opt, { borderColor: on ? c.ink : 'transparent' }]}>
-                    <Text style={{ fontSize: 30 }}>{m === 'shared' ? '🚤' : '🛥️'}</Text>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[type.bodyStrong, { color: c.ink }]}>{t(m)}</Text>
-                      <Note>{t(`${m}Sub`).replace('{n}', String(FEATURE_SETTINGS.shared.seatsToDepart)).replace('{m}', String(FEATURE_SETTINGS.shared.maxWaitMinutes))}</Note>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-
-          {flat && timing === 'now' && mode === 'shared' && (
-            <View style={{ gap: space(2) }}>
-              <Text style={[type.bodyStrong, { color: c.ink }]}>{t('sharedH')}</Text>
-              {joinable.length === 0 ? (
-                <Note>
-                  {t('noShared').replace('{n}', String(FEATURE_SETTINGS.shared.seatsToDepart)).replace('{m}', String(FEATURE_SETTINGS.shared.maxWaitMinutes))}
-                </Note>
-              ) : (
-                joinable.map((b) => {
-                  const on = b.id === joinId;
-                  return (
-                    <Pressable key={b.id} accessibilityRole="radio" accessibilityState={{ checked: on }} onPress={() => setJoinId(on ? null : b.id)} style={[styles.opt, { borderColor: on ? c.ink : c.line }]}>
-                      <Ionicons name="people" size={22} color={c.flame} />
-                      <View style={{ flex: 1 }}>
-                        <Text style={[type.bodyStrong, { color: c.ink }]}>{t('leavesIn').replace('{m}', String(minsUntil(b.departsAt)))}</Text>
-                        <Note>{t('seatsTaken').replace('{n}', String(b.seatsTaken)).replace('{t}', String(b.seatsTotal))}</Note>
-                      </View>
-                      <Text style={[type.label, { color: on ? c.flame : c.ink, fontSize: 14 }]}>{on ? '✓' : t('joinBoat')}</Text>
-                    </Pressable>
-                  );
-                })
-              )}
-            </View>
-          )}
-
-          <Segmented
-            value={timing}
-            onChange={(v) => {
-              setTiming(v);
-              setMode(v === 'scheduled' ? 'private' : 'shared');
-            }}
-            options={[
-              { value: 'now', label: t('now') },
-              { value: 'scheduled', label: t('later') },
-            ]}
-          />
-
-          {timing === 'scheduled' && (
-            <View style={{ gap: space(3) }}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space(2) }}>
-                {slots.map((s, i) => (
-                  <Pressable key={s.toISOString()} onPress={() => setSlot(i)} style={[styles.slot, { backgroundColor: i === slot ? c.ink : c.tile }]}>
-                    <Text style={[type.label, { fontSize: 14, color: i === slot ? c.onInk : c.ink }]}>{clock(s, i18n.language)}</Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-              <View style={styles.switchRow}>
-                <Text style={[type.body, { color: c.ink, flex: 1 }]}>{t('wet')}</Text>
-                <Switch value={towels} onValueChange={setTowels} trackColor={{ true: c.flame }} />
-              </View>
-              <View style={styles.switchRow}>
-                <Text style={[type.body, { color: c.ink, flex: 1 }]}>{t('kids')}</Text>
-                <Switch value={kids} onValueChange={setKids} trackColor={{ true: c.flame }} />
-              </View>
-              <Note>{needsFamilyBoat(riders, kids) ? `${t('cap2')} · ${t('jackets')}` : t('cap1')}</Note>
-
-              <View style={styles.switchRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[type.body, { color: c.ink }]}>{t('repeatToggle')}</Text>
-                  <Note>{t('repeatHint')}</Note>
-                </View>
-                <Switch value={repeat} onValueChange={setRepeat} trackColor={{ true: c.flame }} />
-              </View>
-              {repeat && (
-                <View style={{ gap: space(3) }}>
-                  <View style={styles.days}>
-                    <Pressable onPress={() => setRepeatDays([])} style={[styles.day, { backgroundColor: repeatDays.length === 0 ? c.ink : c.tile, paddingHorizontal: 12 }]}>
-                      <Text style={[type.label, { color: repeatDays.length === 0 ? c.onInk : c.ink }]}>{t('everyDay')}</Text>
-                    </Pressable>
-                    {WEEKDAYS.map((d) => {
-                      const on = repeatDays.includes(d);
-                      return (
-                        <Pressable key={d} onPress={() => setRepeatDays(on ? repeatDays.filter((x) => x !== d) : [...repeatDays, d].sort())} style={[styles.day, { backgroundColor: on ? c.ink : c.tile }]}>
-                          <Text style={[type.label, { color: on ? c.onInk : c.ink }]}>{t(`wd${d}`)}</Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                  <Stepper label={t('repeatUntil')} value={repeatFor} min={1} max={14} onChange={setRepeatFor} />
-                </View>
-              )}
-
-              <View style={[styles.banner, { backgroundColor: c.tile }]}>
-                <Ionicons name="shield-checkmark" size={20} color={c.flame} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={[type.bodyStrong, { color: c.ink }]}>{t('guaranteeH')}</Text>
-                  <Note>{t('guaranteeMsg').replace('{c}', String(FEATURE_SETTINGS.guarantee.missedPickupCreditUsd))}</Note>
-                </View>
-              </View>
-            </View>
-          )}
-
-          <Stepper label={t('riders')} value={riders} min={1} max={PRICING.maxRiders} onChange={setRiders} />
-
-          {covered ? (
-            <View style={[styles.banner, { backgroundColor: c.tile }]}>
-              <Ionicons name="ticket" size={20} color={c.flame} />
-              <View style={{ flex: 1 }}>
-                <Text style={[type.bodyStrong, { color: c.ink }]}>{t('passCovered')}</Text>
-                {cover.extraRiders > 0 && <Note>{t('passExtra').replace('{n}', String(cover.extraRiders)).replace('{p}', usd(cover.fareUsd))}</Note>}
-              </View>
-            </View>
-          ) : flat && !pass ? (
-            <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/pass', params: { group: String(riders) } })} style={[styles.banner, { backgroundColor: c.tile }]}>
-              <Ionicons name="ticket-outline" size={20} color={c.flame} />
-              <Text style={[type.small, { color: c.ink, flex: 1 }]}>{t('passPromo').replace('{p}', String(FEATURE_SETTINGS.passes[0].priceUsd / FEATURE_SETTINGS.passes[0].riders))}</Text>
-              <Text style={[type.label, { color: c.flame, fontSize: 14 }]}>{t('passSeeOptions')} ›</Text>
-            </Pressable>
-          ) : null}
-
-          <Button
-            label={joined ? t('joinedBoat').replace('{m}', String(minsUntil(joined.departsAt))) : timing === 'scheduled' ? t('reserve') : t('request')}
-            trailing={usd(price)}
-            disabled={blocked}
-            onPress={request}
-          />
-          <Note center>{timing === 'scheduled' && flat ? t('feeNote') : t('note')}</Note>
         </View>
       </ScrollView>
 
