@@ -1,0 +1,12 @@
+# Publishes the current code so it can be opened in the Expo Go app on a phone.
+# Run it by hand. It publishes to its own "expo-go" branch and never touches installed builds.
+name: Expo Go preview
+jobs:
+  publish:
+    name: Publish for Expo Go
+    type: update
+    env:
+      EXPO_GO_PREVIEW: '1'
+    params:
+      branch: expo-go
+      message: Expo Go preview

@@ -55,7 +55,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: { favicon: './assets/favicon.png', bundler: 'metro' },
   // Over-the-air updates: JS changes reach installed apps without a new store build.
-  runtimeVersion: { policy: 'appVersion' },
+  // Expo Go only loads updates published for its own SDK runtime, so the Expo Go preview workflow
+  // sets EXPO_GO_PREVIEW. Installed builds keep the app-version runtime.
+  runtimeVersion: { policy: process.env.EXPO_GO_PREVIEW === '1' ? 'sdkVersion' : 'appVersion' },
   updates: { url: 'https://u.expo.dev/e04fa82d-56e2-4fa2-a255-286935a7b916', enabled: !IS_CAPTAIN },
   plugins: [
     'expo-router',
