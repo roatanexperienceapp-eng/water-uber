@@ -62,6 +62,20 @@ export const PORTALS: Portal[] = [
   "kind": "book"
  },
  {
+  "key": "paddle",
+  "icon": "🏄",
+  "names": {
+   "en": "Paddleboarding",
+   "es": "Paddle surf",
+   "fr": "Stand up paddle",
+   "de": "Stand-up-Paddling",
+   "pt": "Stand up paddle",
+   "it": "SUP",
+   "zh": "桨板"
+  },
+  "kind": "book"
+ },
+ {
   "key": "para",
   "icon": "🪂",
   "names": {

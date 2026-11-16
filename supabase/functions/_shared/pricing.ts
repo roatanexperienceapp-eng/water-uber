@@ -44,7 +44,7 @@ export interface FareQuote {
   miles: number;
   rideMinutes: number;
   rule: 'flat' | 'zone' | 'distance';
-  /** Human-readable breakdown, e.g. "3.9 mi × $5 × 2 = $39". */
+  /** Human-readable breakdown, e.g. "3.9 mi × $6 × 2 = $47". */
   breakdown: string;
   reservationFee: number;
 }
