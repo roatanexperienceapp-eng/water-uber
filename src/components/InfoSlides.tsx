@@ -17,7 +17,7 @@ const goTo = (href: Href) => () => router.push(href);
 
 /** Explore's top banner: a slide show of the things guests should know. Each slide stays 4 seconds. */
 const SLIDES: Slide[] = [
-  { key: 'crowd', bg: '#0E7490', image: require('../../assets/images/promo.jpg'), go: () => router.navigate('/') },
+  { key: 'crowd', bg: '#0E7490', emoji: '⏰', go: () => router.navigate('/') },
   { key: 'pass', bg: '#0B4466', emoji: '🎟️', go: goTo('/pass') },
   { key: 'package', bg: '#7C3AED', emoji: '🏝️', go: goTo('/pass') },
   { key: 'land', bg: '#111827', emoji: '🚕', go: () => { setService('land'); router.navigate('/'); } },
@@ -48,10 +48,11 @@ export function InfoSlides() {
     setIndex(i);
   }, [width]);
 
-  // Advance every 4 seconds, unless the guest is swiping, has just swiped, or has reduce-motion on.
+  // Advance every 4 seconds, unless the guest is swiping or has just swiped.
+  // With Reduce Motion on, the next slide appears without the sliding animation.
   useEffect(() => {
-    if (!width || paused || reduceMotion) return;
-    const id = setTimeout(() => show((index + 1) % SLIDES.length), SLIDE_MS);
+    if (!width || paused) return;
+    const id = setTimeout(() => show((index + 1) % SLIDES.length, !reduceMotion), SLIDE_MS);
     return () => clearTimeout(id);
   }, [index, width, paused, reduceMotion, show]);
 
