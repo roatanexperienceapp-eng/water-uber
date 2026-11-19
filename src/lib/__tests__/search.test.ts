@@ -23,7 +23,7 @@ test('product words point to the right kind of shop', () => {
   const r = searchListings('sunscreen', LISTINGS, PORTALS);
   expect(r.isProduct).toBe(true);
   expect(r.portals).toEqual(expect.arrayContaining(['rx', 'merch']));
-  expect(r.hits.every((h) => ['rx', 'merch'].includes(h.listing.portal))).toBe(true);
+  expect(r.hits.every((h) => ['rx', 'merch', 'concierge'].includes(h.listing.portal))).toBe(true);
   expect(r.hits[0].likely).toBe(true);
   expect(r.hits[0].listing.portal).toBe('rx');
 });

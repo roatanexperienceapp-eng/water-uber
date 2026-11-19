@@ -25,4 +25,6 @@ export const PORTAL_ART: Partial<Record<string, ImageSourcePropType>> = {
   jetcar: require('../../assets/images/portals/jetcar.jpg'),
   books: require('../../assets/images/portals/books.jpg'),
   paddle: require('../../assets/images/portals/paddle.jpg'),
+  concierge: require('../../assets/images/portals/concierge.jpg'),
+  catering: require('../../assets/images/portals/catering.jpg'),
 };
