@@ -3259,6 +3259,6 @@ export const LISTINGS: Listing[] = [
   "priceUsd": 18.0,
   "unit": "person",
   "tag": "Local author",
-  "booking": "request"
+  "booking": "instant"
  }
 ];
