@@ -2633,9 +2633,11 @@ export const LISTINGS: Listing[] = [
  {
   "id": "nsnork-our-night-snorkel",
   "portal": "nsnork",
-  "name": "Night snorkel with our captains",
+  "name": "Night snorkel with Lindsey & Corey",
   "area": "West End",
-  "description": "The reef after dark with our boat, guide and dive lights: octopus, lobster, sleeping parrotfish and, on some nights, glowing plankton.",
+  "description": "The reef after dark with our guides Lindsey and Corey, our boat and dive lights: octopus, lobster, sleeping parrotfish and, on some nights, glowing plankton.",
+  "priceText": "$85 pp",
+  "priceUsd": 85.0,
   "unit": "person",
   "ours": true,
   "booking": "request",
