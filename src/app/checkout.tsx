@@ -217,7 +217,8 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   const [days] = useState(() => Array.from({ length: 10 }, (_, i) => roatanDate(new Date(new Date().getTime() + i * 86_400_000))));
   const [day, setDay] = useState(1);
   const [pickedTime, setTime] = useState('09:00');
-  const [qty, setQty] = useState(2);
+  // Books are sold by the copy: one to start with, no date, time or transport.
+  const [qty, setQty] = useState(() => (LISTINGS.find((l) => l.id === id)?.portal === 'books' ? 1 : 2));
   const [withTaxi, setWithTaxi] = useState(true);
   const [withVan, setWithVan] = useState(true);
   const [split, setSplit] = useState(false);
@@ -238,22 +239,23 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   }, []);
 
   if (!listing) return <Note>{t('noResults')}</Note>;
+  const product = listing.portal === 'books';
   const instant = listing.booking === 'instant' && listing.priceUsd != null;
   const activityTotal = instant ? activityTotalUsd(listing.priceUsd!, listing.unit, qty) : undefined;
   // Per-boat charters still count people: it decides how many boats the group needs.
-  const unitLabel = t(`u_${listing.unit === 'boat' ? 'person' : listing.unit ?? 'person'}`);
+  const unitLabel = product ? t('copies') : t(`u_${listing.unit === 'boat' ? 'person' : listing.unit ?? 'person'}`);
   const boats = listing.unit === 'boat' ? boatsFor(qty) : 0;
 
   // ---- Cruise mode: the ship's day only, and only start times that get the group back in time ----
-  const cruise = ship && ship.date >= roatanDate(now) ? ship : null;
+  const cruise = !product && ship && ship.date >= roatanDate(now) ? ship : null;
   const shipTimes = cruise ? cruiseStartTimes(cruise, listing, now) : [];
   // With our van on, only offer starts the van can reach after its full wait at the port gate.
-  const vanEligible = !!cruise && instant && !(listing.portPickup && !listing.ours);
+  const vanEligible = !product && !!cruise && instant && !(listing.portPickup && !listing.ours);
   const vanTimes = vanEligible && withVan
     ? shipTimes.filter((x) => vanPlan(cruise!, { area: listing.area, portal: listing.portal, start: roatanInstant(cruise!.date, x), durationMinutes: listing.durationMinutes, people: qty })?.onTime !== false)
     : shipTimes;
   const cruiseTimes = vanTimes.length ? vanTimes : shipTimes;
-  const date = cruise ? cruise.date : days[day];
+  const date = cruise ? cruise.date : product ? days[0] : days[day];
   const time = cruise ? (cruiseTimes.includes(pickedTime) ? pickedTime : cruiseTimes[0] ?? '') : pickedTime;
   const start = time ? roatanInstant(date, time) : null;
   const fit = cruise && start ? fitsPortTime(cruise, { area: listing.area, portal: listing.portal, start, durationMinutes: listing.durationMinutes }) : null;
@@ -263,13 +265,13 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
   // ---- Boat there and back (week-stay guests; cruise guests come by road from the port) ----
   const dest = dockForArea(listing.area);
   const hours = ACTIVITY_HOURS[listing.portal] ?? 2;
-  const offerTaxi = !cruise && dest !== null && hours > 0;
+  const offerTaxi = !product && !cruise && dest !== null && hours > 0;
   const taxiOn = offerTaxi && withTaxi && !split && dest !== home;
   const riders = Math.min(qty, PRICING.maxRiders);
   const there = taxiOn && dest ? quoteFare({ from: home, to: dest, riders, mode: 'private', timing: 'scheduled' }) : null;
   const pickupAt = start ? pickupForActivity(start, there?.rideMinutes ?? 0) : null;
   const backAt = start ? new Date(start.getTime() + hours * 3_600_000) : null;
-  const tooSoon = !start || (taxiOn && pickupAt ? pickupAt.getTime() < now.getTime() + 15 * 60_000 : start.getTime() < now.getTime() + 15 * 60_000);
+  const tooSoon = product ? false : !start || (taxiOn && pickupAt ? pickupAt.getTime() < now.getTime() + 15 * 60_000 : start.getTime() < now.getTime() + 15 * 60_000);
   const legFare = (at: Date | null) => {
     if (!there || !dest || !at) return 0;
     const cv = passCovers(pass, { from: home, to: dest, riders, at });
@@ -348,6 +350,8 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
         </Note>
       </Card>
 
+      {!product && (
+      <>
       <Text style={[type.bodyStrong, { color: c.ink }]}>{t('date')}</Text>
       {cruise ? (
         <Note>
@@ -398,6 +402,8 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
         </View>
       )}
       {unknownArea && <Note>{t('fitUnknown')}</Note>}
+      </>
+      )}
 
       <Stepper label={unitLabel} value={qty} min={1} max={20} onChange={setQty} />
       {boats > 0 && <Note>{t('boatsNeeded').replace('{n}', String(boats)).replace('{s}', String(TOUR_SETTINGS.seatsPerBoat))}</Note>}
@@ -412,10 +418,17 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
       )}
 
       {/* Where to meet */}
+      {product ? (
+        <Card>
+          <Text style={[type.bodyStrong, { color: c.ink }]}>📦 {t('bookHandoffH')}</Text>
+          <Note>{t('bookHandoff')}</Note>
+        </Card>
+      ) : (
       <Card>
         <Text style={[type.bodyStrong, { color: c.ink }]}>📍 {t('meetH')}</Text>
         <Note>{meetingText(listing, cruise, t, vanOn && van ? islandClock(van.pickupAt, i18n.language) : null)}</Note>
       </Card>
+      )}
 
       {/* Our van from the cruise port */}
       {van && (
@@ -443,7 +456,7 @@ function ListingCheckout({ id, busy, setBusy, setErr }: { id: string } & Flow) {
       )}
 
       {/* Split with my group */}
-      {instant && (
+      {instant && !product && (
         <Card>
           <View style={styles.switchRow}>
             <Ionicons name="people" size={20} color={c.flame} />

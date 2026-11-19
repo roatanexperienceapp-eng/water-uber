@@ -3248,5 +3248,17 @@ export const LISTINGS: Listing[] = [
   "unit": "person",
   "tag": "Local author",
   "booking": "request"
+ },
+ {
+  "id": "books-el-alma-perdida",
+  "portal": "books",
+  "name": "El Alma Perdida · Evelyn Posas Cruz",
+  "area": "Roatán",
+  "description": "Evelyn Posas Cruz's true story in Spanish of faith, identity and purpose: childhood wounds, the masks we wear to survive, and healing through faith. Paperback, 208 pages (2026). ISBN 979-8167688636. Tap the cover for more photos.",
+  "priceText": "$18",
+  "priceUsd": 18.0,
+  "unit": "person",
+  "tag": "Local author",
+  "booking": "instant"
  }
 ];
