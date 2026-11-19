@@ -3262,5 +3262,17 @@ export const LISTINGS: Listing[] = [
   "unit": "person",
   "tag": "Local author",
   "booking": "instant"
+ },
+ {
+  "id": "books-luna-encuentra-el-camino-a-casa",
+  "portal": "books",
+  "name": "Luna encuentra el camino a casa · Evelyn Posas",
+  "area": "Roatán",
+  "description": "A children's picture book in Spanish from the Amigos del Arrecife de Roatán series: Luna and her reef friends find the way home.",
+  "priceText": "$15",
+  "priceUsd": 15.0,
+  "unit": "person",
+  "tag": "Local author",
+  "booking": "instant"
  }
 ];

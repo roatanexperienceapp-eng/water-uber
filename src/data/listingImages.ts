@@ -4,6 +4,7 @@ import type { ImageSourcePropType } from 'react-native';
 export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
   'books-saca-tu-mejor-version': require('../../assets/books/saca-tu-mejor-version-1-cover.jpg'),
   'books-el-alma-perdida': require('../../assets/books/el-alma-perdida-1-cover.jpg'),
+  'books-luna-encuentra-el-camino-a-casa': require('../../assets/books/luna-encuentra-el-camino-a-casa.jpg'),
 };
 
 /** Extra photos a guest can swipe through by tapping the cover. The first one is the cover. */
