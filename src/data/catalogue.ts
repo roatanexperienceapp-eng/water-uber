@@ -3244,10 +3244,12 @@ export const LISTINGS: Listing[] = [
   "portal": "books",
   "name": "Saca tu mejor versión · Evelyn Posas",
   "area": "Roatán",
-  "description": "Evelyn Posas's book in Spanish on faith, discipline and perseverance: routines, devotionals and encouragement for women ready for a fresh start. Paperback, 32 pages (2025). ISBN 979-8285138730. Also on Amazon.",
+  "description": "Evelyn Posas's book in Spanish on faith, discipline and perseverance: routines, devotionals and encouragement for women ready for a fresh start. Paperback, 32 pages (2025). ISBN 979-8285138730. Also on Amazon. Tap the cover for more photos.",
+  "priceText": "$18",
+  "priceUsd": 18.0,
   "unit": "person",
   "tag": "Local author",
-  "booking": "request"
+  "booking": "instant"
  },
  {
   "id": "books-el-alma-perdida",
