@@ -3244,9 +3244,35 @@ export const LISTINGS: Listing[] = [
   "portal": "books",
   "name": "Saca tu mejor versión · Evelyn Posas",
   "area": "Roatán",
-  "description": "Evelyn Posas's book in Spanish on faith, discipline and perseverance: routines, devotionals and encouragement for women ready for a fresh start. Paperback, 32 pages (2025). ISBN 979-8285138730. Also on Amazon.",
+  "description": "Evelyn Posas's book in Spanish on faith, discipline and perseverance: routines, devotionals and encouragement for women ready for a fresh start. Paperback, 32 pages (2025). ISBN 979-8285138730. Also on Amazon. Tap the cover for more photos.",
+  "priceText": "$18",
+  "priceUsd": 18.0,
   "unit": "person",
   "tag": "Local author",
-  "booking": "request"
+  "booking": "instant"
+ },
+ {
+  "id": "books-el-alma-perdida",
+  "portal": "books",
+  "name": "El Alma Perdida · Evelyn Posas Cruz",
+  "area": "Roatán",
+  "description": "Evelyn Posas Cruz's true story in Spanish of faith, identity and purpose: childhood wounds, the masks we wear to survive, and healing through faith. Paperback, 208 pages (2026). ISBN 979-8167688636. Tap the cover for more photos.",
+  "priceText": "$18",
+  "priceUsd": 18.0,
+  "unit": "person",
+  "tag": "Local author",
+  "booking": "instant"
+ },
+ {
+  "id": "books-luna-encuentra-el-camino-a-casa",
+  "portal": "books",
+  "name": "Luna encuentra el camino a casa · Evelyn Posas",
+  "area": "Roatán",
+  "description": "A children's picture book in Spanish from the Amigos del Arrecife de Roatán series: Luna and her reef friends find the way home.",
+  "priceText": "$15",
+  "priceUsd": 15.0,
+  "unit": "person",
+  "tag": "Local author",
+  "booking": "instant"
  }
 ];
