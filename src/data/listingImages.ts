@@ -5,10 +5,30 @@ export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
   'books-saca-tu-mejor-version': require('../../assets/books/saca-tu-mejor-version-1-cover.jpg'),
   'books-el-alma-perdida': require('../../assets/books/el-alma-perdida-1-cover.jpg'),
   'books-luna-encuentra-el-camino-a-casa': require('../../assets/books/luna-encuentra-el-camino-a-casa.jpg'),
+  'nsnork-our-night-snorkel': require('../../assets/nightsnorkel/01-basket-star.jpg'),
+  'nsnork-corey': require('../../assets/nightsnorkel/01-basket-star.jpg'),
 };
 
 /** Extra photos a guest can swipe through by tapping the cover. The first one is the cover. */
+const NIGHT_SNORKEL: ImageSourcePropType[] = [
+  require('../../assets/nightsnorkel/01-basket-star.jpg'),
+  require('../../assets/nightsnorkel/02-octopus.jpg'),
+  require('../../assets/nightsnorkel/03-crab.jpg'),
+  require('../../assets/nightsnorkel/04-cowfish.jpg'),
+  require('../../assets/nightsnorkel/05-barracuda.jpg'),
+  require('../../assets/nightsnorkel/06-sea-fan.jpg'),
+  require('../../assets/nightsnorkel/07-urchin.jpg'),
+  require('../../assets/nightsnorkel/08-trunkfish.jpg'),
+  require('../../assets/nightsnorkel/09-scorpionfish.jpg'),
+  require('../../assets/nightsnorkel/10-trumpetfish.jpg'),
+  require('../../assets/nightsnorkel/11-grouper.jpg'),
+  require('../../assets/nightsnorkel/12-guests-1.jpg'),
+  require('../../assets/nightsnorkel/13-guests-2.jpg'),
+  ];
+
 export const LISTING_GALLERIES: Record<string, ImageSourcePropType[]> = {
+  'nsnork-our-night-snorkel': NIGHT_SNORKEL,
+  'nsnork-corey': NIGHT_SNORKEL,
   'books-saca-tu-mejor-version': [
     require('../../assets/books/saca-tu-mejor-version-1-cover.jpg'),
     require('../../assets/books/saca-tu-mejor-version-2-about.jpg'),

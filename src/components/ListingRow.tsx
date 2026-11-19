@@ -83,7 +83,7 @@ export function ListingRow({ listing: l, likely, showPortal }: { listing: Listin
               onPress={() => router.push({ pathname: '/checkout', params: { kind: 'listing', id: l.id } })}
               style={[styles.btn, { backgroundColor: c.ink }]}
             >
-              <Text style={[type.label, { color: c.onInk, fontSize: 14 }]}>{l.booking === 'instant' ? t('bookBtn') : t('quoteBtn')}</Text>
+              <Text style={[type.label, { color: c.onInk, fontSize: 14 }]}>{l.booking === 'instant' ? t('bookBtn') : l.priceText ? t('requestBook') : t('quoteBtn')}</Text>
             </Pressable>
           )}
         </View>
