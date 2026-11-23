@@ -76,6 +76,76 @@ export const PORTALS: Portal[] = [
   "kind": "book"
  },
  {
+  "key": "hydro",
+  "icon": "🚲",
+  "names": {
+   "en": "Hydrobikes",
+   "es": "Hidrobicicletas",
+   "fr": "Vélos aquatiques",
+   "de": "Wasserfahrräder",
+   "pt": "Bicicletas aquáticas",
+   "it": "Bici d'acqua",
+   "zh": "水上自行车"
+  },
+  "kind": "book"
+ },
+ {
+  "key": "flyboard",
+  "icon": "🌊",
+  "names": {
+   "en": "Flyboarding",
+   "es": "Flyboard",
+   "fr": "Flyboard",
+   "de": "Flyboarding",
+   "pt": "Flyboard",
+   "it": "Flyboard",
+   "zh": "飞板"
+  },
+  "kind": "book"
+ },
+ {
+  "key": "kite",
+  "icon": "🪁",
+  "names": {
+   "en": "Kitesurfing",
+   "es": "Kitesurf",
+   "fr": "Kitesurf",
+   "de": "Kitesurfen",
+   "pt": "Kitesurf",
+   "it": "Kitesurf",
+   "zh": "风筝冲浪"
+  },
+  "kind": "book"
+ },
+ {
+  "key": "glassbottom",
+  "icon": "🐠",
+  "names": {
+   "en": "Glass bottom boat",
+   "es": "Bote con fondo de cristal",
+   "fr": "Bateau à fond de verre",
+   "de": "Glasbodenboot",
+   "pt": "Barco com fundo de vidro",
+   "it": "Barca dal fondo di vetro",
+   "zh": "玻璃底船"
+  },
+  "kind": "book"
+ },
+ {
+  "key": "sub",
+  "icon": "🟡",
+  "names": {
+   "en": "Submarine",
+   "es": "Submarino",
+   "fr": "Sous-marin",
+   "de": "U-Boot",
+   "pt": "Submarino",
+   "it": "Sottomarino",
+   "zh": "潜水艇"
+  },
+  "kind": "book"
+ },
+ {
   "key": "para",
   "icon": "🪂",
   "names": {
@@ -902,6 +972,79 @@ export const LISTINGS: Listing[] = [
   "area": "Roatán",
   "description": "Water sports and jet ski trips.",
   "unit": "person",
+  "booking": "request"
+ },
+ {
+  "id": "hydro-roatan-hydrobikes",
+  "portal": "hydro",
+  "name": "Roatan Hydrobikes",
+  "area": "French Cay (pickup at Coxen Hole & Mahogany Bay ports)",
+  "description": "Pedal stable hydrobikes around French Cay harbour (almost impossible to tip over), then snorkel the reef and relax on a private island beach. Run by local Mark Bodden; rated about 4.9/5 by cruise guests. Back at your ship 2 hours before it sails.",
+  "priceText": "From about $81 pp",
+  "booking": "request",
+  "durationMinutes": 300
+ },
+ {
+  "id": "flyboard-west-bay",
+  "portal": "flyboard",
+  "name": "Flyboarding in West Bay",
+  "area": "West Bay (pickup from West Bay hotels)",
+  "description": "Strap into the flyboard and the water jets lift you over the turquoise bay. About 20 minutes of flying with an English/Spanish instructor, safety briefing and gear included.",
+  "booking": "request",
+  "durationMinutes": 20
+ },
+ {
+  "id": "kite-kitesurf-roatan",
+  "portal": "kite",
+  "name": "Kitesurf Roatan · Camp Bay Lodge",
+  "area": "Camp Bay (east end)",
+  "description": "Kite school with beginner to advanced lessons, gear rental, beach and boat rescue. Waist-deep water inside the reef, waves outside for experts. Open December to September; trade winds about 12–25 knots.",
+  "booking": "request"
+ },
+ {
+  "id": "kite-kite-honduras",
+  "portal": "kite",
+  "name": "Kite Honduras",
+  "area": "Marble Hill Farms",
+  "description": "IKO-method lessons for beginners to advanced riders, with equipment, instruction and boat support included, plus board rentals, repairs and custom trips for advanced riders.",
+  "booking": "request"
+ },
+ {
+  "id": "glassbottom-reef-explorer",
+  "portal": "glassbottom",
+  "name": "Reef Explorer glass bottom boat",
+  "area": "West Bay Beach",
+  "description": "Sit about six feet below the surface in air-conditioning and watch the reef, fish and turtles through the windows. Great for kids and anyone who doesn't swim. Boat time about 30–40 minutes.",
+  "booking": "request",
+  "durationMinutes": 40
+ },
+ {
+  "id": "glassbottom-jamie-jason",
+  "portal": "glassbottom",
+  "name": "Glass bottom boat & beach (Jamie and Jason)",
+  "area": "West Bay Beach (cruise pickup included)",
+  "description": "Glass bottom ride over the West Bay reef with licensed captains, with options to add beach time or a resort day pass. Pickup from the cruise terminals.",
+  "priceText": "From about $49 pp",
+  "booking": "request",
+  "durationMinutes": 120
+ },
+ {
+  "id": "glassbottom-anderson",
+  "portal": "glassbottom",
+  "name": "Glass bottom boat + wildlife & chocolate (Roatan Anderson Tours)",
+  "area": "West Bay",
+  "description": "Glass bottom boat ride, then an animal sanctuary and a chocolate & rum tasting. Air-conditioned transport included; starts about 9 AM.",
+  "priceText": "From about $82 pp",
+  "booking": "request",
+  "durationMinutes": 240
+ },
+ {
+  "id": "sub-stanley-idabel",
+  "portal": "sub",
+  "name": "Stanley Submarines · \"Idabel\"",
+  "area": "Half Moon Bay, West End",
+  "description": "Captain Karl Stanley pilots his own yellow 2-passenger submarine as deep as 2,000 ft (610 m) to see deep-sea creatures most people never will. 30-inch viewport and 11 lights. Reservations only; book well ahead.",
+  "priceText": "From about $300/hr",
   "booking": "request"
  },
  {
