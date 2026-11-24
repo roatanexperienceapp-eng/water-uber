@@ -1314,7 +1314,20 @@ export const LISTINGS: Listing[] = [
   "portal": "land",
   "name": "Mayan Jungle ATV",
   "area": "Roatán",
-  "description": "ATV rides on jungle trails.",
+  "description": "Victor Bodden's ATV rides on jungle trails. Adults $65, kids 5–10 $35. ATV + park $80 (kids $50); ATV + canopy + park $115 (kids $80).",
+  "priceText": "$65 · kids $35",
+  "priceUsd": 65.0,
+  "unit": "person",
+  "booking": "request"
+ },
+ {
+  "id": "land-victor-bodden-combo",
+  "portal": "land",
+  "name": "ATV + Canopy + Park combo · Victor Bodden",
+  "area": "Sandy Bay",
+  "description": "The full day at Victor Bodden's: ATV jungle ride, sanctuary canopy zip line and the sloth & monkey park. Adults $115, kids 5–10 $80. ATV + park only: $80 (kids $50).",
+  "priceText": "$115 · kids $80",
+  "priceUsd": 115.0,
   "unit": "person",
   "booking": "request"
  },
@@ -1367,7 +1380,9 @@ export const LISTINGS: Listing[] = [
   "portal": "zip",
   "name": "Mayan Jungle Canopy",
   "area": "Roatán",
-  "description": "Zip line with monkeys and sloths.",
+  "description": "Victor Bodden's sanctuary canopy: zip line with monkeys and sloths, $50. ATV + canopy + park combo $115 (kids 5–10 $80).",
+  "priceText": "$50",
+  "priceUsd": 50.0,
   "unit": "person",
   "booking": "request"
  },
@@ -1421,7 +1436,9 @@ export const LISTINGS: Listing[] = [
   "portal": "park",
   "name": "Victor Bodden's Monkey Business",
   "area": "Sandy Bay",
-  "description": "Sloths and monkeys. Closed Saturdays.",
+  "description": "Victor Bodden's sloth and monkey sanctuary. Adults $20, kids 3–6 $15. Combos: ATV + park $80 (kids 5–10 $50); ATV + canopy + park $115 (kids $80). Closed Saturdays.",
+  "priceText": "$20 · kids $15",
+  "priceUsd": 20.0,
   "unit": "person",
   "booking": "request"
  },
