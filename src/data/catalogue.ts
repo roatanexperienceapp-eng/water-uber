@@ -2852,6 +2852,8 @@ export const LISTINGS: Listing[] = [
   "name": "Horseback ride to West Bay Beach",
   "area": "West Bay",
   "description": "Trail ride through the hills and along the beach. We book it with a local stable.",
+  "priceText": "$55 pp",
+  "priceUsd": 55.0,
   "unit": "person",
   "booking": "request",
   "durationMinutes": 120
@@ -2862,6 +2864,8 @@ export const LISTINGS: Listing[] = [
   "name": "West Bay Tours · horseback riding",
   "area": "West Bay",
   "description": "Horseback riding with beach time, booked through West Bay Tours.",
+  "priceText": "$55 pp",
+  "priceUsd": 55.0,
   "unit": "person",
   "booking": "request",
   "durationMinutes": 120
