@@ -216,6 +216,34 @@ export const PORTALS: Portal[] = [
   "kind": "book"
  },
  {
+  "key": "concierge",
+  "icon": "🛎️",
+  "names": {
+   "en": "Concierge service",
+   "es": "Servicio de conserjería",
+   "fr": "Conciergerie",
+   "de": "Concierge-Service",
+   "pt": "Concierge",
+   "it": "Servizio concierge",
+   "zh": "礼宾服务"
+  },
+  "kind": "book"
+ },
+ {
+  "key": "catering",
+  "icon": "🍽️",
+  "names": {
+   "en": "Catering & private chefs",
+   "es": "Catering y chefs privados",
+   "fr": "Traiteurs et chefs privés",
+   "de": "Catering & Privatköche",
+   "pt": "Bufê e chefs particulares",
+   "it": "Catering e chef privati",
+   "zh": "餐饮与私厨"
+  },
+  "kind": "book"
+ },
+ {
   "key": "nsnork",
   "icon": "🔦",
   "names": {
@@ -3289,5 +3317,160 @@ export const LISTINGS: Listing[] = [
   "unit": "person",
   "tag": "Local author",
   "booking": "instant"
+ },
+ {
+  "id": "concierge-villa-stocking",
+  "portal": "concierge",
+  "name": "Villa pre-arrival stocking · Roatan Concierge",
+  "area": "West Bay · West End · Sandy Bay · French Harbour",
+  "description": "Send your list before you land and walk into a stocked villa: groceries, tropical fruit, breakfast staples, snacks and cold drinks. Delivered to villas, rentals, boats and yachts.",
+  "priceText": "Quoted from your list",
+  "ours": true,
+  "booking": "request"
+ },
+ {
+  "id": "concierge-seafood",
+  "portal": "concierge",
+  "name": "Fresh seafood delivery · Roatan Concierge",
+  "area": "West Bay · West End",
+  "description": "Caught this morning by island fishermen: red snapper $14/lb, lobster tails $22/lb, conch $12/lb, mahi mahi $15/lb, shrimp raw or cooked your way.",
+  "priceText": "From $12/lb",
+  "ours": true,
+  "booking": "request"
+ },
+ {
+  "id": "concierge-drinks",
+  "portal": "concierge",
+  "name": "Drinks & cooler delivery · Roatan Concierge",
+  "area": "West Bay · West End",
+  "description": "Ice-cold cases delivered: SalvaVida or Imperial 24-pack $24, Coors Light, Bud Light, Miller Lite and Michelob Ultra from $36.",
+  "priceText": "From $24",
+  "ours": true,
+  "booking": "request"
+ },
+ {
+  "id": "concierge-essentials",
+  "portal": "concierge",
+  "name": "Island essentials · Roatan Concierge",
+  "area": "West Bay · West End",
+  "description": "Reef-safe sunscreen $18, sandfly repellent $12, aloe $9, beach towels $22 (set of 2), snorkel set $35, brought to your door.",
+  "priceText": "From $9",
+  "ours": true,
+  "booking": "request"
+ },
+ {
+  "id": "concierge-spa",
+  "portal": "concierge",
+  "name": "In-villa massage & spa · Roatan Concierge",
+  "area": "West Bay · West End",
+  "description": "Licensed therapists come to your terrace or poolside: Swedish, deep tissue or couples. Table, linens and oils included.",
+  "priceText": "$90 / 60 min",
+  "ours": true,
+  "booking": "request",
+  "durationMinutes": 60
+ },
+ {
+  "id": "concierge-cakes",
+  "portal": "concierge",
+  "name": "Custom cakes & party decor · Roatan Concierge",
+  "area": "West Bay · West End",
+  "description": "Birthday, anniversary or engagement: custom cake, balloon arch and banner, delivered ready to celebrate.",
+  "priceText": "From $45",
+  "ours": true,
+  "booking": "request"
+ },
+ {
+  "id": "concierge-errands",
+  "portal": "concierge",
+  "name": "Custom errands & bookings · Roatan Concierge",
+  "area": "All Roatán",
+  "description": "Pharmacy runs, hard-to-find brands, restaurant and excursion bookings. Tell us what you need and we quote it on WhatsApp.",
+  "priceText": "Quoted",
+  "ours": true,
+  "booking": "request"
+ },
+ {
+  "id": "catering-aidas-kitchen",
+  "portal": "catering",
+  "name": "Aida's Kitchen · Chef Aida Watler",
+  "area": "Main St, between Petrosun & Gibson Bight · cooks island-wide",
+  "description": "Award-winning island cook (1st place mango jam, 2nd place mango dessert, 2024 Roatán Mango Festival). Bay Islands and Garifuna home cooking in your villa, plus buffets for groups: seafood boil, whole roast pig, rice & beans, celebration cakes. Her clients get 15% off tours booked with us. Open Mon–Sat from 11 AM.",
+  "tag": "Our partner",
+  "booking": "request"
+ },
+ {
+  "id": "catering-donna-island-chef",
+  "portal": "catering",
+  "name": "Donna The Island Chef",
+  "area": "West End",
+  "description": "Seafood, steak and fusion plates, served restaurant-style at your villa: grilled mahi with mango salsa, surf & turf, coconut curry shrimp, jerk chicken. Rated 5 of 5 on Tripadvisor.",
+  "tag": "Our partner",
+  "booking": "request"
+ },
+ {
+  "id": "catering-detour-roatan",
+  "portal": "catering",
+  "name": "Roatan Chef Services & Catering (Detour Roatan)",
+  "area": "West End · serves the whole island",
+  "description": "An island chef comes to your villa for breakfast, brunch, lunch or dinner, about 3–4 hours. Priced by group size; groceries billed separately. Full event catering for 25+.",
+  "priceText": "From about $105 (1–2 guests)",
+  "booking": "request"
+ },
+ {
+  "id": "catering-roatan-chefs",
+  "portal": "catering",
+  "name": "Roatan Chefs and Catering",
+  "area": "Roatán",
+  "description": "Chef for the night or for the whole week (3 meals a day): they shop, cook, serve and clean up. 3- and 4-course dinners, island and international.",
+  "booking": "request"
+ },
+ {
+  "id": "catering-jennie-mann",
+  "portal": "catering",
+  "name": "Roatan Chef Service · Jennie Mann",
+  "area": "West End",
+  "description": "Island-style breakfast, lunch and dinner in your villa or Airbnb, cocktails included (try the Monkeylala). Handles allergies; can have dinner ready when you land.",
+  "booking": "request"
+ },
+ {
+  "id": "catering-chef-blackie",
+  "portal": "catering",
+  "name": "Chef Loretta \"Blackie\"",
+  "area": "Roatán",
+  "description": "Traditional island home cooking for 16+ years: fresh lobster, coconut dishes, kids' meals and vegan menus, cooked in your villa kitchen.",
+  "booking": "request"
+ },
+ {
+  "id": "catering-roatan-events",
+  "portal": "catering",
+  "name": "Roatan Events",
+  "area": "French Harbour",
+  "description": "Weddings and private events with catering, decor, cake and rentals handled in one place. 5.0 on Google from 120+ reviews.",
+  "booking": "request"
+ },
+ {
+  "id": "catering-kimpton",
+  "portal": "catering",
+  "name": "Kimpton Grand Roatán · private dining & catering",
+  "area": "West Bay",
+  "description": "Resort catering menus for weddings and events, and the Guest Chef Series private dinner (about $500 per couple plus tax and service).",
+  "booking": "request"
+ },
+ {
+  "id": "catering-vista-verde",
+  "portal": "catering",
+  "name": "Vista Verde Roatan · event catering",
+  "area": "Roatán",
+  "description": "Beachside villa venue with catering or a private chef for parties and weddings, plus setup, serving and concierge help.",
+  "booking": "request"
+ },
+ {
+  "id": "catering-weddings-roatan",
+  "portal": "catering",
+  "name": "Weddings Roatan",
+  "area": "Roatán",
+  "description": "Wedding and elopement planner since 2001 with food included in its packages: about $5,500 for 30 guests or $9,000 for 60.",
+  "priceText": "From about $5,500 (30 guests)",
+  "booking": "request"
  }
 ];
