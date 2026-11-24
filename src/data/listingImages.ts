@@ -2,6 +2,13 @@ import type { ImageSourcePropType } from 'react-native';
 
 /** Photos bundled with the app, by listing id (book covers, and later partner photos). */
 export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
+  'para-roatan-tucan-adventures': require('../../assets/para/para-roatan-tucan-adventures.jpg'),
+  'para-roatan-tour-guide-association': require('../../assets/para/para-roatan-tour-guide-association.jpg'),
+  'para-roatan-breakaway-tours': require('../../assets/para/para-roatan-breakaway-tours.jpg'),
+  'para-roatan-activities-hn-oficial': require('../../assets/para/para-roatan-activities-hn-oficial.jpg'),
+  'para-roatan-exclusive': require('../../assets/para/para-roatan-exclusive.jpg'),
+  'para-at21-tours-roatan': require('../../assets/para/para-at21-tours-roatan.jpg'),
+  'para-roatan-water-activities-and-tours': require('../../assets/para/para-roatan-water-activities-and-tours.jpg'),
   'jet-roa-live-jet-ski-rental': require('../../assets/jet/jet-roa-live-jet-ski-rental.jpg'),
   'jet-blue-water-beach-co': require('../../assets/jet/jet-blue-water-beach-co.jpg'),
   'jet-joyride-adventure-roatan': require('../../assets/jet/jet-joyride-adventure-roatan.jpg'),
