@@ -323,15 +323,38 @@ function WaterRide() {
             </View>
           )}
 
-          {blocked && <Button variant="ink" label={t('landTaxi')} onPress={() => router.push('/assistant')} />}
-
-          <Button
-            label={joined ? t('joinedBoat').replace('{m}', String(minsUntil(joined.departsAt))) : timing === 'scheduled' ? t('reserve') : t('request')}
-            trailing={usd(price)}
-            disabled={blocked}
-            onPress={request}
-          />
-          <Note center>{timing === 'scheduled' && flat ? t('feeNote') : t('note')}</Note>
+          {blocked ? (
+            <View style={[styles.banner, styles.blockedCard, { backgroundColor: night === 'boats_closed' ? '#3A1410' : '#14213D' }]}>
+              <View style={{ flexDirection: 'row', gap: space(3), alignItems: 'flex-start' }}>
+                <Ionicons name={night === 'boats_closed' ? 'close-circle' : 'warning'} size={20} color="#fff" />
+                <View style={{ flex: 1, gap: 4 }}>
+                  <Text style={[type.bodyStrong, { color: '#fff' }]}>{night === 'boats_closed' ? t('closedH') : `${t('seaTitle')}: ${t(`sea_${cond.state}`)}`}</Text>
+                  <Text style={[type.small, { color: '#E5E7EB' }]}>
+                    {night === 'boats_closed' ? t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language)) : t('seaRoughMsg')}
+                  </Text>
+                </View>
+              </View>
+              <Button variant="tile" label={t('landTaxi')} onPress={() => router.push('/assistant')} />
+            </View>
+          ) : (
+            <>
+              {night === 'night' && (
+                <View style={[styles.banner, { backgroundColor: '#14213D' }]}>
+                  <Ionicons name="moon" size={20} color="#fff" />
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={[type.bodyStrong, { color: '#fff' }]}>{t('nightH')}</Text>
+                    <Text style={[type.small, { color: '#E5E7EB' }]}>{t('nightMsg')}</Text>
+                  </View>
+                </View>
+              )}
+              <Button
+                label={joined ? t('joinedBoat').replace('{m}', String(minsUntil(joined.departsAt))) : timing === 'scheduled' ? t('reserve') : t('request')}
+                trailing={usd(price)}
+                onPress={request}
+              />
+              <Note center>{timing === 'scheduled' && flat ? t('feeNote') : t('note')}</Note>
+            </>
+          )}
 
           <View style={{ gap: 2 }}>
             <Text style={[type.bodyStrong, { color: c.ink }]}>
@@ -373,17 +396,6 @@ function WaterRide() {
             </View>
           )}
 
-          {night !== 'day' && (
-            <View style={[styles.banner, { backgroundColor: night === 'night' ? '#14213D' : '#3A1410' }]}>
-              <Ionicons name={night === 'night' ? 'moon' : 'close-circle'} size={20} color="#fff" />
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={[type.bodyStrong, { color: '#fff' }]}>{t(night === 'night' ? 'nightH' : 'closedH')}</Text>
-                <Text style={[type.small, { color: '#E5E7EB' }]}>
-                  {night === 'night' ? t('nightMsg') : t('closedMsg').replace('{h}', hourLabel(FEATURE_SETTINGS.night.lastBoatHour, i18n.language))}
-                </Text>
-              </View>
-            </View>
-          )}
 
           {covered ? (
             <View style={[styles.banner, { backgroundColor: c.tile }]}>
@@ -575,6 +587,7 @@ const styles = StyleSheet.create({
   mileNote: { borderRadius: radius.sm, padding: space(3) },
   opt: { flexDirection: 'row', alignItems: 'center', gap: space(3), padding: space(3), borderRadius: radius.md, borderWidth: 2 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
+  blockedCard: { flexDirection: 'column', alignItems: 'stretch' },
   banner: { flexDirection: 'row', alignItems: 'center', gap: space(3), borderRadius: radius.md, padding: space(3) },
   seaDot: { width: 12, height: 12, borderRadius: 6 },
   days: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
