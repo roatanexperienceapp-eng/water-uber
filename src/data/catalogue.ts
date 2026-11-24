@@ -824,8 +824,9 @@ export const LISTINGS: Listing[] = [
   "name": "ROA LIVE Jet Ski Rental",
   "area": "West Bay",
   "description": "Jet ski rentals right from West Bay Beach.",
-  "priceText": "$90",
-  "priceUsd": 90.0,
+  "priceText": "$50 / 30 min · $95 / hour",
+  "priceUsd": 50.0,
+  "priceIsFrom": true,
   "unit": "ski",
   "booking": "request"
  },
@@ -835,8 +836,9 @@ export const LISTINGS: Listing[] = [
   "name": "Blue Water Beach Co.",
   "area": "West Bay",
   "description": "30-minute guided ride past the reef, 2 per ski.",
-  "priceText": "$85",
-  "priceUsd": 85.0,
+  "priceText": "$50 / 30 min · $95 / hour",
+  "priceUsd": 50.0,
+  "priceIsFrom": true,
   "unit": "ski",
   "booking": "request"
  },
@@ -846,7 +848,10 @@ export const LISTINGS: Listing[] = [
   "name": "Joyride Adventure Roatán",
   "area": "West End",
   "description": "Jet skis, jet cars and water sports.",
-  "unit": "person",
+  "priceText": "$50 / 30 min · $95 / hour",
+  "priceUsd": 50.0,
+  "priceIsFrom": true,
+  "unit": "ski",
   "booking": "request"
  },
  {
@@ -855,7 +860,10 @@ export const LISTINGS: Listing[] = [
   "name": "Sunshine Powersport Rentals",
   "area": "West Bay",
   "description": "Powersport rentals in West Bay.",
-  "unit": "person",
+  "priceText": "$50 / 30 min · $95 / hour",
+  "priceUsd": 50.0,
+  "priceIsFrom": true,
+  "unit": "ski",
   "booking": "request"
  },
  {
@@ -864,7 +872,10 @@ export const LISTINGS: Listing[] = [
   "name": "Snorkel Roatan",
   "area": "West Bay",
   "description": "Jet ski rentals and water tours.",
-  "unit": "person",
+  "priceText": "$50 / 30 min · $95 / hour",
+  "priceUsd": 50.0,
+  "priceIsFrom": true,
+  "unit": "ski",
   "booking": "request"
  },
  {
@@ -873,7 +884,10 @@ export const LISTINGS: Listing[] = [
   "name": "Rankin Water Adventures",
   "area": "Roatán",
   "description": "Water sports and jet ski trips.",
-  "unit": "person",
+  "priceText": "$50 / 30 min · $95 / hour",
+  "priceUsd": 50.0,
+  "priceIsFrom": true,
+  "unit": "ski",
   "booking": "request"
  },
  {
