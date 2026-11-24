@@ -757,34 +757,37 @@ export const LISTINGS: Listing[] = [
   "portal": "dive",
   "name": "West End Divers",
   "area": "West End",
-  "description": "Long-running PADI dive center.",
+  "description": "Long-running PADI dive center. Prices: 2-tank dive for cruise guests about $90.",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "About $90 / 2-tank"
  },
  {
   "id": "dive-native-sons-dive-shop",
   "portal": "dive",
   "name": "Native Sons Dive Shop",
   "area": "West End",
-  "description": "Locally owned PADI dive shop.",
+  "description": "Locally owned PADI dive shop. Prices: 1–2 dives $45 each, 3–9 dives $40, 10+ dives $35; gear $5 per dive; night dive $60 with light.",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "From $45 / dive"
  },
  {
   "id": "dive-roatan-divers",
   "portal": "dive",
   "name": "Roatan Divers",
   "area": "West End",
-  "description": "PADI 5-Star Instructor Development Center.",
+  "description": "PADI 5-Star Instructor Development Center. Prices: 1 dive $60, 2 dives $110, 10 dives $500, with gear and tax included. Dives at 9:00, 11:30 and 2:30.",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "$60 / 1 dive · $110 / 2"
  },
  {
   "id": "dive-coconut-tree-divers",
   "portal": "dive",
   "name": "Coconut Tree Divers",
   "area": "West End · Half Moon Bay",
-  "description": "PADI IDC and TDI technical diving.",
+  "description": "PADI IDC and TDI technical diving. Prices: Extras: gear $10 for 2 dives, cruise ship transport $20, Marine Park fee $10.",
   "unit": "person",
   "booking": "request"
  },
@@ -793,18 +796,20 @@ export const LISTINGS: Listing[] = [
   "portal": "dive",
   "name": "Reef Gliders Dive Center",
   "area": "West End",
-  "description": "Daily boat dives at 9:00, 11:30 and 2:30.",
+  "description": "Daily boat dives at 9:00, 11:30 and 2:30. Prices: PADI Open Water course about $375–450 (3 days, gear and materials included).",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "Open Water $375–450"
  },
  {
   "id": "dive-sun-divers-roatan",
   "portal": "dive",
   "name": "Sun Divers Roatan",
   "area": "West End",
-  "description": "PADI courses and fun dives.",
+  "description": "PADI courses and fun dives. Prices: 1-tank from $75, 2-tank from $145, Discover Scuba $150, Open Water $580 (plus 15% tax).",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "From $75 / 1-tank"
  },
  {
   "id": "dive-jackson-s-dive-center",
@@ -831,18 +836,20 @@ export const LISTINGS: Listing[] = [
   "portal": "dive",
   "name": "Splash Inn Dive Resort",
   "area": "West End",
-  "description": "Dive resort on Main Street.",
+  "description": "Dive resort on Main Street. Prices: 1 boat dive $40, 2–9 dives $35 each, 10 dives $300.",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "From $35 / dive"
  },
  {
   "id": "dive-west-bay-divers",
   "portal": "dive",
   "name": "West Bay Divers",
   "area": "West Bay",
-  "description": "PADI 5 Star, two locations on the beach.",
+  "description": "PADI 5 Star, two locations on the beach. Prices: 2-tank cruise excursion with ship pickup, about $165–185; dives at 9 AM (2-tank) and 2 PM (1-tank).",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "About $185 / 2-tank + pickup"
  },
  {
   "id": "dive-mayan-divers",
@@ -885,9 +892,10 @@ export const LISTINGS: Listing[] = [
   "portal": "dive",
   "name": "Anthony's Key Resort",
   "area": "Sandy Bay",
-  "description": "Dive resort near El Aguila wreck.",
+  "description": "Dive resort near El Aguila wreck. Prices: Single tank $45, or $60 with full gear (plus 15% tax). Visitors book by slot availability.",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "From $45 / dive"
  },
  {
   "id": "dive-tranquilseas-divers",
@@ -912,9 +920,10 @@ export const LISTINGS: Listing[] = [
   "portal": "dive",
   "name": "Coco View Resort",
   "area": "South shore",
-  "description": "Dedicated dive resort.",
+  "description": "Dedicated dive resort. Prices: Dive resort packages: 7 nights with diving from $1,864 per person (plus 19% tax).",
   "unit": "person",
-  "booking": "request"
+  "booking": "request",
+  "priceText": "7-night dive package from $1,864"
  },
  {
   "id": "jet-roa-live-jet-ski-rental",
