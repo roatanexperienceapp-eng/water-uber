@@ -1227,6 +1227,71 @@ export const LISTINGS: Listing[] = [
   "booking": "request"
  },
  {
+  "id": "car-cheap-car-rental",
+  "portal": "car",
+  "name": "Cheap Car Rental · Affordable Car Rental",
+  "area": "Politilly Hill, Main Street",
+  "description": "Ford, Honda, Kia and Toyota, automatic or manual, clean interiors and cold A/C. Vans and SUVs available.",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
+  "id": "car-carmania",
+  "portal": "car",
+  "name": "Carmania Car Rental",
+  "area": "Roatán (delivered anywhere)",
+  "description": "Jeeps and island cars with easy booking; they deliver the car wherever you're staying.",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
+  "id": "car-dolphin-rental-car",
+  "portal": "car",
+  "name": "Dolphin Rental Car",
+  "area": "Roatán",
+  "description": "2025 models: Kia Soluto sedan, Nissan Kicks compact SUV and Nissan Frontier pickup.",
+  "priceText": "from $39 / day",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
+  "id": "car-rent-a-car-roatan",
+  "portal": "car",
+  "name": "Rent a Car Roatán",
+  "area": "Roatán",
+  "description": "SUVs and minivans. No credit card or deposit needed; rent 10 days, get 1 free. Visa, Mastercard, Amex and Discover accepted.",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
+  "id": "car-roatan-car-rental",
+  "portal": "car",
+  "name": "Roatan Car Rental",
+  "area": "RTB airport, Main Road",
+  "description": "Sedans, SUVs and minivans at the airport. No deposit required.",
+  "priceText": "from $55 / day",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
+  "id": "car-tonys-rent-a-car",
+  "portal": "car",
+  "name": "Tony's Rent a Car",
+  "area": "Roatán",
+  "description": "Local car rental: drive towards the sunset.",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
+  "id": "car-ramirez-rent-a-car",
+  "portal": "car",
+  "name": "Ramirez Rent a Car",
+  "area": "Roatán",
+  "description": "Local car rental company.",
+  "unit": "day",
+  "booking": "request"
+ },
+ {
   "id": "land-rony-s-tours",
   "portal": "land",
   "name": "Rony's Tours",
