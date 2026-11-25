@@ -1071,6 +1071,16 @@ export const LISTINGS: Listing[] = [
   "booking": "request"
  },
  {
+  "id": "paddle-roatan-paddle-boards",
+  "portal": "paddle",
+  "name": "Roatan Paddle Boards",
+  "area": "Sundowners Beach Bar, West End",
+  "description": "Stand-up paddleboard rentals and lessons on calm water inside the reef, past turtles and eagle rays. Rental $25/hour, $50 half day, $150 a week; guided tour or lesson $40 per person. West End to West Bay downwind paddle about 2 hours. Tap the photo for more.",
+  "priceText": "$25 / hour",
+  "unit": "person",
+  "booking": "request"
+ },
+ {
   "id": "para-roatan-tucan-adventures",
   "portal": "para",
   "name": "Roatan Tucan Adventures",
