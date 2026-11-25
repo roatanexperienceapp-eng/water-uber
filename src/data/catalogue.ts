@@ -721,7 +721,8 @@ export const LISTINGS: Listing[] = [
   "portal": "snork",
   "name": "Roatan Hydrobikes",
   "area": "Roatán",
-  "description": "Hydrobike harbor tour with reef snorkel.",
+  "description": "Hydrobike harbor tour with reef snorkel. $45 per person (2-person minimum); cruise ship pickup package $75 per person (4-guest minimum).",
+  "priceText": "$45 pp · ship pickup $75 pp",
   "unit": "person",
   "booking": "request"
  },
@@ -1002,8 +1003,11 @@ export const LISTINGS: Listing[] = [
   "portal": "hydro",
   "name": "Roatan Hydrobikes",
   "area": "French Cay (pickup at Coxen Hole & Mahogany Bay ports)",
-  "description": "Pedal stable hydrobikes around French Cay harbour (almost impossible to tip over), then snorkel the reef and relax on a private island beach. Run by local Mark Bodden; rated about 4.9/5 by cruise guests. Back at your ship 2 hours before it sails.",
-  "priceText": "From about $81 pp",
+  "description": "Pedal stable hydrobikes around French Cay harbour (almost impossible to tip over), then snorkel the reef and relax on a private island beach. Run by local Mark Bodden; rated about 4.9/5 by cruise guests. Hydrobike tour $45 per person (2-person minimum). Cruise ship pickup package $75 per person (4-guest minimum), back at your ship 2 hours before it sails.",
+  "priceText": "$45 pp · ship pickup $75 pp",
+  "priceUsd": 45,
+  "priceIsFrom": true,
+  "unit": "person",
   "booking": "request",
   "durationMinutes": 300
  },
