@@ -2,6 +2,15 @@ import type { ImageSourcePropType } from 'react-native';
 
 /** Photos bundled with the app, by listing id (book covers, and later partner photos). */
 export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
+  'paddle-roatan-paddle-boards': require('../../assets/paddle/roatan-paddle-boards-1.jpg'),
+  'car-racing-rent-a-car': require('../../assets/cars/car-racing-rent-a-car.jpg'),
+  'car-cheap-car-rental': require('../../assets/cars/car-cheap-car-rental.jpg'),
+  'car-carmania': require('../../assets/cars/car-carmania.jpg'),
+  'car-dolphin-rental-car': require('../../assets/cars/car-dolphin-rental-car.jpg'),
+  'car-rent-a-car-roatan': require('../../assets/cars/car-rent-a-car-roatan.jpg'),
+  'car-roatan-car-rental': require('../../assets/cars/car-roatan-car-rental.jpg'),
+  'car-tonys-rent-a-car': require('../../assets/cars/car-tonys-rent-a-car.jpg'),
+  'car-ramirez-rent-a-car': require('../../assets/cars/car-ramirez-rent-a-car.jpg'),
   'para-roatan-tucan-adventures': require('../../assets/para/para-roatan-tucan-adventures.jpg'),
   'para-roatan-tour-guide-association': require('../../assets/para/para-roatan-tour-guide-association.jpg'),
   'para-roatan-breakaway-tours': require('../../assets/para/para-roatan-breakaway-tours.jpg'),
@@ -43,6 +52,10 @@ const NIGHT_SNORKEL: ImageSourcePropType[] = [
   ];
 
 export const LISTING_GALLERIES: Record<string, ImageSourcePropType[]> = {
+  'paddle-roatan-paddle-boards': [
+    require('../../assets/paddle/roatan-paddle-boards-1.jpg'),
+    require('../../assets/paddle/roatan-paddle-boards-2.jpg'),
+  ],
   'nsnork-our-night-snorkel': NIGHT_SNORKEL,
   'nsnork-corey': NIGHT_SNORKEL,
   'books-saca-tu-mejor-version': [
