@@ -2,6 +2,7 @@ import type { ImageSourcePropType } from 'react-native';
 
 /** Photos bundled with the app, by listing id (book covers, and later partner photos). */
 export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
+  'snork-west-bay-point-guided': require('../../assets/snorkel/west-bay-point-1.jpg'),
   'snork-spooky-channel': require('../../assets/snorkel/spooky-channel-1.jpg'),
   'snork-blue-channel': require('../../assets/snorkel/blue-channel-4.jpg'),
   'snork-pigeon-key-nurse-sharks': require('../../assets/snorkel/pigeon-key-1.jpg'),
@@ -62,6 +63,13 @@ const NIGHT_SNORKEL: ImageSourcePropType[] = [
   ];
 
 export const LISTING_GALLERIES: Record<string, ImageSourcePropType[]> = {
+  'snork-west-bay-point-guided': [
+    require('../../assets/snorkel/west-bay-point-1.jpg'),
+    require('../../assets/snorkel/west-bay-point-2.jpg'),
+    require('../../assets/snorkel/west-bay-point-3.jpg'),
+    require('../../assets/snorkel/west-bay-point-4.jpg'),
+    require('../../assets/snorkel/west-bay-point-5.jpg'),
+  ],
   'snork-spooky-channel': [
     require('../../assets/snorkel/spooky-channel-1.jpg'),
     require('../../assets/snorkel/spooky-channel-2.jpg'),

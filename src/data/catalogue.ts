@@ -626,6 +626,18 @@ export const LISTINGS: Listing[] = [
   "booking": "instant"
  },
  {
+  "id": "snork-west-bay-point-guided",
+  "portal": "snork",
+  "name": "West Bay Point · guided snorkel",
+  "area": "West Bay",
+  "description": "Guided snorkel at West Bay Point, at the end of West Bay Beach, where the reef is full of sergeant majors, chubs and schools of reef fish that swim right up to you. A local guide shows you the best spots. Tap the photo for more.",
+  "priceText": "$25 per person",
+  "priceUsd": 25.0,
+  "unit": "person",
+  "ours": true,
+  "booking": "instant"
+ },
+ {
   "id": "snork-pigeon-key-nurse-sharks",
   "portal": "snork",
   "name": "Pigeon Key nurse shark swim",
