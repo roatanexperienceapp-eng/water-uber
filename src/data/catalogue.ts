@@ -602,6 +602,42 @@ export const LISTINGS: Listing[] = [
   "booking": "request"
  },
  {
+  "id": "snork-blue-channel",
+  "portal": "snork",
+  "name": "Blue Channel · 2 snorkel sites",
+  "area": "West End",
+  "description": "One of the best-loved snorkel spots in West End, just a few minutes by boat from the village: a channel of deep blue water cutting through the reef. Float along coral walls covered in sea fans, with schools of reef fish all around and, if you're lucky, an eagle ray gliding underneath. Then a second nearby reef stop, chosen by your guide for the best conditions that day. Our boat and local guide. Tap the photo for more.",
+  "priceText": "$35 per person",
+  "priceUsd": 35.0,
+  "unit": "person",
+  "ours": true,
+  "booking": "instant"
+ },
+ {
+  "id": "snork-spooky-channel",
+  "portal": "snork",
+  "name": "Spooky Channel · 2 snorkel sites",
+  "area": "Upper Sandy Bay",
+  "description": "One of Roatán's most famous snorkel and dive sites, on the North Shore in Upper Sandy Bay. It's named for the narrow canyon that cuts through the reef: you float at the surface from the calm inner reef out toward the outer reef while the bottom drops away beneath you, between walls of old reef covered in sea fans and brain corals. Beams of sunlight shining down into the blue give it its 'spooky' look. Sea turtles and nurse sharks are often seen along the reef, with angelfish, groupers, snappers and rays on the shallower edges. Then a second reef stop. Our boat and local guide. Tap the photo for more.",
+  "priceText": "$55 per person",
+  "priceUsd": 55.0,
+  "unit": "person",
+  "ours": true,
+  "booking": "instant"
+ },
+ {
+  "id": "snork-west-bay-point-guided",
+  "portal": "snork",
+  "name": "West Bay Point · guided snorkel",
+  "area": "West Bay",
+  "description": "Guided snorkel at West Bay Point, at the end of West Bay Beach, where the reef is full of sergeant majors, chubs and schools of reef fish that swim right up to you. A local guide shows you the best spots. Tap the photo for more.",
+  "priceText": "$25 per person",
+  "priceUsd": 25.0,
+  "unit": "person",
+  "ours": true,
+  "booking": "instant"
+ },
+ {
   "id": "snork-pigeon-key-nurse-sharks",
   "portal": "snork",
   "name": "Pigeon Key nurse shark swim",
