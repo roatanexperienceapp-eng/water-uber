@@ -2,6 +2,8 @@ import type { ImageSourcePropType } from 'react-native';
 
 /** Photos bundled with the app, by listing id (book covers, and later partner photos). */
 export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
+  'snork-pigeon-key-nurse-sharks': require('../../assets/snorkel/pigeon-key-1.jpg'),
+  'snork-shipwreck-snorkel-tour': require('../../assets/snorkel/shipwreck-1.jpg'),
   'hydro-roatan-hydrobikes': require('../../assets/wateradv/hydrobike.jpg'),
   'flyboard-west-bay': require('../../assets/wateradv/flyboard.jpg'),
   'kite-kitesurf-roatan': require('../../assets/wateradv/kitesurf.jpg'),
@@ -58,6 +60,30 @@ const NIGHT_SNORKEL: ImageSourcePropType[] = [
   ];
 
 export const LISTING_GALLERIES: Record<string, ImageSourcePropType[]> = {
+  'snork-pigeon-key-nurse-sharks': [
+    require('../../assets/snorkel/pigeon-key-1.jpg'),
+    require('../../assets/snorkel/pigeon-key-2.jpg'),
+    require('../../assets/snorkel/pigeon-key-3.jpg'),
+    require('../../assets/snorkel/pigeon-key-4.jpg'),
+    require('../../assets/snorkel/pigeon-key-5.jpg'),
+    require('../../assets/snorkel/pigeon-key-6.jpg'),
+    require('../../assets/snorkel/pigeon-key-7.jpg'),
+    require('../../assets/snorkel/pigeon-key-8.jpg'),
+    require('../../assets/snorkel/pigeon-key-9.jpg'),
+    require('../../assets/snorkel/pigeon-key-10.jpg'),
+  ],
+  'snork-shipwreck-snorkel-tour': [
+    require('../../assets/snorkel/shipwreck-1.jpg'),
+    require('../../assets/snorkel/shipwreck-2.jpg'),
+    require('../../assets/snorkel/shipwreck-3.jpg'),
+    require('../../assets/snorkel/shipwreck-4.jpg'),
+    require('../../assets/snorkel/shipwreck-5.jpg'),
+    require('../../assets/snorkel/shipwreck-6.jpg'),
+    require('../../assets/snorkel/shipwreck-7.jpg'),
+    require('../../assets/snorkel/shipwreck-8.jpg'),
+    require('../../assets/snorkel/shipwreck-9.jpg'),
+    require('../../assets/snorkel/shipwreck-10.jpg'),
+  ],
   'paddle-roatan-paddle-boards': [
     require('../../assets/paddle/roatan-paddle-boards-1.jpg'),
     require('../../assets/paddle/roatan-paddle-boards-2.jpg'),
