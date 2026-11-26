@@ -614,6 +614,18 @@ export const LISTINGS: Listing[] = [
   "booking": "instant"
  },
  {
+  "id": "snork-spooky-channel",
+  "portal": "snork",
+  "name": "Spooky Channel · 2 snorkel sites",
+  "area": "West End",
+  "description": "Snorkel two sites on the reef, starting at Spooky Channel: a deep blue crack cutting through the reef, with sea fans, sponges and coral walls on both sides and sunlight beaming down into the blue. Then a second reef stop. Our boat and local guide. Tap the photo for more.",
+  "priceText": "$55 per person",
+  "priceUsd": 55.0,
+  "unit": "person",
+  "ours": true,
+  "booking": "instant"
+ },
+ {
   "id": "snork-pigeon-key-nurse-sharks",
   "portal": "snork",
   "name": "Pigeon Key nurse shark swim",
