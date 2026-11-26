@@ -602,6 +602,18 @@ export const LISTINGS: Listing[] = [
   "booking": "request"
  },
  {
+  "id": "snork-blue-channel",
+  "portal": "snork",
+  "name": "Blue Channel · 2 snorkel sites",
+  "area": "West End",
+  "description": "Snorkel two sites on the reef: the Blue Channel, where coral walls drop into deep blue water full of sergeant majors, angelfish and schools of reef fish, plus a second shallow reef stop where sea turtles and stingrays often feed. Our boat and local guide; mask, snorkel and fins included. Tap the photo for more.",
+  "priceText": "$35 per person",
+  "priceUsd": 35.0,
+  "unit": "person",
+  "ours": true,
+  "booking": "instant"
+ },
+ {
   "id": "snork-pigeon-key-nurse-sharks",
   "portal": "snork",
   "name": "Pigeon Key nurse shark swim",
