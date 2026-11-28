@@ -1,9 +1,13 @@
 {
   "version": "5",
   "specifiers": {
+    "npm:@noble/hashes@1.8.0": "1.8.0",
     "npm:@supabase/server@1": "1.9.1_@supabase+supabase-js@2.117.2"
   },
   "npm": {
+    "@noble/hashes@1.8.0": {
+      "integrity": "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A=="
+    },
     "@supabase/auth-js@2.117.2": {
       "integrity": "sha512-Z3WnGwrphYZubrLbxp5Iv0tLA9A5GhvKzJ/ZXglxqwd2QEH2R4dXRltjVJ8sIn4xEW2BSFIGT0yALVJIgZeDYw==",
       "dependencies": [

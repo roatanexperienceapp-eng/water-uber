@@ -11,6 +11,9 @@
 //
 // To add a Honduran processor (PixelPay, BAC, etc.): implement PaymentProvider and add it to getProvider().
 
+// @ts-ignore -- node:crypto resolves in Deno; the app typecheck has no Node types for server files.
+import { createHash, createHmac } from 'node:crypto';
+
 export interface CheckoutRequest {
   paymentId: string;
   amountCents: number;
@@ -170,6 +173,88 @@ export function stripeProvider(secretKey: string, webhookSecret: string): Paymen
   };
 }
 
+// =====================================================================================
+// PixelPay Hosted Payment (Honduras). Docs: docs.pixelpay.com, "Hosted Payment".
+// The guest pays on PixelPay's page (3D Secure included). PixelPay POSTs a JSON callback to
+// `_callback` with `payment_hash` = md5(order_id|key_id|secret_key), which only we and PixelPay can make.
+// =====================================================================================
+export interface PixelPayConfig {
+  keyId: string;
+  secretKey: string;
+  /** Merchant domain shown in the PixelPay dashboard, e.g. "pixelpay.app". */
+  endpoint: string;
+  /** app_url used in the request signature (Preferences → API Options). */
+  appUrl: string;
+  sandbox: boolean;
+  /** Where PixelPay sends the paid callback: our payment-webhook function. */
+  callbackUrl: string;
+  /** Used when the guest has no email on file (PixelPay requires one). */
+  fallbackEmail: string;
+}
+
+/** `_client_signature`: HMAC SHA3-512 of key|order_id|app_url with the secret key (Secure Signature docs). */
+export function pixelPaySignature(keyId: string, orderId: string, appUrl: string, secretKey: string): string {
+  return createHmac('sha3-512', secretKey).update([keyId, orderId, appUrl].join('|')).digest('hex');
+}
+
+/** The `paymentHash` / `payment_hash` PixelPay sends back: md5(order_id|key_id|secret_key). */
+export function pixelPayPaymentHash(orderId: string, keyId: string, secretKey: string): string {
+  return createHash('md5').update([orderId, keyId, secretKey].join('|')).digest('hex');
+}
+
+/** Turns a PixelPay `_callback` body into our event, after checking its payment_hash. Throws if forged. */
+export function pixelPayCallbackToEvent(body: Json, keyId: string, secretKey: string): PaymentEvent {
+  const order = String(body?.order ?? '');
+  if (!order) throw new Error('missing_order');
+  const hash = String(body?.payment_hash ?? '');
+  if (!hash || !safeEqual(hash.toLowerCase(), pixelPayPaymentHash(order, keyId, secretKey))) throw new Error('bad_signature');
+  if (String(body?.status ?? '').toLowerCase() !== 'paid') return { kind: 'ignored', type: `pixelpay:${body?.status}` };
+  if (String(body?.currency ?? 'USD').toUpperCase() !== 'USD') return { kind: 'ignored', type: `pixelpay:currency:${body?.currency}` };
+  const amount = Number(body?.amount);
+  if (!Number.isFinite(amount)) throw new Error('bad_amount');
+  return { kind: 'succeeded', paymentId: order, providerRef: String(body?.uuid ?? body?.ref ?? order), amountCents: toCents(amount) };
+}
+
+export function pixelPayProvider(cfg: PixelPayConfig): PaymentProvider {
+  const route = `https://${cfg.endpoint}/api/v2/transaction/hosted/${cfg.sandbox ? 'sandbox' : 'other'}`;
+  return {
+    name: 'pixelpay',
+    async createCheckout(req) {
+      if (req.currency !== 'usd') throw new Error('pixelpay_currency');
+      const res = await fetch(route, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json', 'x-client-signature': pixelPaySignature(cfg.keyId, req.paymentId, cfg.appUrl, cfg.secretKey) },
+        body: form({
+          _key: cfg.keyId,
+          _client_signature: pixelPaySignature(cfg.keyId, req.paymentId, cfg.appUrl, cfg.secretKey),
+          _order_id: req.paymentId,
+          _amount: (req.amountCents / 100).toFixed(2),
+          _currency: 'USD',
+          _complete: req.successUrl,
+          _cancel: req.cancelUrl,
+          _callback: cfg.callbackUrl,
+          _first_name: 'Guest',
+          _last_name: 'Roatan',
+          _email: req.customerEmail ?? cfg.fallbackEmail,
+          _order_content: btoa(JSON.stringify([{ title: req.description.slice(0, 60).padEnd(3, '.'), price: req.amountCents / 100, qty: 1, total: req.amountCents / 100 }])),
+          json: 'true',
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success || !data?.url) throw new Error(`pixelpay_${res.status}:${JSON.stringify(data?.errors ?? data?.message ?? 'error').slice(0, 200)}`);
+      return { providerSessionId: req.paymentId, checkoutUrl: String(data.url), expiresAt: new Date(Date.now() + 30 * 60 * 1000) };
+    },
+    async parseWebhook(rawBody) {
+      return pixelPayCallbackToEvent(JSON.parse(rawBody), cfg.keyId, cfg.secretKey);
+    },
+    async refund() {
+      // Hosted Payment has no refund API. PixelPay only voids same-day card payments through its SDK.
+      // Refunds stay in the queue with this error, and are done by hand in the PixelPay dashboard.
+      throw new Error('pixelpay_manual_refund');
+    },
+  };
+}
+
 /** Picks the processor from server secrets. Returns null until one is configured. */
 export function getProvider(env: { get(k: string): string | undefined }): PaymentProvider | null {
   const name = env.get('PAYMENT_PROVIDER');
@@ -178,6 +263,23 @@ export function getProvider(env: { get(k: string): string | undefined }): Paymen
     const hook = env.get('STRIPE_WEBHOOK_SECRET');
     if (!key || !hook) throw new Error('stripe_not_configured');
     return stripeProvider(key, hook);
+  }
+  if (name === 'pixelpay') {
+    const keyId = env.get('PIXELPAY_KEY_ID');
+    const secretKey = env.get('PIXELPAY_SECRET_KEY');
+    const endpoint = env.get('PIXELPAY_ENDPOINT');
+    const appUrl = env.get('PIXELPAY_APP_URL') ?? (endpoint ? `https://${endpoint}` : undefined);
+    const base = env.get('SUPABASE_URL');
+    if (!keyId || !secretKey || !endpoint || !appUrl || !base) throw new Error('pixelpay_not_configured');
+    return pixelPayProvider({
+      keyId,
+      secretKey,
+      endpoint,
+      appUrl,
+      sandbox: env.get('PIXELPAY_SANDBOX') !== 'false',
+      callbackUrl: `${base}/functions/v1/payment-webhook`,
+      fallbackEmail: env.get('PIXELPAY_FALLBACK_EMAIL') ?? 'bookings@roatanexperienceapp.com',
+    });
   }
   return null;
 }

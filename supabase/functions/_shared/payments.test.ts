@@ -40,3 +40,35 @@ Deno.test('Stripe events map to our payment events', () => {
   eq(ref, { kind: 'refunded', providerRef: 'pi_1', refundRef: 're_1' });
   ok(stripeEventToPaymentEvent({ type: 'customer.created' }).kind === 'ignored');
 });
+
+// PixelPay: values from the PixelPay "Secure Signature" docs (sandbox keys, order ORDER-8888).
+import { pixelPayCallbackToEvent, pixelPayPaymentHash, pixelPaySignature } from './payments.ts';
+const PP_KEY = '1234567890';
+const PP_SECRET = '@s4ndb0x-abcd-1234-n1l4-p1x3l';
+
+Deno.test('pixelpay signature matches the documented example', () => {
+  const sig = pixelPaySignature(PP_KEY, 'ORDER-8888', 'https://pixelpay.dev', PP_SECRET);
+  ok(sig.startsWith('688084a6') && sig.endsWith('e852ee2a'), sig);
+});
+
+Deno.test('pixelpay callback with a good hash becomes a payment in cents', () => {
+  const order = 'pay-123';
+  const ev = pixelPayCallbackToEvent({ order, status: 'paid', currency: 'USD', amount: 35, uuid: 'P-1', payment_hash: pixelPayPaymentHash(order, PP_KEY, PP_SECRET) }, PP_KEY, PP_SECRET);
+  eq(ev, { kind: 'succeeded', paymentId: order, providerRef: 'P-1', amountCents: 3500 });
+});
+
+Deno.test('pixelpay callback with a forged hash is rejected', () => {
+  let threw = false;
+  try {
+    pixelPayCallbackToEvent({ order: 'pay-123', status: 'paid', currency: 'USD', amount: 35, payment_hash: 'abc' }, PP_KEY, PP_SECRET);
+  } catch {
+    threw = true;
+  }
+  ok(threw);
+});
+
+Deno.test('pixelpay callback in lempiras is not treated as a dollar payment', () => {
+  const order = 'pay-9';
+  const ev = pixelPayCallbackToEvent({ order, status: 'paid', currency: 'HNL', amount: 900, payment_hash: pixelPayPaymentHash(order, PP_KEY, PP_SECRET) }, PP_KEY, PP_SECRET);
+  eq(ev.kind, 'ignored');
+});

@@ -35,10 +35,28 @@ are set, the app runs in demo mode (no backend) or answers "payments not connect
 | Option | Needs | Notes |
 |---|---|---|
 | **Stripe** (built in) | A company in a Stripe country, e.g. a US LLC (Stripe Atlas or similar) and a US bank account | Fastest to launch. Adapter, signature check and refunds already written and tested. |
-| Honduran processor (PixelPay, BAC Credomatic, etc.) | Honduran company and merchant account | Write one adapter in `supabase/functions/_shared/payments.ts` (create checkout, parse webhook, refund). Nothing else changes. |
+| **PixelPay** (built in) | Honduran merchant account with **API Configuration** access and **Hosted Payment** | Adapter written and its signature tested against PixelPay's documented example. Charges in USD. No refund API: refunds are done by hand in the PixelPay dashboard. |
+| Other Honduran processor (BAC Credomatic, etc.) | Honduran company and merchant account | Write one adapter in `supabase/functions/_shared/payments.ts` (create checkout, parse webhook, refund). Nothing else changes. |
 
 **Apple and Google rules:** tours, rides and passes are real-world services, so they're paid with a normal
 card processor, not in-app purchase. Don't sell digital-only items (like a paid "premium" feature) this way.
+
+## Go-live checklist (PixelPay)
+
+1. In PixelPay, open **Preferences → API Options** and copy the **Key ID**, the **Secret Key** and the
+   merchant **domain** (shown in the top search bar, e.g. `pixelpay.app`). Make sure **USD** is enabled.
+2. Set server secrets (never in the app or the repo), sandbox first:
+   ```bash
+   npx supabase secrets set PAYMENT_PROVIDER=pixelpay \
+     PIXELPAY_KEY_ID=... PIXELPAY_SECRET_KEY=... PIXELPAY_ENDPOINT=pixelpay.app \
+     PIXELPAY_SANDBOX=true PUBLIC_WEB_URL=https://YOUR-DOMAIN
+   ```
+   `PIXELPAY_APP_URL` defaults to `https://<endpoint>`; set it if API Options shows a different one.
+3. PixelPay sends the paid callback to `payment-webhook` (we pass `_callback` on every checkout). It is
+   checked with `payment_hash` = md5(order|key|secret) and the amount must match.
+4. Run a sandbox payment end to end, then set `PIXELPAY_SANDBOX=false`.
+5. **Refunds:** PixelPay's Hosted Payment has no refund API. Refunds wait in the queue marked
+   `pixelpay_manual_refund`; do them in the PixelPay dashboard (same-day voids or bank refund), then mark them done.
 
 ## Go-live checklist (Stripe)
 
