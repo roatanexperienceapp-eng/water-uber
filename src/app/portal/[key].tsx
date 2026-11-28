@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AllAboardBar } from '@/components/AllAboardBar';
+import { CharterCard } from '@/components/CharterCard';
 import { ListingRow } from '@/components/ListingRow';
 import { LISTINGS, PORTALS } from '@/data/catalogue';
 import { radius, space, type, useTheme } from '@/theme';
@@ -26,7 +27,7 @@ export default function PortalScreen() {
       <FlatList
         data={items}
         keyExtractor={(l) => l.id}
-        renderItem={({ item }) => <ListingRow listing={item} />}
+        renderItem={({ item }) => (item.charter ? <CharterCard listing={item} /> : <ListingRow listing={item} />)}
         contentContainerStyle={{ paddingHorizontal: space(4), paddingBottom: space(10) }}
         ListHeaderComponent={
           <View style={{ gap: space(2), paddingTop: space(2), paddingBottom: space(2) }}>

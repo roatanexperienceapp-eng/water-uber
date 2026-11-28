@@ -960,5 +960,12 @@
  "crashTitle": "Un problème est survenu",
  "crashBody": "Notre équipe est déjà prévenue, inutile de le signaler. Vos réservations et billets sont en sécurité.",
  "crashRetry": "Réessayer",
- "crashHome": "Retour à l’accueil"
+ "crashHome": "Retour à l’accueil",
+ "yrsWater": "{{n}} ans en mer",
+ "bitingWeek": "Ça mord cette semaine",
+ "bite_hot": "très bien",
+ "bite_good": "bien",
+ "bite_slow": "lent",
+ "tripsAsk": "Sorties et prix sur demande",
+ "chooseTrip": "Choisir une sortie"
 }

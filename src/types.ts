@@ -34,6 +34,22 @@ export interface Listing {
   portPickup?: boolean;
   /** Activity length; defaults to the typical length for the portal. */
   durationMinutes?: number;
+  /** Fishing charter profile (captain, trips, what's biting). */
+  charter?: CharterInfo;
+}
+
+export type BiteLevel = 'hot' | 'good' | 'slow';
+
+export interface CharterInfo {
+  captain?: string;
+  /** Checked by us; shows the Certified badge. */
+  certified?: boolean;
+  yearsOnWater?: number;
+  boat?: string;
+  trips?: { name: string; detail?: string; priceText: string }[];
+  biting?: { fish: string; level: BiteLevel }[];
+  /** ISO date the captain last updated what's biting; hidden after 7 days. */
+  bitingUpdated?: string;
 }
 
 export type BoatKind = 'taxi' | 'tour' | 'fish';

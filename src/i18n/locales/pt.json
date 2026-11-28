@@ -960,5 +960,12 @@
  "crashTitle": "Algo deu errado",
  "crashBody": "Já avisamos nossa equipe, você não precisa relatar. Suas reservas e ingressos estão seguros.",
  "crashRetry": "Tentar de novo",
- "crashHome": "Voltar ao início"
+ "crashHome": "Voltar ao início",
+ "yrsWater": "{{n}} anos no mar",
+ "bitingWeek": "O que está mordendo",
+ "bite_hot": "forte",
+ "bite_good": "bom",
+ "bite_slow": "fraco",
+ "tripsAsk": "Passeios e preços sob consulta",
+ "chooseTrip": "Escolher passeio"
 }
