@@ -41,12 +41,16 @@ export interface Listing {
 export type BiteLevel = 'hot' | 'good' | 'slow';
 
 export interface CharterInfo {
+  /** Name shown on the card instead of the listing name. */
+  title?: string;
+  /** Show this listing inside another listing's card instead of on its own. */
+  groupedInto?: string;
   captain?: string;
   /** Checked by us; shows the Certified badge. */
   certified?: boolean;
   yearsOnWater?: number;
   boat?: string;
-  trips?: { name: string; detail?: string; priceText: string }[];
+  trips?: { name: string; detail?: string; priceText: string; listingId?: string }[];
   biting?: { fish: string; level: BiteLevel }[];
   /** ISO date the captain last updated what's biting; hidden after 7 days. */
   bitingUpdated?: string;

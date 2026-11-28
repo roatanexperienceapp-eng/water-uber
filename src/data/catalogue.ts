@@ -383,7 +383,17 @@ export const LISTINGS: Listing[] = [
   "unit": "person",
   "ours": true,
   "portPickup": true,
-  "booking": "instant"
+  "booking": "instant",
+  "charter": {
+   "title": "Roatán Experience fishing",
+   "captain": "Dean",
+   "certified": true,
+   "yearsOnWater": 15,
+   "trips": [
+    {"name": "Reef and bottom fishing", "detail": "Snapper, grouper", "priceText": "$60 pp", "listingId": "fish-bottom-fishing"},
+    {"name": "Deep sea trolling · half day", "detail": "4 hrs · wahoo, mahi, tuna · up to 6", "priceText": "$350 boat", "listingId": "fish-deep-sea-trolling"}
+   ]
+  }
  },
  {
   "id": "fish-deep-sea-trolling",
@@ -397,7 +407,8 @@ export const LISTINGS: Listing[] = [
   "ours": true,
   "portPickup": true,
   "booking": "instant",
-  "durationMinutes": 240
+  "durationMinutes": 240,
+  "charter": {"groupedInto": "fish-bottom-fishing"}
  },
  {
   "id": "fish-ruthless-roatan-charters",

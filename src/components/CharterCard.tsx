@@ -33,9 +33,10 @@ export function CharterCard({ listing: l }: { listing: Listing }) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const trips = ch.trips ?? [];
   const biting = bitingIsFresh(ch.bitingUpdated) ? ch.biting ?? [] : [];
-  const who = ch.captain ? `Capt. ${ch.captain} · ${l.name}` : l.name;
+  const title = ch.title ?? l.name;
+  const who = ch.captain ? `Capt. ${ch.captain} · ${title}` : title;
   const sub = [ch.boat, l.area, l.rating ? `${l.rating}★ · ${l.reviews} reviews` : null].filter(Boolean).join(' · ');
-  const book = () => router.push({ pathname: '/checkout', params: { kind: 'listing', id: l.id } });
+  const book = (id = l.id) => router.push({ pathname: '/checkout', params: { kind: 'listing', id } });
 
   return (
     <View style={[styles.card, { borderColor: c.line, backgroundColor: c.bg }]}>
@@ -53,7 +54,7 @@ export function CharterCard({ listing: l }: { listing: Listing }) {
       <View style={styles.body}>
         <View style={styles.head}>
           <View style={[styles.avatar, { backgroundColor: c.tile }]}>
-            <Text style={[type.bodyStrong, { color: c.ink }]}>{initials(ch.captain ?? l.name)}</Text>
+            <Text style={[type.bodyStrong, { color: c.ink }]}>{initials(ch.captain ?? title)}</Text>
           </View>
           <View style={{ flex: 1 }}>
             {l.ours ? <Text style={[type.label, { color: c.flame }]}>{t('ours')}</Text> : null}
@@ -68,16 +69,18 @@ export function CharterCard({ listing: l }: { listing: Listing }) {
           {ch.yearsOnWater ? <Chip bg={c.tile} fg={c.muted} text={t('yrsWater', { n: ch.yearsOnWater })} /> : null}
         </View>
 
-        {biting.length ? (
-          <View style={[styles.section, { borderTopColor: c.line }]}>
-            <Text style={[type.small, { color: c.muted }]}>🎣 {t('bitingWeek')}</Text>
+        <View style={[styles.section, { borderTopColor: c.line }]}>
+          <Text style={[type.small, { color: c.muted }]}>🎣 {t('bitingWeek')}</Text>
+          {biting.length ? (
             <View style={styles.chips}>
               {biting.map((b) => (
                 <Chip key={b.fish} bg={BITE_COLORS[b.level].bg} fg={BITE_COLORS[b.level].fg} text={`${b.fish} · ${t(`bite_${b.level}`)}`} />
               ))}
             </View>
-          </View>
-        ) : null}
+          ) : (
+            <Text style={[type.small, { color: c.muted }]}>{t('bitingAsk')}</Text>
+          )}
+        </View>
 
         <View style={[styles.section, { borderTopColor: c.line }]}>
           {trips.length ? (
@@ -85,7 +88,7 @@ export function CharterCard({ listing: l }: { listing: Listing }) {
               <Pressable
                 key={tr.name}
                 accessibilityRole="button"
-                onPress={book}
+                onPress={() => book(tr.listingId)}
                 style={[styles.trip, i < trips.length - 1 ? { borderBottomWidth: 1, borderBottomColor: c.line } : null]}
               >
                 <View style={{ flex: 1 }}>
@@ -102,7 +105,7 @@ export function CharterCard({ listing: l }: { listing: Listing }) {
 
         <View style={styles.foot}>
           <ShareQR id={l.id} name={l.name} />
-          <Pressable accessibilityRole="button" onPress={book} style={[styles.btn, { backgroundColor: c.ink }]}>
+          <Pressable accessibilityRole="button" onPress={() => book()} style={[styles.btn, { backgroundColor: c.ink }]}>
             <Text style={[type.label, { color: c.onInk, fontSize: 14 }]}>{trips.length ? t('chooseTrip') : t('quoteBtn')}</Text>
           </Pressable>
         </View>
