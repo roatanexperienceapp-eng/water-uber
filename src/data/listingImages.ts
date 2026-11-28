@@ -2,6 +2,7 @@ import type { ImageSourcePropType } from 'react-native';
 
 /** Photos bundled with the app, by listing id (book covers, and later partner photos). */
 export const LISTING_IMAGES: Record<string, ImageSourcePropType> = {
+  'fish-roatan-blissful-charters': require('../../assets/fish/blissful-1.jpg'),
   'snork-west-bay-point-guided': require('../../assets/snorkel/west-bay-point-1.jpg'),
   'snork-spooky-channel': require('../../assets/snorkel/spooky-channel-1.jpg'),
   'snork-blue-channel': require('../../assets/snorkel/blue-channel-4.jpg'),
@@ -63,6 +64,15 @@ const NIGHT_SNORKEL: ImageSourcePropType[] = [
   ];
 
 export const LISTING_GALLERIES: Record<string, ImageSourcePropType[]> = {
+  'fish-roatan-blissful-charters': [
+    require('../../assets/fish/blissful-1.jpg'),
+    require('../../assets/fish/blissful-2.jpg'),
+    require('../../assets/fish/blissful-3.jpg'),
+    require('../../assets/fish/blissful-4.jpg'),
+    require('../../assets/fish/blissful-5.jpg'),
+    require('../../assets/fish/blissful-6.jpg'),
+    require('../../assets/fish/blissful-7.jpg'),
+  ],
   'snork-west-bay-point-guided': [
     require('../../assets/snorkel/west-bay-point-1.jpg'),
     require('../../assets/snorkel/west-bay-point-2.jpg'),

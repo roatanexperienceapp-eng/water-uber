@@ -960,5 +960,12 @@
  "crashTitle": "出了点问题",
  "crashBody": "我们已通知团队，你无需报告。你的预订和票都很安全。",
  "crashRetry": "重试",
- "crashHome": "返回首页"
+ "crashHome": "返回首页",
+ "yrsWater": "出海 {{n}} 年",
+ "bitingWeek": "本周鱼情",
+ "bite_hot": "旺",
+ "bite_good": "好",
+ "bite_slow": "淡",
+ "tripsAsk": "行程和价格请咨询",
+ "chooseTrip": "选择行程"
 }

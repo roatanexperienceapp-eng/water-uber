@@ -960,5 +960,12 @@
  "crashTitle": "Something went wrong",
  "crashBody": "We've told our team, so you don't need to report it. Your bookings and tickets are safe.",
  "crashRetry": "Try again",
- "crashHome": "Back to home"
+ "crashHome": "Back to home",
+ "yrsWater": "{{n}} yrs on the water",
+ "bitingWeek": "Biting this week",
+ "bite_hot": "hot",
+ "bite_good": "good",
+ "bite_slow": "slow",
+ "tripsAsk": "Trips and prices on request",
+ "chooseTrip": "Choose a trip"
 }

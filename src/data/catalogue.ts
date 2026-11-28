@@ -476,8 +476,9 @@ export const LISTINGS: Listing[] = [
   "portal": "fish",
   "name": "Roatan Blissful Charters",
   "area": "West End",
-  "description": "Private fishing charters.",
+  "description": "Private fishing charters for families and groups: offshore trolling for wahoo, tuna and kingfish, and reef fishing for snapper. Kids welcome. Tap the photo for more.",
   "unit": "person",
+  "charter": {},
   "rating": 5.0,
   "reviews": 37,
   "booking": "request"

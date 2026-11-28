@@ -960,5 +960,12 @@
  "crashTitle": "Qualcosa è andato storto",
  "crashBody": "Il nostro team è già stato avvisato, non serve segnalarlo. Prenotazioni e biglietti sono al sicuro.",
  "crashRetry": "Riprova",
- "crashHome": "Torna alla home"
+ "crashHome": "Torna alla home",
+ "yrsWater": "{{n}} anni in mare",
+ "bitingWeek": "Cosa abbocca questa settimana",
+ "bite_hot": "ottimo",
+ "bite_good": "buono",
+ "bite_slow": "lento",
+ "tripsAsk": "Uscite e prezzi su richiesta",
+ "chooseTrip": "Scegli un'uscita"
 }
