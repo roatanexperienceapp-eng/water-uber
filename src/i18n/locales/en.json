@@ -967,5 +967,6 @@
  "bite_good": "good",
  "bite_slow": "slow",
  "tripsAsk": "Trips and prices on request",
- "chooseTrip": "Choose a trip"
+ "chooseTrip": "Choose a trip",
+ "bitingAsk": "Ask the captain what's biting today"
 }

@@ -967,5 +967,6 @@
  "bite_good": "bien",
  "bite_slow": "lent",
  "tripsAsk": "Sorties et prix sur demande",
- "chooseTrip": "Choisir une sortie"
+ "chooseTrip": "Choisir une sortie",
+ "bitingAsk": "Demandez au capitaine ce qui mord aujourd'hui"
 }

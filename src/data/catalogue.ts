@@ -383,7 +383,19 @@ export const LISTINGS: Listing[] = [
   "unit": "person",
   "ours": true,
   "portPickup": true,
-  "booking": "instant"
+  "booking": "instant",
+  "charter": {
+   "title": "Roatán Experience fishing",
+   "captain": "Dean",
+   "certified": true,
+   "yearsOnWater": 15,
+   "biting": [{"fish": "Wahoo", "level": "hot"}],
+   "bitingUpdated": "2026-11-28",
+   "trips": [
+    {"name": "Reef and bottom fishing", "detail": "Snapper, grouper", "priceText": "$60 pp", "listingId": "fish-bottom-fishing"},
+    {"name": "Deep sea trolling · half day", "detail": "4 hrs · wahoo, mahi, tuna · up to 6", "priceText": "$350 boat", "listingId": "fish-deep-sea-trolling"}
+   ]
+  }
  },
  {
   "id": "fish-deep-sea-trolling",
@@ -397,7 +409,8 @@ export const LISTINGS: Listing[] = [
   "ours": true,
   "portPickup": true,
   "booking": "instant",
-  "durationMinutes": 240
+  "durationMinutes": 240,
+  "charter": {"groupedInto": "fish-bottom-fishing"}
  },
  {
   "id": "fish-ruthless-roatan-charters",
@@ -478,7 +491,12 @@ export const LISTINGS: Listing[] = [
   "area": "West End",
   "description": "Private fishing charters for families and groups: offshore trolling for wahoo, tuna and kingfish, and reef fishing for snapper. Kids welcome. Tap the photo for more.",
   "unit": "person",
-  "charter": {},
+  "portPickup": true,
+  "charter": {
+   "certified": true,
+   "biting": [{"fish": "Wahoo", "level": "hot"}],
+   "bitingUpdated": "2026-11-28"
+  },
   "rating": 5.0,
   "reviews": 37,
   "booking": "request"

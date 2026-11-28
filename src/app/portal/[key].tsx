@@ -20,7 +20,7 @@ export default function PortalScreen() {
   const info = portal?.kind === 'info';
   const dist = (l: Listing) => (l.coords ? kmBetween(l.coords, [HOME_CENTER.longitude, HOME_CENTER.latitude]) : 999);
   // Info portals (pharmacies, hospitals): nearest to West End first. Others: your own listings first.
-  const items = LISTINGS.filter((l) => l.portal === key).sort((a, b) => (info ? dist(a) - dist(b) : Number(!!b.ours) - Number(!!a.ours)));
+  const items = LISTINGS.filter((l) => l.portal === key && !l.charter?.groupedInto).sort((a, b) => (info ? dist(a) - dist(b) : Number(!!b.ours) - Number(!!a.ours)));
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }} edges={['top']}>
